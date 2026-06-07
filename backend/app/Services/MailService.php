@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class MailService
@@ -14,16 +15,16 @@ class MailService
     public function send(string $recipientEmail, string $recipientName, Mailable $mailable): void
     {
         if (app()->environment('local')) {
-            $this->printToConsole($recipientEmail, $recipientName, $mailable);
+            $this->logEmail($recipientEmail, $recipientName, $mailable);
         } else {
             Mail::to($recipientEmail, $recipientName)->send($mailable);
         }
     }
 
     /**
-     * Render the mailable and print a summary to STDERR (visible in `php artisan serve`).
+     * Render the mailable and write a summary to storage/logs/laravel.log.
      */
-    private function printToConsole(string $recipientEmail, string $recipientName, Mailable $mailable): void
+    private function logEmail(string $recipientEmail, string $recipientName, Mailable $mailable): void
     {
         $subject = $mailable->envelope()->subject ?? '(no subject)';
         $html    = $mailable->render();
@@ -32,23 +33,12 @@ class MailService
         preg_match_all('/href=["\']((https?:\/\/)[^"\']+)["\']/', $html, $matches);
         $links = array_unique($matches[1] ?? []);
 
-        $separator = str_repeat('─', 64);
+        $context = [
+            'to'      => "{$recipientName} <{$recipientEmail}>",
+            'subject' => $subject,
+            'links'   => $links,
+        ];
 
-        $output  = "\n\e[33m" . $separator . "\e[0m\n";
-        $output .= "\e[1;33m📧  EMAIL (local — not sent)\e[0m\n";
-        $output .= $separator . "\n";
-        $output .= "\e[36mTo     :\e[0m {$recipientName} <{$recipientEmail}>\n";
-        $output .= "\e[36mSubject:\e[0m {$subject}\n";
-
-        if (!empty($links)) {
-            $output .= $separator . "\n";
-            foreach ($links as $link) {
-                $output .= "\e[32m🔗  " . $link . "\e[0m\n";
-            }
-        }
-
-        $output .= "\e[33m" . $separator . "\e[0m\n\n";
-
-        error_log($output);
+        Log::info('EMAIL (local — not sent)', $context);
     }
 }

@@ -111,3 +111,4 @@ class User extends Authenticatable
             'password_reset_expires_at' => null,
         ])->save();
     }
+}

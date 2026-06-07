@@ -1,0 +1,33 @@
+/vendor/
+
+# Environment
+.env
+.env.backup
+.env.production
+
+# Laravel generated / runtime
+/bootstrap/cache/*.php
+/storage/*.key
+/storage/app/private/
+/storage/framework/cache/data/
+/storage/framework/compiled.php
+/storage/framework/sessions/*
+/storage/framework/testing/
+/storage/framework/views/*
+/storage/logs/*
+
+# Keep directory structure
+!/storage/framework/cache/data/.gitkeep
+!/storage/framework/sessions/.gitkeep
+!/storage/framework/views/.gitkeep
+!/storage/logs/.gitkeep
+!/bootstrap/cache/.gitkeep
+
+# Testing
+.phpunit.result.cache
+/.phpactor.json
+/auth.json
+
+# Public build artifacts
+/public/storage
+/public/hot

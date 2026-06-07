@@ -1,44 +1,43 @@
-import { useEffect, useState } from 'react'
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import ResendVerification from './pages/ResendVerification';
+import Home from './pages/Home';
 
 function App() {
-  const [healthStatus, setHealthStatus] = useState<string>('checking...')
-
-  useEffect(() => {
-    // Check API health
-    fetch('/api/health')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === 'success') {
-          setHealthStatus('API is running ✓')
-        }
-      })
-      .catch(() => {
-        setHealthStatus('API connection failed')
-      })
-  }, [])
-
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body text-center">
-              <h1 className="card-title mb-4">Laravel + React Template</h1>
-              <p className="card-text mb-3">Headless API with React UI</p>
-              <div className="alert alert-info" role="alert">
-                {healthStatus}
-              </div>
-              <div className="mt-4">
-                <p className="text-muted small">
-                  Edit <code>src/App.tsx</code> to get started
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/resend-verification" element={<ResendVerification />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+
+          {/* Protected routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

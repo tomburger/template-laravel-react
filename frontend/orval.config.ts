@@ -3,7 +3,7 @@ import { defineConfig } from 'orval';
 const orvalConfig = defineConfig({
   api: {
     input: {
-      target: 'http://localhost:8000/api/docs/openapi.json',
+      target: '../backend/storage/app/scribe/openapi.yaml',
     },
     output: {
       target: './src/services/api.ts',

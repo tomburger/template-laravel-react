@@ -72,33 +72,38 @@ const Admin: React.FC = () => {
                 )}
 
                 {!loading && !error && stats && (
-                  <div className="table-responsive">
-                    <table className="table table-bordered align-middle mb-0">
-                      <thead className="table-light">
-                        <tr>
-                          <th scope="col">Metric</th>
-                          <th scope="col">Value</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>Total</td>
-                          <td>{stats.total}</td>
-                        </tr>
-                        <tr>
-                          <td>Active</td>
-                          <td>{stats.active}</td>
-                        </tr>
-                        <tr>
-                          <td>Pending verification</td>
-                          <td>{stats.pending_verification}</td>
-                        </tr>
-                        <tr>
-                          <td>Recent (last 7 days)</td>
-                          <td>{stats.recent}</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <div>
+                    <div className="row g-3 mb-4">
+                      <div className="col-6 col-md-3">
+                        <div className="border rounded-3 p-3 bg-white h-100">
+                          <div className="text-muted small">Total</div>
+                          <div className="fs-4 fw-semibold">{stats.total}</div>
+                        </div>
+                      </div>
+                      <div className="col-6 col-md-3">
+                        <div className="border rounded-3 p-3 bg-white h-100">
+                          <div className="text-muted small">Active</div>
+                          <div className="fs-4 fw-semibold text-success">{stats.active}</div>
+                        </div>
+                      </div>
+                      <div className="col-6 col-md-3">
+                        <div className="border rounded-3 p-3 bg-white h-100">
+                          <div className="text-muted small">Pending verification</div>
+                          <div className="fs-4 fw-semibold text-warning">{stats.pending_verification}</div>
+                        </div>
+                      </div>
+                      <div className="col-6 col-md-3">
+                        <div className="border rounded-3 p-3 bg-white h-100">
+                          <div className="text-muted small">Recent (7d)</div>
+                          <div className="fs-4 fw-semibold text-primary">{stats.recent}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="alert alert-light border mb-0" role="status">
+                      <strong>Next:</strong> user register management.
+                      <span className="ms-2 text-muted">Looks good so far. Stay tuned, we can add search, filters, and quick actions next.</span>
+                    </div>
                   </div>
                 )}
               </div>

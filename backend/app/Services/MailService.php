@@ -49,6 +49,6 @@ class MailService
 
         $output .= "\e[33m" . $separator . "\e[0m\n\n";
 
-        fwrite(\STDERR, $output);
+        error_log($output);
     }
 }

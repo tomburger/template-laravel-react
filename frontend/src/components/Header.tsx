@@ -16,7 +16,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-5">
+    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-2">
       <div className="container">
         <span
           className="navbar-brand mb-0 h1"

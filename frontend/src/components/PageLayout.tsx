@@ -7,7 +7,7 @@ interface PageLayoutProps {
   mainClassName?: string;
 }
 
-const PageLayout: React.FC<PageLayoutProps> = ({ children, mainClassName = 'flex-grow-1 container my-5' }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ children, mainClassName = 'flex-grow-1 container my-2' }) => {
   return (
     <div className="d-flex flex-column min-vh-100" style={{ backgroundColor: '#f8f9fa' }}>
       <Header />

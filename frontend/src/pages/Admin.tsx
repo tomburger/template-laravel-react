@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import PageLayout from '../components/PageLayout';
 import { getEndpoints } from '../services/endpoints/endpoints';
 
 const AUTH_TOKEN_KEY = 'auth_token';
@@ -47,10 +46,7 @@ const Admin: React.FC = () => {
   }, []);
 
   return (
-    <div className="d-flex flex-column min-vh-100" style={{ backgroundColor: '#f8f9fa' }}>
-      <Header />
-
-      <main className="flex-grow-1 container my-5">
+    <PageLayout>
         <div className="row">
           <div className="col-md-10 mx-auto">
             <div className="card shadow-sm">
@@ -116,10 +112,7 @@ const Admin: React.FC = () => {
             </div>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 

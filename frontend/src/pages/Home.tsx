@@ -1,16 +1,12 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import PageLayout from '../components/PageLayout';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="d-flex flex-column min-vh-100" style={{ backgroundColor: '#f8f9fa' }}>
-      <Header />
-
-      <main className="flex-grow-1 container my-5">
+    <PageLayout>
         <div className="row">
           <div className="col-md-8 mx-auto">
             <div className="card shadow-sm">
@@ -53,10 +49,7 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 

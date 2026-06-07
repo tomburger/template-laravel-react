@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
+const AUTH_TOKEN_KEY = 'auth_token';
+
 interface User {
   id: number;
   name: string;
@@ -41,15 +43,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     withCredentials: true,
   });
 
+  apiClient.interceptors.request.use((config) => {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  });
+
   // Check if user is authenticated on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
         setLoading(true);
+
+        const token = localStorage.getItem(AUTH_TOKEN_KEY);
+        if (!token) {
+          setUser(null);
+          setIsAuthenticated(false);
+          return;
+        }
+
         const response = await apiClient.get('/user');
         setUser(response.data.user);
         setIsAuthenticated(true);
       } catch {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
         setUser(null);
         setIsAuthenticated(false);
       } finally {
@@ -67,6 +89,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
       });
+
+      const token = response.data?.token;
+      if (token) {
+        localStorage.setItem(AUTH_TOKEN_KEY, token);
+      }
+
       setUser(response.data.user);
       setIsAuthenticated(true);
     } catch (err: any) {
@@ -98,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setError(null);
       await apiClient.post('/logout');
+      localStorage.removeItem(AUTH_TOKEN_KEY);
       setUser(null);
       setIsAuthenticated(false);
     } catch (err: any) {

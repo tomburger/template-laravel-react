@@ -3,6 +3,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 
+const AUTH_TOKEN_KEY = 'auth_token';
+
 interface AdminInfoResponse {
   users: {
     total: number;
@@ -25,9 +27,11 @@ const Admin: React.FC = () => {
         setError(null);
 
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+        const token = localStorage.getItem(AUTH_TOKEN_KEY);
         const response = await adminDashboardInfo<{ data: AdminInfoResponse }>({
           baseURL: apiUrl.replace(/\/api\/?$/, ''),
           withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
 
         setStats(response.data.users);

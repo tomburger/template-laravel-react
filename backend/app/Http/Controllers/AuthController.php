@@ -82,12 +82,12 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Please verify your email before logging in',
             ], 403);
+        }
 
-                if ($user->is_deactivated) {
-                    return response()->json([
-                        'message' => 'Your account has been deactivated',
-                    ], 403);
-                }
+        if ($user->is_deactivated) {
+            return response()->json([
+                'message' => 'Your account has been deactivated',
+            ], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

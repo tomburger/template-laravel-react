@@ -6,9 +6,11 @@
 .env.production
 
 # Laravel generated / runtime
+.scribe/
 /bootstrap/cache/*.php
 /storage/*.key
 /storage/app/private/
+/storage/app/scribe/
 /storage/framework/cache/data/
 /storage/framework/compiled.php
 /storage/framework/sessions/*

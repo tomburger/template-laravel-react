@@ -15,6 +15,7 @@ import type {
   RegisterANewUserBody,
   ResendVerificationEmailBody,
   ResetPasswordBody,
+  UpdateUserFlagsBody,
   VerifyEmailBody
 } from '../api.schemas'
 
@@ -126,7 +127,44 @@ const getCurrentUser = <TData = AxiosResponse<unknown>>(
       `/api/user`,options
     );
   }
-return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser}};
+/**
+ * Get high-level user statistics for the admin dashboard.
+Only admins can access this endpoint.
+ * @summary Admin dashboard info
+ */
+const adminDashboardInfo = <TData = AxiosResponse<unknown>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.default.get(
+      `/api/admin/info`,options
+    );
+  }
+/**
+ * Get a list of all registered users. Only admins can access this endpoint.
+ * @summary List all users
+ */
+const listAllUsers = <TData = AxiosResponse<unknown>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.default.get(
+      `/api/users`,options
+    );
+  }
+/**
+ * Update the is_admin and/or is_deactivated flags for a user. Only admins can access this endpoint.
+An admin cannot remove their own admin status.
+ * @summary Update user flags
+ */
+const updateUserFlags = <TData = AxiosResponse<unknown>>(
+    id: number,
+    updateUserFlagsBody?: UpdateUserFlagsBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.default.post(
+      `/api/users/${id}`,
+      updateUserFlagsBody,options
+    );
+  }
+return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,adminDashboardInfo,listAllUsers,updateUserFlags}};
 export type RegisterANewUserResult = AxiosResponse<unknown>
 export type LoginUserResult = AxiosResponse<unknown>
 export type VerifyEmailResult = AxiosResponse<unknown>
@@ -136,3 +174,6 @@ export type ResetPasswordResult = AxiosResponse<unknown>
 export type LogoutUserResult = AxiosResponse<unknown>
 export type RefreshTokenResult = AxiosResponse<unknown>
 export type GetCurrentUserResult = AxiosResponse<unknown>
+export type AdminDashboardInfoResult = AxiosResponse<unknown>
+export type ListAllUsersResult = AxiosResponse<unknown>
+export type UpdateUserFlagsResult = AxiosResponse<unknown>

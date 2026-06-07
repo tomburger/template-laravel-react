@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { getEndpoints } from '../services/endpoints/endpoints';
 
 interface AdminInfoResponse {
   users: {
@@ -13,6 +13,7 @@ interface AdminInfoResponse {
 }
 
 const Admin: React.FC = () => {
+  const { adminDashboardInfo } = getEndpoints();
   const [stats, setStats] = useState<AdminInfoResponse['users'] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +25,8 @@ const Admin: React.FC = () => {
         setError(null);
 
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-        const response = await axios.get<AdminInfoResponse>(`${apiUrl}/admin/info`, {
+        const response = await adminDashboardInfo<{ data: AdminInfoResponse }>({
+          baseURL: apiUrl.replace(/\/api\/?$/, ''),
           withCredentials: true,
         });
 

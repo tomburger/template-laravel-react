@@ -9,7 +9,22 @@ export type HealthCheckEndpoint200 = {
   status?: string;
 };
 
-export type GetCurrentUser500 = {
+export type UpdateUserFlagsBody = {
+  /** Set whether the user is an admin. */
+  is_admin?: boolean;
+  /** Set whether the user is deactivated. */
+  is_deactivated?: boolean;
+};
+
+export type ListAllUsers401 = {
+  message?: string;
+};
+
+export type AdminDashboardInfo401 = {
+  message?: string;
+};
+
+export type GetCurrentUser401 = {
   message?: string;
 };
 

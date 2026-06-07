@@ -11,16 +11,20 @@ use App\Http\Requests\VerifyEmailRequest;
 use App\Mail\ResetPasswordMailable;
 use App\Mail\VerifyEmailMailable;
 use App\Models\User;
+use App\Services\MailService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
     use AuthorizesRequests, ValidatesRequests;
+
+    public function __construct(private readonly MailService $mailService)
+    {
+    }
 
     /**
      * Register a new user
@@ -49,7 +53,7 @@ class AuthController extends Controller
         $token = $user->generateEmailVerificationToken();
 
         // Send verification email
-        Mail::send(new VerifyEmailMailable($user, $token));
+        $this->mailService->send($user->email, $user->name, new VerifyEmailMailable($user, $token));
 
         return response()->json([
             'user' => $user,
@@ -180,7 +184,7 @@ class AuthController extends Controller
         $token = $user->generateEmailVerificationToken();
 
         // Send verification email
-        Mail::send(new VerifyEmailMailable($user, $token));
+        $this->mailService->send($user->email, $user->name, new VerifyEmailMailable($user, $token));
 
         return response()->json([
             'message' => 'Verification email sent successfully',
@@ -210,7 +214,7 @@ class AuthController extends Controller
         $token = $user->generatePasswordResetToken();
 
         // Send password reset email
-        Mail::send(new ResetPasswordMailable($user, $token));
+        $this->mailService->send($user->email, $user->name, new ResetPasswordMailable($user, $token));
 
         return response()->json([
             'message' => 'Password reset email sent successfully',

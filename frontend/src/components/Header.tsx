@@ -18,7 +18,13 @@ const Header: React.FC = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-5">
       <div className="container">
-        <span className="navbar-brand mb-0 h1">LaravelReact</span>
+        <span
+          className="navbar-brand mb-0 h1"
+          onClick={() => navigate('/')}
+          style={{ cursor: 'pointer' }}
+        >
+          LaravelReact
+        </span>
         <div className="d-flex align-items-center gap-2">
           <span className="me-3">Welcome, {user?.name}!</span>
           {user?.is_admin && (

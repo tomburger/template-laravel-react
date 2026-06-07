@@ -33,3 +33,6 @@
 # Public build artifacts
 /public/storage
 /public/hot
+
+# Generated API docs view
+/resources/views/scribe/index.blade.php

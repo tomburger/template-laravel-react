@@ -1,38 +1,16 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const Home: React.FC = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch {
-      // Error is handled in context
-    }
-  };
+  const { user } = useAuth();
 
   return (
-    <div className="min-vh-100" style={{ backgroundColor: '#f8f9fa' }}>
-      <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-5">
-        <div className="container">
-          <span className="navbar-brand mb-0 h1">LaravelReact</span>
-          <div className="d-flex align-items-center">
-            <span className="me-3">Welcome, {user?.name}!</span>
-            <button
-              className="btn btn-outline-danger btn-sm"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+    <div className="d-flex flex-column min-vh-100" style={{ backgroundColor: '#f8f9fa' }}>
+      <Header />
 
-      <div className="container">
+      <main className="flex-grow-1 container my-5">
         <div className="row">
           <div className="col-md-8 mx-auto">
             <div className="card shadow-sm">
@@ -75,7 +53,9 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 };

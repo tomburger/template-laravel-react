@@ -40,6 +40,11 @@ class AuthController extends Controller
             'password' => $request->input('password'),
         ]);
 
+        // First user ever becomes admin automatically
+        if (User::count() === 1) {
+            $user->forceFill(['is_admin' => true])->save();
+        }
+
         // Generate email verification token
         $token = $user->generateEmailVerificationToken();
 
@@ -77,6 +82,12 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Please verify your email before logging in',
             ], 403);
+
+                if ($user->is_deactivated) {
+                    return response()->json([
+                        'message' => 'Your account has been deactivated',
+                    ], 403);
+                }
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

@@ -36,3 +36,6 @@
 
 # Generated API docs view
 /resources/views/scribe/index.blade.php
+
+# Local dev database snapshot
+/database/laravel_react.sql

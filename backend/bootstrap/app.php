@@ -1,5 +1,7 @@
 <?php
 
+use App\Providers\RouteServiceProvider;
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application
@@ -41,6 +43,8 @@ $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
 );
+
+$app->register(RouteServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

@@ -6,5 +6,59 @@ info:
 servers:
   -
     url: 'http://localhost:8000'
-tags: []
-paths: []
+tags:
+  -
+    name: Endpoints
+    description: ''
+  -
+    name: System
+    description: ''
+paths:
+  /api/user:
+    get:
+      summary: ''
+      operationId: getApiUser
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+      security: []
+  /api/health:
+    get:
+      summary: 'Health check endpoint.'
+      operationId: healthCheckEndpoint
+      description: 'Returns the current API availability status.'
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: success
+                  message: 'API is running'
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: 'API is running'
+      tags:
+        - System
+      security: []

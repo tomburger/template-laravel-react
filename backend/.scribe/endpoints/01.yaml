@@ -1,0 +1,44 @@
+name: System
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/health
+    metadata:
+      custom: []
+      groupName: System
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Health check endpoint.'
+      description: 'Returns the current API availability status.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "status": "success",
+            "message": "API is running"
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

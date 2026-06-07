@@ -45,7 +45,7 @@ API documentation is generated using Scribe. To generate:
 php artisan scribe:generate
 ```
 
-Documentation will be available at `/api/documentation`
+Documentation will be available at `/docs`
 
 ## Testing
 
@@ -63,7 +63,7 @@ php artisan test
 
 - **Controllers**: `app/Http/Controllers/`
 - **Models**: `app/Models/`
-- **Routes**: `routes/api.php`
+- **Routes**: `routes/api.php`, `routes/web.php`
 - **Migrations**: `database/migrations/`
 
 ## CORS

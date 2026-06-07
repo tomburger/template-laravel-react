@@ -164,7 +164,19 @@ const updateUserFlags = <TData = AxiosResponse<unknown>>(
       updateUserFlagsBody,options
     );
   }
-return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,adminDashboardInfo,listAllUsers,updateUserFlags}};
+/**
+ * Resend the verification email for a specific user by ID.
+Only admins can access this endpoint.
+ * @summary Resend verification email for user (admin)
+ */
+const resendVerificationEmailForUseradmin = <TData = AxiosResponse<unknown>>(
+    id: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.default.post(
+      `/api/users/${id}/resend-verification-email`,undefined,options
+    );
+  }
+return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin}};
 export type RegisterANewUserResult = AxiosResponse<unknown>
 export type LoginUserResult = AxiosResponse<unknown>
 export type VerifyEmailResult = AxiosResponse<unknown>
@@ -177,3 +189,4 @@ export type GetCurrentUserResult = AxiosResponse<unknown>
 export type AdminDashboardInfoResult = AxiosResponse<unknown>
 export type ListAllUsersResult = AxiosResponse<unknown>
 export type UpdateUserFlagsResult = AxiosResponse<unknown>
+export type ResendVerificationEmailForUseradminResult = AxiosResponse<unknown>

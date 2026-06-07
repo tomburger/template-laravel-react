@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateUserRequest;
+use App\Mail\VerifyEmailMailable;
 use App\Models\User;
+use App\Services\MailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function __construct(private readonly MailService $mailService)
+    {
+    }
+
     /**
      * List all users
      *
@@ -90,10 +96,54 @@ class UserController extends Controller
 
         $data = $request->only(['is_admin', 'is_deactivated']);
         $user->forceFill($data)->save();
+        $updatedUser = $user->fresh();
 
         return response()->json([
-            'user' => $user->fresh(['id', 'name', 'email', 'is_admin', 'is_deactivated', 'email_verified_at', 'created_at']),
+            'user' => [
+                'id' => $updatedUser->id,
+                'name' => $updatedUser->name,
+                'email' => $updatedUser->email,
+                'is_admin' => $updatedUser->is_admin,
+                'is_deactivated' => $updatedUser->is_deactivated,
+                'email_verified_at' => $updatedUser->email_verified_at,
+                'created_at' => $updatedUser->created_at,
+            ],
             'message' => 'User updated successfully',
+        ], 200);
+    }
+
+    /**
+     * Resend verification email for user (admin)
+     *
+     * Resend the verification email for a specific user by ID.
+     * Only admins can access this endpoint.
+     *
+     * @endpoint
+     * @authenticated
+     * @urlParam id integer required The user ID. Example: 1
+     * @responseField message string Success message
+     */
+    public function resendVerificationEmail(int $id): JsonResponse
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        if ($user->isEmailVerified()) {
+            return response()->json([
+                'message' => 'User email is already verified',
+            ], 400);
+        }
+
+        $token = $user->generateEmailVerificationToken();
+        $this->mailService->send($user->email, $user->name, new VerifyEmailMailable($user, $token));
+
+        return response()->json([
+            'message' => 'Verification email resent successfully',
         ], 200);
     }
 }

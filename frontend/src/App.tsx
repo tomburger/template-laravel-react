@@ -10,6 +10,7 @@ import ResetPassword from './pages/ResetPassword';
 import ResendVerification from './pages/ResendVerification';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
+import AdminUsers from './pages/AdminUsers';
 
 function App() {
   return (
@@ -39,6 +40,16 @@ function App() {
               <ProtectedRoute>
                 <AdminRoute>
                   <Admin />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminUsers />
                 </AdminRoute>
               </ProtectedRoute>
             }

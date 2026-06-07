@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { getEndpoints } from '../services/endpoints/endpoints';
@@ -100,9 +101,14 @@ const Admin: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="alert alert-light border mb-0" role="status">
-                      <strong>Next:</strong> user register management.
-                      <span className="ms-2 text-muted">Looks good so far. Stay tuned, we can add search, filters, and quick actions next.</span>
+                    <div className="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-3 mb-0" role="status">
+                      <div>
+                        <strong>Next:</strong> user register management.
+                        <span className="ms-2 text-muted">Search, filter, edit users, and resend verification emails.</span>
+                      </div>
+                      <Link to="/admin/users" className="btn btn-primary btn-sm">
+                        Open User Register
+                      </Link>
                     </div>
                   </div>
                 )}

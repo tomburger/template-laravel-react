@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
     Route::get('/admin/info', [UserController::class, 'adminInfo']);
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}', [UserController::class, 'update']);
+    Route::post('/users/{id}/resend-verification-email', [UserController::class, 'resendVerificationEmail']);
 });
 
 // Health check

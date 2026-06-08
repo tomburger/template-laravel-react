@@ -1,0 +1,159 @@
+name: Build And Deploy Via SFTP
+run-name: Deploy build #${{ github.run_number }} on ${{ github.ref_name }}
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-sftp-master
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TZ: UTC
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate deployment secrets
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_REMOTE_PATH: ${{ secrets.SFTP_REMOTE_PATH }}
+        run: |
+          set -euo pipefail
+          test -n "$SFTP_HOST" || (echo "Missing secret: SFTP_HOST" && exit 1)
+          test -n "$SFTP_USERNAME" || (echo "Missing secret: SFTP_USERNAME" && exit 1)
+          test -n "$SFTP_PASSWORD" || (echo "Missing secret: SFTP_PASSWORD" && exit 1)
+          test -n "$SFTP_REMOTE_PATH" || (echo "Missing secret: SFTP_REMOTE_PATH" && exit 1)
+
+      - name: Compute release name
+        id: release
+        run: |
+          set -euo pipefail
+          BUILD_TS="$(date -u +'%Y%m%d-%H%M%S')"
+          RELEASE_NAME="build-${BUILD_TS}-r${GITHUB_RUN_NUMBER}"
+          echo "release_name=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_NAME=$RELEASE_NAME" >> "$GITHUB_ENV"
+          echo "Release: $RELEASE_NAME"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          coverage: none
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Prepare Laravel environment
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          php artisan key:generate --force --no-interaction
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan migrate --force --no-interaction
+
+      - name: Generate Scribe documentation
+        working-directory: backend
+        run: php artisan scribe:generate --no-interaction --force
+
+      - name: Ensure OpenAPI file exists
+        run: |
+          set -euo pipefail
+          test -f backend/storage/app/scribe/openapi.yaml || (echo "Missing generated file: backend/storage/app/scribe/openapi.yaml" && exit 1)
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Generate Orval client
+        working-directory: frontend
+        run: npm run generate-api
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Ensure frontend build exists
+        run: |
+          set -euo pipefail
+          test -f frontend/dist/index.html || (echo "Missing generated file: frontend/dist/index.html" && exit 1)
+
+      - name: Stage deployment payload
+        run: |
+          set -euo pipefail
+          rm -rf deploy
+          mkdir -p deploy/backend
+          mkdir -p deploy/frontend-dist
+
+          rsync -a backend/ deploy/backend/ \
+            --exclude='.git' \
+            --exclude='.env' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='storage/logs/*' \
+            --exclude='storage/framework/cache/*' \
+            --exclude='storage/framework/sessions/*' \
+            --exclude='storage/framework/views/*'
+
+          rsync -a frontend/dist/ deploy/frontend-dist/
+
+      - name: Archive deployment payload
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          zip -r "artifacts/${RELEASE_NAME}.zip" deploy
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.release.outputs.release_name }}
+          path: artifacts/${{ steps.release.outputs.release_name }}.zip
+          if-no-files-found: error
+
+      - name: Install lftp client
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Deploy to SFTP
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_REMOTE_PATH: ${{ secrets.SFTP_REMOTE_PATH }}
+        run: |
+          set -euo pipefail
+          lftp -u "$SFTP_USERNAME","$SFTP_PASSWORD" "sftp://$SFTP_HOST:22" << 'EOF'
+          set sftp:auto-confirm yes
+          set net:max-retries 2
+          set net:timeout 20
+          mirror -R --delete --verbose=1 ./deploy "$SFTP_REMOTE_PATH"
+          bye
+          EOF
+
+      - name: Print deployment summary
+        run: |
+          echo "Deployed release: ${RELEASE_NAME}"
+          echo "Remote path: ${{ secrets.SFTP_REMOTE_PATH }}"

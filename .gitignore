@@ -2,28 +2,35 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
-# Laravel 4 specific
-bootstrap/compiled.php
-app/storage/
+# Laravel build artifacts
+src/public/build
+src/public/storage
+src/public/hot
 
 # Laravel 5 & Lumen specific
-public/storage
-public/hot
+src/bootstrap/compiled.php
+src/app/storage/
 
-# Laravel 5 & Lumen specific with changed public path
-public_html/storage
-public_html/hot
+# Environment & config
+src/.env
+src/.env.backup
+src/.env.production
+src/auth.json
+src/.phpactor.json
+src/.scribe/
 
-storage/*.key
-.env
-Homestead.yaml
-Homestead.json
+# Laravel cache & logs
+src/storage/*.key
+src/storage/pail
+src/bootstrap/cache
+src/storage/framework/
+src/storage/logs
+src/.phpunit.result.cache
+
+# Vagrant
 /.vagrant
-.phpunit.result.cache
 
-/public/build
-/storage/pail
-.env.backup
-.env.production
-.phpactor.json
-auth.json
+# Frontend node_modules
+src/frontend/node_modules/
+src/frontend/dist/
+

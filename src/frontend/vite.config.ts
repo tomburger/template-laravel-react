@@ -12,17 +12,12 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    strictPort: true,
-    proxy: {
-      '/api': {
-        target: process.env.VITE_API_URL || 'http://localhost:8000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
-      },
-    },
+    strictPort: false,
   },
   build: {
-    outDir: 'dist',
+    outDir: '../public/build',
     sourcemap: false,
+    manifest: false,
   },
 })
+

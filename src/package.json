@@ -1,0 +1,16 @@
+{
+  "name": "template-laravel-react",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build --prefix frontend && vite build",
+    "preview": "vite preview",
+    "install-all": "npm install && npm install --prefix frontend"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.1.1",
+    "laravel-vite-plugin": "^1.2",
+    "vite": "^5.0.2"
+  }
+}

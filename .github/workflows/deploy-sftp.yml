@@ -98,12 +98,25 @@ jobs:
 
       - name: Build frontend
         working-directory: src
-        run: npm run build
+        run: |
+          set -euo pipefail
+          rm -rf public/build
+          npm run build
 
       - name: Ensure Vite build exists
         run: |
           set -euo pipefail
-          test -f src/public/build/manifest.json || (echo "Missing generated file: src/public/build/manifest.json" && exit 1)
+          if [ -f src/public/build/manifest.json ] || [ -f src/public/build/.vite/manifest.json ]; then
+            echo "Vite manifest found."
+            exit 0
+          fi
+
+          echo "Missing generated file: src/public/build/manifest.json or src/public/build/.vite/manifest.json"
+            echo "Directory listing for src/public/build:"
+            ls -la src/public/build || true
+            echo "Recursive listing for src/public/build:"
+            find src/public/build -maxdepth 4 -type f || true
+            exit 1
 
       - name: Stage deployment payload
         run: |

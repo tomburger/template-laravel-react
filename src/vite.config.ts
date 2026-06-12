@@ -26,7 +26,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'public/build',
-    manifest: true,
+    manifest: 'manifest.json',
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'axios', 'bootstrap'],

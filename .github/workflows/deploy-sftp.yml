@@ -20,7 +20,7 @@ jobs:
       TZ: UTC
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Validate deployment secrets
         env:
@@ -53,11 +53,11 @@ jobs:
           coverage: none
 
       - name: Install backend dependencies
-        working-directory: backend
+        working-directory: src
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
       - name: Prepare Laravel environment
-        working-directory: backend
+        working-directory: src
         run: |
           set -euo pipefail
           cp .env.example .env
@@ -67,46 +67,41 @@ jobs:
           php artisan migrate --force --no-interaction
 
       - name: Generate Scribe documentation
-        working-directory: backend
+        working-directory: src
         run: php artisan scribe:generate --no-interaction --force
 
       - name: Ensure OpenAPI file exists
         run: |
           set -euo pipefail
-          test -f backend/storage/app/scribe/openapi.yaml || (echo "Missing generated file: backend/storage/app/scribe/openapi.yaml" && exit 1)
+          test -f src/storage/app/scribe/openapi.yaml || (echo "Missing generated file: src/storage/app/scribe/openapi.yaml" && exit 1)
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: src/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: frontend
+        working-directory: src
         run: npm ci
 
-      - name: Generate Orval client
-        working-directory: frontend
-        run: npm run generate-api
-
       - name: Build frontend
-        working-directory: frontend
+        working-directory: src
         run: npm run build
 
-      - name: Ensure frontend build exists
+      - name: Ensure Vite build exists
         run: |
           set -euo pipefail
-          test -f frontend/dist/index.html || (echo "Missing generated file: frontend/dist/index.html" && exit 1)
+          test -f src/public/build/manifest.json || (echo "Missing generated file: src/public/build/manifest.json" && exit 1)
 
       - name: Stage deployment payload
         run: |
           set -euo pipefail
           rm -rf deploy
           mkdir -p deploy/backend
-          mkdir -p deploy/frontend-dist
 
-          rsync -a backend/ deploy/backend/ \
+          rsync -a src/ deploy/backend/ \
             --exclude='.git' \
             --exclude='.env' \
             --exclude='node_modules' \
@@ -116,8 +111,6 @@ jobs:
             --exclude='storage/framework/sessions/*' \
             --exclude='storage/framework/views/*'
 
-          rsync -a frontend/dist/ deploy/frontend-dist/
-
       - name: Archive deployment payload
         run: |
           set -euo pipefail
@@ -125,7 +118,7 @@ jobs:
           zip -r "artifacts/${RELEASE_NAME}.zip" deploy
 
       - name: Upload deployment artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.release.outputs.release_name }}
           path: artifacts/${{ steps.release.outputs.release_name }}.zip

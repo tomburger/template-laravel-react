@@ -25,6 +25,7 @@ jobs:
       - name: Validate deployment secrets
         env:
           SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
           SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
           SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
           SFTP_REMOTE_PATH: ${{ secrets.SFTP_REMOTE_PATH }}
@@ -34,6 +35,27 @@ jobs:
           test -n "$SFTP_USERNAME" || (echo "Missing secret: SFTP_USERNAME" && exit 1)
           test -n "$SFTP_PASSWORD" || (echo "Missing secret: SFTP_PASSWORD" && exit 1)
           test -n "$SFTP_REMOTE_PATH" || (echo "Missing secret: SFTP_REMOTE_PATH" && exit 1)
+
+          # Backward compatibility: allow SFTP_HOST to be provided as host:port.
+          if [[ "$SFTP_HOST" == *:* ]]; then
+            HOST_PART="${SFTP_HOST%%:*}"
+            PORT_PART="${SFTP_HOST##*:}"
+            SFTP_HOST="$HOST_PART"
+            if [ -z "${SFTP_PORT:-}" ]; then
+              SFTP_PORT="$PORT_PART"
+            fi
+          fi
+
+          SFTP_PORT="${SFTP_PORT:-22}"
+          case "$SFTP_PORT" in
+            ''|*[!0-9]*)
+              echo "Invalid SFTP_PORT: $SFTP_PORT"
+              exit 1
+              ;;
+          esac
+
+          echo "SFTP_HOST=$SFTP_HOST" >> "$GITHUB_ENV"
+          echo "SFTP_PORT=$SFTP_PORT" >> "$GITHUB_ENV"
 
       - name: Compute release name
         id: release
@@ -156,12 +178,13 @@ jobs:
       - name: Deploy to SFTP
         env:
           SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
           SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
           SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
           SFTP_REMOTE_PATH: ${{ secrets.SFTP_REMOTE_PATH }}
         run: |
           set -euo pipefail
-          lftp -u "$SFTP_USERNAME","$SFTP_PASSWORD" "sftp://$SFTP_HOST:22" << 'EOF'
+          lftp -u "$SFTP_USERNAME","$SFTP_PASSWORD" "sftp://$SFTP_HOST:$SFTP_PORT" << 'EOF'
           set sftp:auto-confirm yes
           set net:max-retries 2
           set net:timeout 20

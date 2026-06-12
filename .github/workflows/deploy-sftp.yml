@@ -52,6 +52,16 @@ jobs:
           tools: composer:v2
           coverage: none
 
+      - name: Ensure Laravel writable directories exist
+        working-directory: src
+        run: |
+          set -euo pipefail
+          mkdir -p bootstrap/cache
+          mkdir -p storage/logs
+          mkdir -p storage/framework/cache
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+
       - name: Install backend dependencies
         working-directory: src
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader

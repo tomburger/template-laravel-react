@@ -100,7 +100,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: src
-        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+        run: composer install --no-dev --prefer-dist --no-interaction
 
       - name: Generate Scribe documentation
         working-directory: src
@@ -226,10 +226,9 @@ jobs:
           ssh -p "$SFTP_PORT" "$SFTP_USERNAME@$SFTP_HOST" << EOF
           set -euo pipefail
           cd "$SFTP_REMOTE_PATH"
-          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-          php artisan migrate --force
-          php artisan config:cache
-          php artisan route:cache
+          composer install --no-dev --prefer-dist --no-interaction
+          php artisan -- migrate --force
+          php artisan -- optimize
           EOF
 
       - name: Print deployment summary

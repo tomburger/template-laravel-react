@@ -100,18 +100,14 @@ jobs:
         working-directory: src
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
-      - name: Prepare Laravel environment
-        working-directory: src
-        run: |
-          set -euo pipefail
-          cp .env.example .env
-          php artisan key:generate --force --no-interaction
-          mkdir -p database
-          touch database/database.sqlite
-          php artisan migrate --force --no-interaction
-
       - name: Generate Scribe documentation
         working-directory: src
+        env:
+          APP_ENV: ci
+          APP_DEBUG: false
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
         run: php artisan scribe:generate --no-interaction --force
 
       - name: Ensure OpenAPI file exists
@@ -156,12 +152,13 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf deploy
-          mkdir -p deploy/backend
+          mkdir -p deploy
 
-          rsync -a src/ deploy/backend/ \
+          rsync -a src/ deploy/ \
             --exclude='.git' \
             --exclude='.env' \
             --exclude='node_modules' \
+            --exclude='vendor' \
             --exclude='tests' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/cache/*' \
@@ -203,6 +200,33 @@ jobs:
           mirror -R --delete --verbose=1 ./deploy "$SFTP_REMOTE_PATH"
           bye
           EOF
+
+      - name: Configure SSH key for post-deploy
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' '${{ secrets.SSH_PRIVATE_KEY }}' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "$SFTP_PORT" "$SFTP_HOST" >> ~/.ssh/known_hosts
+
+      - name: Run post-deploy commands via SSH
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' }}
+        run: |
+          set -euo pipefail
+          ssh -p "$SFTP_PORT" "$SFTP_USERNAME@$SFTP_HOST" << EOF
+          set -euo pipefail
+          cd "$SFTP_REMOTE_PATH"
+          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+          EOF
+
+      - name: Post-deploy SSH step skipped
+        if: ${{ secrets.SSH_PRIVATE_KEY == '' }}
+        run: |
+          echo "Skipping post-deploy SSH commands (SSH_PRIVATE_KEY secret is not set)."
 
       - name: Print deployment summary
         run: |

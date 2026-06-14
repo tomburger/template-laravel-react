@@ -205,6 +205,8 @@ jobs:
 
       - name: Configure SSH key for post-deploy
         env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           set -euo pipefail
@@ -214,6 +216,11 @@ jobs:
           ssh-keyscan -p "$SFTP_PORT" "$SFTP_HOST" >> ~/.ssh/known_hosts
 
       - name: Run post-deploy commands via SSH
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+          SFTP_REMOTE_PATH: ${{ secrets.SFTP_REMOTE_PATH }}
         run: |
           set -euo pipefail
           ssh -p "$SFTP_PORT" "$SFTP_USERNAME@$SFTP_HOST" << EOF

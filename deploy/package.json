@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@samkirkland/ftp-deploy": "^1.2.5",
+    "commander": "^14.0.0"
+  }
+}

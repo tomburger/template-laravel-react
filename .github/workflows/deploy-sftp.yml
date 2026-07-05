@@ -111,10 +111,10 @@ jobs:
       - name: Stage deployment payload
         run: |
           set -euo pipefail
-          rm -rf deploy
-          mkdir -p deploy
+          rm -rf deploy_payload
+          mkdir -p deploy_payload
 
-          rsync -a src/ deploy/ \
+          rsync -a src/ deploy_payload/ \
             --exclude='.git' \
             --exclude='.env' \
             --exclude='node_modules' \
@@ -137,7 +137,7 @@ jobs:
             -p ${{ secrets.SFTP_PASSWORD }} \
             -h replikant3692.thinline.cz \
             -u prazelenina_burger_software \
-            -s ../src/ \
+            -s ../deploy_payload/ \
             -d .
 
       - name: Update deployed server

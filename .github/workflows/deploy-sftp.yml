@@ -125,8 +125,10 @@ jobs:
             --exclude='storage/framework/views/*'
 
       - name: Prepare deployment script
+        working-directory: deploy
         run: |
           set -euo pipefail
+          npm install          
 
       - name: Deploy via FTP
         working-directory: deploy

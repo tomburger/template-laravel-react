@@ -39,7 +39,7 @@ const AdminUsers: React.FC = () => {
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
     return {
-      baseURL: '/api',
+      baseURL: '',
       withCredentials: true,
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     };

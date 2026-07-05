@@ -28,7 +28,7 @@ const Admin: React.FC = () => {
 
         const token = localStorage.getItem(AUTH_TOKEN_KEY);
         const response = await adminDashboardInfo<{ data: AdminInfoResponse }>({
-          baseURL: '/api',
+          baseURL: '',
           withCredentials: true,
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });

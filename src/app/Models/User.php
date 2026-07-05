@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -44,6 +45,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'password_reset_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'is_deactivated' => 'boolean',
@@ -103,9 +105,19 @@ class User extends Authenticatable
      */
     public function verifyPasswordResetToken(string $token): bool
     {
+        $expiresAt = $this->password_reset_expires_at;
+
+        if (is_string($expiresAt)) {
+            try {
+                $expiresAt = Carbon::parse($expiresAt);
+            } catch (\Throwable $e) {
+                return false;
+            }
+        }
+
         return $this->password_reset_token === $token 
-            && $this->password_reset_expires_at 
-            && $this->password_reset_expires_at->isFuture();
+            && $expiresAt
+            && $expiresAt->isFuture();
     }
 
     /**

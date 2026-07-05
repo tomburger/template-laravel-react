@@ -167,6 +167,12 @@ jobs:
           ssh -i ~/.ssh/id_ci -p "$SFTP_PORT" "$SFTP_USERNAME@$SFTP_HOST" << EOF
           set -euo pipefail
           cd "$SFTP_REMOTE_PATH"
+          test -f .env || (echo "Missing .env in $SFTP_REMOTE_PATH" && exit 1)
+
+          if ! grep -Eq '^APP_KEY=.+$' .env; then
+            php artisan -- key:generate --force --no-interaction
+          fi
+
           php artisan -- migrate --force
           php artisan -- optimize
           EOF

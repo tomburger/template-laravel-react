@@ -25,9 +25,11 @@ jobs:
       - name: Validate deployment secrets
         env:
           SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           set -euo pipefail
           test -n "$SFTP_PASSWORD" || (echo "Missing secret: SFTP_PASSWORD" && exit 1)
+          test -n "$SSH_PRIVATE_KEY" || (echo "Missing secret: SSH_PRIVATE_KEY" && exit 1)
 
       - name: Compute release name
         id: release
@@ -128,7 +130,7 @@ jobs:
         working-directory: deploy
         run: |
           set -euo pipefail
-          npm install          
+          npm ci          
 
       - name: Deploy via FTP
         working-directory: deploy
@@ -140,6 +142,20 @@ jobs:
             -s ../deploy_payload/ \
             -d ./
 
+      - name: Configure SSH access
+        env:
+          SFTP_HOST: replikant3692.thinline.cz
+          SFTP_PORT: 2736
+          SFTP_USERNAME: burger_software
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ci
+          chmod 600 ~/.ssh/id_ci
+          ssh-keyscan -p "$SFTP_PORT" "$SFTP_HOST" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
       - name: Update deployed server
         env:
           SFTP_HOST: replikant3692.thinline.cz
@@ -148,7 +164,7 @@ jobs:
           SFTP_REMOTE_PATH: prazelenina.burger.software
         run: |
           set -euo pipefail
-          ssh -p "$SFTP_PORT" "$SFTP_USERNAME@$SFTP_HOST" << EOF
+          ssh -i ~/.ssh/id_ci -p "$SFTP_PORT" "$SFTP_USERNAME@$SFTP_HOST" << EOF
           set -euo pipefail
           cd "$SFTP_REMOTE_PATH"
           php artisan -- migrate --force

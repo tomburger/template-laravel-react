@@ -129,12 +129,13 @@ jobs:
           set -euo pipefail
 
       - name: Deploy via FTP
+        working-directory: deploy
         run: |
-          node ./deploy/deploy.js \
+          node ./deploy.js \
             -p ${{ secrets.SFTP_PASSWORD }} \
             -h replikant3692.thinline.cz \
             -u prazelenina_burger_software \
-            -s src/ \
+            -s ../src/ \
             -d .
 
       - name: Update deployed server

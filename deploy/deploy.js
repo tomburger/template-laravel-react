@@ -26,7 +26,7 @@ async function deployCode() {
         "server-dir": options.destination,
         exclude: [...excludeDefaults],
         timeout: 300000,
-        "log-level": "info",
+        "log-level": "minimal",
     });
 
     console.log("Deploy complete!");

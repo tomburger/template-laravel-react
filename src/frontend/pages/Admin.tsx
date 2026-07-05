@@ -26,10 +26,9 @@ const Admin: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
         const token = localStorage.getItem(AUTH_TOKEN_KEY);
         const response = await adminDashboardInfo<{ data: AdminInfoResponse }>({
-          baseURL: apiUrl.replace(/\/api\/?$/, ''),
+          baseURL: '/api',
           withCredentials: true,
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });

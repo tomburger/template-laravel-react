@@ -37,9 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
   const apiClient = axios.create({
-    baseURL: apiUrl,
+    baseURL: '/api',
     withCredentials: true,
   });
 

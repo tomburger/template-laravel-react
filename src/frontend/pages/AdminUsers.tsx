@@ -35,13 +35,11 @@ const AdminUsers: React.FC = () => {
   const [filter, setFilter] = useState<FilterValue>('all');
   const [busyUserId, setBusyUserId] = useState<number | null>(null);
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
   const requestOptions = () => {
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
     return {
-      baseURL: apiUrl.replace(/\/api\/?$/, ''),
+      baseURL: '/api',
       withCredentials: true,
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     };

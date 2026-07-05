@@ -138,7 +138,7 @@ jobs:
             -h replikant3692.thinline.cz \
             -u prazelenina_burger_software \
             -s ../deploy_payload/ \
-            -d .
+            -d ./
 
       - name: Update deployed server
         env:

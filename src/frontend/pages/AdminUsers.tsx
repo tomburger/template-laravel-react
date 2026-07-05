@@ -28,7 +28,7 @@ type UpdateUserResponse = {
 type FilterValue = 'all' | 'active' | 'deactivated' | 'verified' | 'pending-verification' | 'admin';
 
 const AdminUsers: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isDefaultAdminActive, setDefaultAdminActive } = useAuth();
   const { listAllUsers, updateUserFlags, resendVerificationEmailForUseradmin } = getEndpoints();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +54,8 @@ const AdminUsers: React.FC = () => {
       setError(null);
       const response = await listAllUsers<{ data: UsersResponse }>(requestOptions());
       setUsers(response.data.users);
+      const defaultAdminActive = response.data.users.some((item) => item.id === 1 && item.is_admin && !item.is_deactivated);
+      setDefaultAdminActive(defaultAdminActive);
     } catch {
       setError('Failed to load users.');
     } finally {
@@ -95,6 +97,15 @@ const AdminUsers: React.FC = () => {
     });
   }, [users, search, filter]);
 
+  const defaultAdminActiveFromUsers = useMemo(
+    () => users.some((item) => item.id === 1 && item.is_admin && !item.is_deactivated),
+    [users],
+  );
+
+  const shouldShowDefaultAdminWarning = users.length > 0
+    ? defaultAdminActiveFromUsers
+    : isDefaultAdminActive;
+
   const handleToggleDeactivated = async (user: UserRow) => {
     try {
       setBusyUserId(user.id);
@@ -108,6 +119,9 @@ const AdminUsers: React.FC = () => {
       );
 
       setUsers((prevUsers) => prevUsers.map((item) => (item.id === user.id ? response.data.user : item)));
+      if (response.data.user.id === 1) {
+        setDefaultAdminActive(response.data.user.is_admin && !response.data.user.is_deactivated);
+      }
       setNotice(response.data.message || 'User status updated.');
     } catch {
       setError('Failed to update user status.');
@@ -129,6 +143,9 @@ const AdminUsers: React.FC = () => {
       );
 
       setUsers((prevUsers) => prevUsers.map((item) => (item.id === user.id ? response.data.user : item)));
+      if (response.data.user.id === 1) {
+        setDefaultAdminActive(response.data.user.is_admin && !response.data.user.is_deactivated);
+      }
       setNotice(response.data.message || 'User role updated.');
     } catch {
       setError('Failed to update admin role.');
@@ -158,7 +175,11 @@ const AdminUsers: React.FC = () => {
           <div className="col-12">
             <div className="card shadow-sm">
               <div className="card-body p-4 p-md-5">
-                <DefaultAdminWarning userId={user?.id} isAdmin={user?.is_admin} />
+                <DefaultAdminWarning
+                  isDefaultAdminActive={shouldShowDefaultAdminWarning}
+                  isCurrentUserAdmin={user?.is_admin}
+                  showActionButton={false}
+                />
                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                   <div>
                     <h1 className="h3 mb-1">User Register</h1>
@@ -228,6 +249,7 @@ const AdminUsers: React.FC = () => {
 
                         {filteredUsers.map((user) => {
                           const isBusy = busyUserId === user.id;
+                          const disableMakeAdminForDefaultUser = user.id === 1 && !user.is_admin;
 
                           return (
                             <tr key={user.id}>
@@ -267,7 +289,7 @@ const AdminUsers: React.FC = () => {
                                   <button
                                     className={`btn btn-sm ${user.is_admin ? 'btn-outline-dark' : 'btn-dark'}`}
                                     onClick={() => handleToggleAdmin(user)}
-                                    disabled={isBusy}
+                                    disabled={isBusy || disableMakeAdminForDefaultUser}
                                   >
                                     {user.is_admin ? 'Remove admin' : 'Make admin'}
                                   </button>

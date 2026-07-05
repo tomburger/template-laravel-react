@@ -17,7 +17,7 @@ interface AdminInfoResponse {
 }
 
 const Admin: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isDefaultAdminActive } = useAuth();
   const { adminDashboardInfo } = getEndpoints();
   const [stats, setStats] = useState<AdminInfoResponse['users'] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,10 @@ const Admin: React.FC = () => {
           <div className="col-md-10 mx-auto">
             <div className="card shadow-sm">
               <div className="card-body p-5">
-                <DefaultAdminWarning userId={user?.id} isAdmin={user?.is_admin} />
+                <DefaultAdminWarning
+                  isDefaultAdminActive={isDefaultAdminActive}
+                  isCurrentUserAdmin={user?.is_admin}
+                />
                 <h1 className="card-title mb-4">Admin Panel</h1>
 
                 <h2 className="h4 mb-3">Users</h2>

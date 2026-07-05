@@ -22,6 +22,14 @@ class AuthController extends Controller
 {
     use AuthorizesRequests, ValidatesRequests;
 
+    private function isDefaultAdminActive(): bool
+    {
+        return User::where('id', 1)
+            ->where('is_admin', true)
+            ->where('is_deactivated', false)
+            ->exists();
+    }
+
     public function __construct(private readonly MailService $mailService)
     {
     }
@@ -57,6 +65,7 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
+            'is_default_admin_active' => $this->isDefaultAdminActive(),
             'message' => 'User registered successfully. Please check your email to verify your account.',
         ], 201);
     }
@@ -98,6 +107,7 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
+            'is_default_admin_active' => $this->isDefaultAdminActive(),
             'token' => $token,
             'message' => 'Login successful',
         ], 200);
@@ -151,6 +161,7 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
+            'is_default_admin_active' => $this->isDefaultAdminActive(),
             'message' => 'Email verified successfully',
         ], 200);
     }
@@ -291,6 +302,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'user' => $request->user(),
+            'is_default_admin_active' => $this->isDefaultAdminActive(),
         ], 200);
     }
 }

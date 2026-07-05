@@ -2,12 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 type DefaultAdminWarningProps = {
-  userId?: number;
-  isAdmin?: boolean;
+  isDefaultAdminActive: boolean;
+  isCurrentUserAdmin?: boolean;
+  showActionButton?: boolean;
 };
 
-const DefaultAdminWarning: React.FC<DefaultAdminWarningProps> = ({ userId, isAdmin }) => {
-  if (userId !== 1 || !isAdmin) {
+const DefaultAdminWarning: React.FC<DefaultAdminWarningProps> = ({
+  isDefaultAdminActive,
+  isCurrentUserAdmin,
+  showActionButton = true,
+}) => {
+  if (!isDefaultAdminActive || !isCurrentUserAdmin) {
     return null;
   }
 
@@ -17,11 +22,13 @@ const DefaultAdminWarning: React.FC<DefaultAdminWarningProps> = ({ userId, isAdm
       <span className="ms-2">
         Create a new non-default admin user, then remove admin access and deactivate this account.
       </span>
-      <div className="mt-2">
-        <Link to="/admin/users" className="btn btn-sm btn-outline-dark">
-          Open User Register
-        </Link>
-      </div>
+      {showActionButton && (
+        <div className="mt-2">
+          <Link to="/admin/users" className="btn btn-sm btn-outline-dark">
+            Open User Register
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

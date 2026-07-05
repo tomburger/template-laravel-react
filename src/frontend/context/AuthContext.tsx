@@ -16,6 +16,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  isDefaultAdminActive: boolean;
+  setDefaultAdminActive: (isActive: boolean) => void;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
@@ -33,6 +35,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isDefaultAdminActive, setIsDefaultAdminActive] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,16 +65,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const token = localStorage.getItem(AUTH_TOKEN_KEY);
         if (!token) {
           setUser(null);
+          setIsDefaultAdminActive(false);
           setIsAuthenticated(false);
           return;
         }
 
         const response = await apiClient.get('/user');
         setUser(response.data.user);
+        setIsDefaultAdminActive(Boolean(response.data.is_default_admin_active));
         setIsAuthenticated(true);
       } catch {
         localStorage.removeItem(AUTH_TOKEN_KEY);
         setUser(null);
+        setIsDefaultAdminActive(false);
         setIsAuthenticated(false);
       } finally {
         setLoading(false);
@@ -95,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setUser(response.data.user);
+      setIsDefaultAdminActive(Boolean(response.data.is_default_admin_active));
       setIsAuthenticated(true);
     } catch (err: any) {
       const message = err.response?.data?.message || 'Login failed';
@@ -127,6 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await apiClient.post('/logout');
       localStorage.removeItem(AUTH_TOKEN_KEY);
       setUser(null);
+      setIsDefaultAdminActive(false);
       setIsAuthenticated(false);
     } catch (err: any) {
       const message = err.response?.data?.message || 'Logout failed';
@@ -143,6 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
       });
       setUser(response.data.user);
+      setIsDefaultAdminActive(Boolean(response.data.is_default_admin_active));
       setIsAuthenticated(false); // User needs to login after verification
     } catch (err: any) {
       const message = err.response?.data?.message || 'Email verification failed';
@@ -195,6 +204,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value: AuthContextType = {
     user,
+    isDefaultAdminActive,
+    setDefaultAdminActive: setIsDefaultAdminActive,
     isAuthenticated,
     loading,
     error,

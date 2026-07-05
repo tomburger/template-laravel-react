@@ -1,78 +1,91 @@
-# Laravel Backend API
+# Application README (src)
 
-Headless REST API built with Laravel for the React frontend.
+This folder is the real application root. It contains both:
+- Laravel backend code
+- React frontend source integrated through Vite
+
+## Folder Overview
+
+```
+src/
+├── app/                        # Laravel application code
+├── routes/                     # API and web routes
+├── database/                   # Migrations and seeders
+├── resources/views/            # Blade entry points
+├── frontend/                   # React pages/components/styles/services
+├── public/build/               # Built frontend assets (production)
+├── artisan
+├── composer.json
+├── package.json
+└── vite.config.ts
+```
+
+## Prerequisites
+
+- PHP 8.1+
+- Composer
+- Node.js 20+
+- npm
+- SQLite or another Laravel-supported database
 
 ## Setup
 
-### Prerequisites
-- PHP 8.1+
-- Composer
-- SQLite (or other database)
+1. Install dependencies
 
-### Installation
-
-1. Install dependencies:
 ```bash
 composer install
+npm install
 ```
 
-2. Copy environment file:
-```bash
-cp .env.example .env
-```
+2. Configure environment
 
-3. Generate application key:
 ```bash
+copy .env.example .env
 php artisan key:generate
-```
-
-4. Run database migrations:
-```bash
 php artisan migrate
 ```
 
-5. Start the development server:
+On macOS/Linux, use `cp .env.example .env`.
+
+3. Run development servers
+
 ```bash
 php artisan serve
+npm run dev
 ```
 
-The API will be available at `http://localhost:8000/api`
+Default local URLs:
+- Laravel: `http://localhost:8000`
+- Vite: `http://localhost:5173`
+
+## Frontend Workflow
+
+- React source is under `frontend/`.
+- Use `npm run dev` for live watch and HMR.
+- Avoid `npm run build` during routine local development unless you explicitly need production output.
 
 ## API Documentation
 
-API documentation is generated using Scribe. To generate:
-```bash
-php artisan scribe:generate
-```
+Generate Scribe docs:
 
-Documentation will be available at `/docs`
+```bash
+php artisan scribe:generate --no-interaction --force
+```
 
 ## Testing
 
-Run tests:
+Backend tests:
+
 ```bash
 php artisan test
 ```
 
-## API Endpoints
-
-- `GET /api/health` - Health check
-- `GET /api/user` - Get authenticated user (requires Sanctum token)
-
-## Architecture
-
-- **Controllers**: `app/Http/Controllers/`
-- **Models**: `app/Models/`
-- **Routes**: `routes/api.php`, `routes/web.php`
-- **Migrations**: `database/migrations/`
-
-## CORS
-
-CORS is configured to allow requests from the frontend. Configure the `FRONTEND_URL` in `.env`.
-
 ## Authentication
 
-Uses Laravel Sanctum for token-based authentication. Tokens are issued on login and must be included in request headers:
+Token-based auth is used for API requests.
+
+Authorization header format:
+
 ```
 Authorization: Bearer {token}
 ```

@@ -11,13 +11,50 @@ class MailService
     /**
      * Send a mailable to a recipient.
      * On local environment, prints the email to the PHP console instead.
+     * Uses PHP native mail() instead of Symfony Mailer for better host compatibility.
      */
     public function send(string $recipientEmail, string $recipientName, Mailable $mailable): void
     {
         if (app()->environment('local')) {
             $this->logEmail($recipientEmail, $recipientName, $mailable);
         } else {
-            Mail::to($recipientEmail, $recipientName)->send($mailable);
+            $this->sendNativeMail($recipientEmail, $recipientName, $mailable);
+        }
+    }
+
+    /**
+     * Send email using PHP native mail() function.
+     */
+    private function sendNativeMail(string $recipientEmail, string $recipientName, Mailable $mailable): void
+    {
+        if (config('mail.default') === 'log') {
+            $this->logEmail($recipientEmail, $recipientName, $mailable);
+            return;
+        }
+
+        $subject = $mailable->envelope()->subject ?? '(no subject)';
+        $html = $mailable->render();
+
+        $fromEmail = (string) config('mail.from.address', 'noreply@example.com');
+        $fromName = (string) config('mail.from.name', config('app.name'));
+
+        $headers = "From: =?UTF-8?B?" . base64_encode($fromName) . "?= <{$fromEmail}>\n"
+            . "Reply-To: {$fromEmail}\n"
+            . "MIME-Version: 1.0\n"
+            . "Content-Type: text/html; charset=utf-8\n"
+            . "Content-Transfer-Encoding: 8bit\n";
+
+        $encodedSubject = "=?UTF-8?B?" . base64_encode($subject) . "?=";
+        $to = $recipientName ? "{$recipientName} <{$recipientEmail}>" : $recipientEmail;
+
+        $result = mail($recipientEmail, $encodedSubject, $html, $headers);
+
+        if (!$result) {
+            Log::warning('Failed to send email via mail()', [
+                'to' => $to,
+                'subject' => $subject,
+                'from' => $fromEmail,
+            ]);
         }
     }
 

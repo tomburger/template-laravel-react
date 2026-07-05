@@ -35,7 +35,7 @@ class VerifyEmailMailable extends Mailable
      */
     public function content(): Content
     {
-        $verificationUrl = config('frontend.url') . '/verify-email?email=' . urlencode($this->user->email) . '&token=' . $this->token;
+        $verificationUrl = config('app.url') . '/verify-email?email=' . urlencode($this->user->email) . '&token=' . $this->token;
 
         return new Content(
             view: 'emails.verify-email',

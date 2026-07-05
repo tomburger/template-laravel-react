@@ -41,6 +41,11 @@ jobs:
           echo "RELEASE_NAME=$RELEASE_NAME" >> "$GITHUB_ENV"
           echo "Release: $RELEASE_NAME"
 
+      - name: Setup version in the source code
+        run: |
+          set -euo pipefail
+          sed -i "s/\[\[VERSION\]\]/${GITHUB_RUN_NUMBER}/g" src/frontend/components/Footer.tsx
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
+import { useAuth } from '../context/AuthContext';
+import DefaultAdminWarning from '../components/DefaultAdminWarning';
 import { getEndpoints } from '../services/endpoints/endpoints';
 
 const AUTH_TOKEN_KEY = 'auth_token';
@@ -15,6 +17,7 @@ interface AdminInfoResponse {
 }
 
 const Admin: React.FC = () => {
+  const { user } = useAuth();
   const { adminDashboardInfo } = getEndpoints();
   const [stats, setStats] = useState<AdminInfoResponse['users'] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,6 +53,7 @@ const Admin: React.FC = () => {
           <div className="col-md-10 mx-auto">
             <div className="card shadow-sm">
               <div className="card-body p-5">
+                <DefaultAdminWarning userId={user?.id} isAdmin={user?.is_admin} />
                 <h1 className="card-title mb-4">Admin Panel</h1>
 
                 <h2 className="h4 mb-3">Users</h2>

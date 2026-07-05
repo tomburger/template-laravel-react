@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import PageLayout from '../components/PageLayout';
+import { useAuth } from '../context/AuthContext';
+import DefaultAdminWarning from '../components/DefaultAdminWarning';
 import { getEndpoints } from '../services/endpoints/endpoints';
 
 const AUTH_TOKEN_KEY = 'auth_token';
@@ -26,6 +28,7 @@ type UpdateUserResponse = {
 type FilterValue = 'all' | 'active' | 'deactivated' | 'verified' | 'pending-verification' | 'admin';
 
 const AdminUsers: React.FC = () => {
+  const { user } = useAuth();
   const { listAllUsers, updateUserFlags, resendVerificationEmailForUseradmin } = getEndpoints();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,6 +158,7 @@ const AdminUsers: React.FC = () => {
           <div className="col-12">
             <div className="card shadow-sm">
               <div className="card-body p-4 p-md-5">
+                <DefaultAdminWarning userId={user?.id} isAdmin={user?.is_admin} />
                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                   <div>
                     <h1 className="h3 mb-1">User Register</h1>

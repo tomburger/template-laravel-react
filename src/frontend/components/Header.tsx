@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { APP_NAME } from '../config';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -23,7 +24,7 @@ const Header: React.FC = () => {
           onClick={() => navigate('/')}
           style={{ cursor: 'pointer' }}
         >
-          LaravelReact
+          {APP_NAME}
         </span>
         <div className="d-flex align-items-center gap-2">
           <span className="me-3">Welcome, {user?.name}!</span>

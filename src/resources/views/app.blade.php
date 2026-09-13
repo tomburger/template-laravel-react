@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Laravel React App Template</title>
+    <meta name="app-name" content="{{ config('app.name') }}" />
+    <title>{{ config('app.name') }}</title>
     <!-- Scripts -->
     @viteReactRefresh
     @vite(['frontend/main.tsx'])

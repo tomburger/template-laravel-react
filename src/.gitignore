@@ -9,8 +9,7 @@
 .scribe/
 /bootstrap/cache/*.php
 /storage/*.key
-/storage/app/private/
-/storage/app/scribe/
+/storage/app/
 /storage/framework/cache/data/
 /storage/framework/compiled.php
 /storage/framework/sessions/*

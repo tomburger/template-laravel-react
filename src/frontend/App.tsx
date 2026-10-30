@@ -16,6 +16,7 @@ import AdminLocations from './pages/AdminLocations';
 import AdminMembers from './pages/AdminMembers';
 import AdminSeasons from './pages/AdminSeasons';
 import AdminPricing from './pages/AdminPricing';
+import AdminLocationLayout from './pages/AdminLocationLayout';
 import AdminSeasonDetail from './pages/AdminSeasonDetail';
 import AdminUnits from './pages/AdminUnits';
 
@@ -100,6 +101,17 @@ function App() {
               <ProtectedRoute>
                 <AdminRoute>
                   <AdminSeasons />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/locations/:locationId/layout"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminLocationLayout />
                 </AdminRoute>
               </ProtectedRoute>
             }

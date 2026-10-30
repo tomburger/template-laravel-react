@@ -120,6 +120,9 @@ const AdminLocations: React.FC = () => {
                           <Link to={`/admin/locations/${location.id}`} className="btn btn-sm btn-primary">
                             {t('adminLocations.manageUnits')}
                           </Link>
+                          <Link to={`/admin/locations/${location.id}/layout`} className="btn btn-sm btn-primary">
+                            {t('adminLocations.layout')}
+                          </Link>
                           <button className="btn btn-sm btn-dark" onClick={() => openDrawer(location)}>
                             {t('adminUsers.edit')}
                           </button>

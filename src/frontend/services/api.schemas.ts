@@ -9,6 +9,10 @@ export type HealthCheckEndpoint200 = {
   status?: string;
 };
 
+export type GetLocationLayoutImage404 = {
+  message?: string;
+};
+
 export type UpdateUnitBody = {
   /**
    * Unit category.
@@ -30,6 +34,23 @@ export type CreateUnitBody = {
 };
 
 export type ListUnitsOfALocation401 = {
+  message?: string;
+};
+
+export type SaveLocationLayoutBody = {
+  /**
+   * Background image (jpg, png, gif or webp, up to 10 MB). Omit to keep the current one. Must be a file. Must not be greater than 10240 kilobytes.
+   * @nullable
+   */
+  image?: Blob | null;
+  /**
+   * SVG markup drawn over the image. Elements with id "unit-<unitId>" represent units. Must not be greater than 1000000 characters.
+   * @nullable
+   */
+  svg?: string | null;
+};
+
+export type GetLocationLayout401 = {
   message?: string;
 };
 

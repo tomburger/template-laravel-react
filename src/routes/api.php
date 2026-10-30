@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\LocationLayoutController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\PricingRuleController;
@@ -67,8 +68,14 @@ Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
     Route::delete('/seasons/{season}/units/{unitSeason}', [SeasonUnitController::class, 'destroy']);
     Route::apiResource('seasons', SeasonController::class)->except('show');
     Route::apiResource('locations', LocationController::class)->except('show');
+    Route::get('/locations/{location}/layout', [LocationLayoutController::class, 'show']);
+    Route::post('/locations/{location}/layout', [LocationLayoutController::class, 'update']);
+    Route::delete('/locations/{location}/layout', [LocationLayoutController::class, 'destroy']);
     Route::apiResource('locations.units', UnitController::class)->except('show');
 });
 
 // Health check
 Route::get('/health', [HealthController::class, 'show']);
+
+// Layout images are plain <img> sources, which cannot send a bearer token
+Route::get('/locations/{location}/layout/image', [LocationLayoutController::class, 'image']);

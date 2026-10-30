@@ -26,6 +26,7 @@ import type {
   RegisterANewUserBody,
   ResendVerificationEmailBody,
   ResetPasswordBody,
+  SaveLocationLayoutBody,
   UpdateAllocationBody,
   UpdateLanguageBody,
   UpdateLocationBody,
@@ -556,6 +557,47 @@ const deleteLocation = <TData = AxiosResponse<unknown>>(
     );
   }
 /**
+ * @summary Get location layout
+ */
+const getLocationLayout = <TData = AxiosResponse<unknown>>(
+    locationId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/locations/${locationId}/layout`,options
+    );
+  }
+/**
+ * Replaces the SVG and, when an image is sent, the background image.
+ * @summary Save location layout
+ */
+const saveLocationLayout = <TData = AxiosResponse<unknown>>(
+    locationId: number,
+    saveLocationLayoutBody?: SaveLocationLayoutBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {const formData = new FormData();
+if(saveLocationLayoutBody?.svg !== undefined && saveLocationLayoutBody.svg !== null) {
+ formData.append('svg', saveLocationLayoutBody.svg)
+ }
+if(saveLocationLayoutBody?.image !== undefined && saveLocationLayoutBody.image !== null) {
+ formData.append('image', saveLocationLayoutBody.image)
+ }
+
+    return axios.post(
+      `/api/locations/${locationId}/layout`,
+      formData,options
+    );
+  }
+/**
+ * Removes the SVG and the background image.
+ * @summary Clear location layout
+ */
+const clearLocationLayout = <TData = AxiosResponse<unknown>>(
+    locationId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/locations/${locationId}/layout`,options
+    );
+  }
+/**
  * @summary List units of a location
  */
 const listUnitsOfALocation = <TData = AxiosResponse<unknown>>(
@@ -601,7 +643,18 @@ const deleteUnit = <TData = AxiosResponse<unknown>>(
       `/api/locations/${locationId}/units/${id}`,options
     );
   }
-return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,previewPrice,listAllocationsOfASeason,allocateAUnitToAMember,updateAllocation,deleteAllocation,changeAllocationStatus,listPricingRules,createPricingRule,updatePricingRule,deletePricingRule,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,listUnitsOfALocation,createUnit,updateUnit,deleteUnit}};
+/**
+ * Public on purpose: it is a plain <img> source and will also be shown to members.
+ * @summary Get location layout image
+ */
+const getLocationLayoutImage = <TData = AxiosResponse<unknown>>(
+    locationId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/locations/${locationId}/layout/image`,options
+    );
+  }
+return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,previewPrice,listAllocationsOfASeason,allocateAUnitToAMember,updateAllocation,deleteAllocation,changeAllocationStatus,listPricingRules,createPricingRule,updatePricingRule,deletePricingRule,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,getLocationLayout,saveLocationLayout,clearLocationLayout,listUnitsOfALocation,createUnit,updateUnit,deleteUnit,getLocationLayoutImage}};
 export type RegisterANewUserResult = AxiosResponse<unknown>
 export type LoginUserResult = AxiosResponse<unknown>
 export type VerifyEmailResult = AxiosResponse<unknown>
@@ -647,7 +700,11 @@ export type ListLocationsResult = AxiosResponse<unknown>
 export type CreateLocationResult = AxiosResponse<unknown>
 export type UpdateLocationResult = AxiosResponse<unknown>
 export type DeleteLocationResult = AxiosResponse<unknown>
+export type GetLocationLayoutResult = AxiosResponse<unknown>
+export type SaveLocationLayoutResult = AxiosResponse<unknown>
+export type ClearLocationLayoutResult = AxiosResponse<unknown>
 export type ListUnitsOfALocationResult = AxiosResponse<unknown>
 export type CreateUnitResult = AxiosResponse<unknown>
 export type UpdateUnitResult = AxiosResponse<unknown>
 export type DeleteUnitResult = AxiosResponse<unknown>
+export type GetLocationLayoutImageResult = AxiosResponse<unknown>

@@ -12,6 +12,8 @@ import ResendVerification from './pages/ResendVerification';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 import AdminUsers from './pages/AdminUsers';
+import AdminLocations from './pages/AdminLocations';
+import AdminUnits from './pages/AdminUnits';
 
 function App() {
   return (
@@ -51,6 +53,27 @@ function App() {
               <ProtectedRoute>
                 <AdminRoute>
                   <AdminUsers />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/locations"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminLocations />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/locations/:locationId"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminUnits />
                 </AdminRoute>
               </ProtectedRoute>
             }

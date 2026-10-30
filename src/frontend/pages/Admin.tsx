@@ -116,6 +116,14 @@ const Admin: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                <hr className="my-4" />
+                <h2 className="h4 mb-3">{t('admin.reservations')}</h2>
+                <div className="d-flex flex-wrap gap-2">
+                  <Link to="/admin/locations" className="btn btn-outline-primary btn-sm">
+                    {t('admin.locationsAndUnits')}
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

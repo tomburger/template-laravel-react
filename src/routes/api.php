@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +41,9 @@ Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}', [UserController::class, 'update']);
     Route::post('/users/{id}/resend-verification-email', [UserController::class, 'resendVerificationEmail']);
+
+    Route::apiResource('locations', LocationController::class)->except('show');
+    Route::apiResource('locations.units', UnitController::class)->except('show');
 });
 
 // Health check

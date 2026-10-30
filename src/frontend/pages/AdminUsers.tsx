@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import { useAuth } from '../context/AuthContext';
 import DefaultAdminWarning from '../components/DefaultAdminWarning';
+import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 
 const AUTH_TOKEN_KEY = 'auth_token';
@@ -37,6 +38,8 @@ const AdminUsers: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterValue>('all');
   const [busyUserId, setBusyUserId] = useState<number | null>(null);
+  const [editingUser, setEditingUser] = useState<UserRow | null>(null);
+  const [editFlags, setEditFlags] = useState({ is_admin: false, is_deactivated: false });
 
   const requestOptions = () => {
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
@@ -66,6 +69,15 @@ const AdminUsers: React.FC = () => {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  useEffect(() => {
+    if (editingUser) {
+      setEditFlags({
+        is_admin: editingUser.is_admin,
+        is_deactivated: editingUser.is_deactivated,
+      });
+    }
+  }, [editingUser]);
 
   const filteredUsers = useMemo(() => {
     const searchText = search.trim().toLowerCase();
@@ -106,49 +118,32 @@ const AdminUsers: React.FC = () => {
     ? defaultAdminActiveFromUsers
     : isDefaultAdminActive;
 
-  const handleToggleDeactivated = async (user: UserRow) => {
-    try {
-      setBusyUserId(user.id);
-      setError(null);
-      setNotice(null);
-
-      const response = await updateUserFlags<{ data: UpdateUserResponse }>(
-        user.id,
-        { is_deactivated: !user.is_deactivated },
-        requestOptions(),
-      );
-
-      setUsers((prevUsers) => prevUsers.map((item) => (item.id === user.id ? response.data.user : item)));
-      if (response.data.user.id === 1) {
-        setDefaultAdminActive(response.data.user.is_admin && !response.data.user.is_deactivated);
-      }
-      setNotice(response.data.message || 'User status updated.');
-    } catch {
-      setError('Failed to update user status.');
-    } finally {
-      setBusyUserId(null);
+  const handleSaveUser = async () => {
+    if (!editingUser) {
+      return;
     }
-  };
 
-  const handleToggleAdmin = async (user: UserRow) => {
     try {
-      setBusyUserId(user.id);
+      setBusyUserId(editingUser.id);
       setError(null);
       setNotice(null);
 
       const response = await updateUserFlags<{ data: UpdateUserResponse }>(
-        user.id,
-        { is_admin: !user.is_admin },
+        editingUser.id,
+        editFlags,
         requestOptions(),
       );
 
-      setUsers((prevUsers) => prevUsers.map((item) => (item.id === user.id ? response.data.user : item)));
+      setUsers((prevUsers) => (
+        prevUsers.map((item) => (item.id === editingUser.id ? response.data.user : item))
+      ));
       if (response.data.user.id === 1) {
         setDefaultAdminActive(response.data.user.is_admin && !response.data.user.is_deactivated);
       }
-      setNotice(response.data.message || 'User role updated.');
+      setNotice(response.data.message || 'User updated.');
+      setEditingUser(null);
     } catch {
-      setError('Failed to update admin role.');
+      setError('Failed to update user.');
     } finally {
       setBusyUserId(null);
     }
@@ -249,7 +244,6 @@ const AdminUsers: React.FC = () => {
 
                         {filteredUsers.map((user) => {
                           const isBusy = busyUserId === user.id;
-                          const disableMakeAdminForDefaultUser = user.id === 1 && !user.is_admin;
 
                           return (
                             <tr key={user.id}>
@@ -280,25 +274,11 @@ const AdminUsers: React.FC = () => {
                               <td className="text-end">
                                 <div className="d-flex justify-content-end flex-wrap gap-2">
                                   <button
-                                    className={`btn btn-sm ${user.is_deactivated ? 'btn-success' : 'btn-outline-secondary'}`}
-                                    onClick={() => handleToggleDeactivated(user)}
+                                    className="btn btn-sm btn-dark"
+                                    onClick={() => setEditingUser(user)}
                                     disabled={isBusy}
                                   >
-                                    {user.is_deactivated ? 'Activate' : 'Deactivate'}
-                                  </button>
-                                  <button
-                                    className={`btn btn-sm ${user.is_admin ? 'btn-outline-dark' : 'btn-dark'}`}
-                                    onClick={() => handleToggleAdmin(user)}
-                                    disabled={isBusy || disableMakeAdminForDefaultUser}
-                                  >
-                                    {user.is_admin ? 'Remove admin' : 'Make admin'}
-                                  </button>
-                                  <button
-                                    className="btn btn-outline-primary btn-sm"
-                                    onClick={() => handleResendVerification(user)}
-                                    disabled={isBusy || user.email_verified_at !== null}
-                                  >
-                                    Resend verification
+                                    Edit
                                   </button>
                                 </div>
                               </td>
@@ -313,6 +293,86 @@ const AdminUsers: React.FC = () => {
             </div>
           </div>
         </div>
+        <RightDrawer
+          isOpen={editingUser !== null}
+          onClose={() => setEditingUser(null)}
+          title="Edit user"
+          subtitle={editingUser?.email}
+          closeText="Close"
+          disableClose={busyUserId === editingUser?.id}
+          ariaLabel="Edit user"
+          footer={
+            <div className="d-flex justify-content-end gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setEditingUser(null)}
+                disabled={busyUserId === editingUser?.id}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-dark"
+                onClick={handleSaveUser}
+                disabled={busyUserId === editingUser?.id}
+              >
+                {busyUserId === editingUser?.id ? 'Saving...' : 'Save changes'}
+              </button>
+            </div>
+          }
+        >
+          {editingUser && (
+            <>
+              <div className="mb-4">
+                <label className="form-label" htmlFor="edit-user-name">Name</label>
+                <input id="edit-user-name" className="form-control" value={editingUser.name} readOnly />
+              </div>
+              <div className="mb-4">
+                <label className="form-label" htmlFor="edit-user-email">Email</label>
+                <input id="edit-user-email" type="email" className="form-control" value={editingUser.email} readOnly />
+              </div>
+              <div className="border rounded p-3 mb-4 bg-light-subtle">
+                <div className="fw-semibold mb-3">Access</div>
+                <div className="form-check form-switch mb-3">
+                  <input
+                    id="edit-user-admin"
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={editFlags.is_admin}
+                    onChange={(event) => setEditFlags((flags) => ({ ...flags, is_admin: event.target.checked }))}
+                    disabled={editingUser.id === 1 && !editingUser.is_admin}
+                  />
+                  <label className="form-check-label" htmlFor="edit-user-admin">Administrator</label>
+                </div>
+                <div className="form-check form-switch">
+                  <input
+                    id="edit-user-deactivated"
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={editFlags.is_deactivated}
+                    onChange={(event) => setEditFlags((flags) => ({ ...flags, is_deactivated: event.target.checked }))}
+                  />
+                  <label className="form-check-label" htmlFor="edit-user-deactivated">Deactivate account</label>
+                </div>
+              </div>
+              <div className="border rounded p-3">
+                <div className="fw-semibold mb-1">Email verification</div>
+                <p className="small text-muted mb-3">
+                  {editingUser.email_verified_at ? 'This email address has been verified.' : 'This email address is awaiting verification.'}
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-outline-primary btn-sm"
+                  onClick={() => handleResendVerification(editingUser)}
+                  disabled={busyUserId === editingUser.id || editingUser.email_verified_at !== null}
+                >
+                  Resend verification
+                </button>
+              </div>
+            </>
+          )}
+        </RightDrawer>
     </PageLayout>
   );
 };

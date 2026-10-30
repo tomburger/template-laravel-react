@@ -3,10 +3,12 @@ import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
 import RightDrawer from '../components/RightDrawer';
-import { Location, Unit, apiErrorMessage, locationsApi, unitsApi } from '../services/adminApi';
+import { getEndpoints } from '../services/endpoints/endpoints';
+import { Location, Unit, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
 const AdminUnits: React.FC = () => {
   const { t } = useTranslation();
+  const { listLocations, listUnitsOfALocation, createUnit, updateUnit, deleteUnit } = getEndpoints();
   const locationId = Number(useParams().locationId);
   const [location, setLocation] = useState<Location | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
@@ -22,9 +24,12 @@ const AdminUnits: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [locations, loadedUnits] = await Promise.all([locationsApi.list(), unitsApi.list(locationId)]);
-      setLocation(locations.find((item) => item.id === locationId) ?? null);
-      setUnits(loadedUnits);
+      const [locationsResponse, unitsResponse] = await Promise.all([
+        listLocations<{ data: { locations: Location[] } }>(authRequestOptions()),
+        listUnitsOfALocation<{ data: { units: Unit[] } }>(locationId, authRequestOptions()),
+      ]);
+      setLocation(locationsResponse.data.locations.find((item) => item.id === locationId) ?? null);
+      setUnits(unitsResponse.data.units);
     } catch (err) {
       setError(apiErrorMessage(err, t('adminUnits.loadFailed')));
     } finally {
@@ -49,9 +54,9 @@ const AdminUnits: React.FC = () => {
       setSaving(true);
       setFormError(null);
       if (editing) {
-        await unitsApi.update(locationId, editing.id, data);
+        await updateUnit(locationId, editing.id, data, authRequestOptions());
       } else {
-        await unitsApi.create(locationId, data);
+        await createUnit(locationId, data, authRequestOptions());
       }
       setDrawerOpen(false);
       await load();
@@ -66,7 +71,7 @@ const AdminUnits: React.FC = () => {
     if (!window.confirm(t('adminUnits.confirmDelete', { code: unit.code }))) return;
     try {
       setError(null);
-      await unitsApi.remove(locationId, unit.id);
+      await deleteUnit(locationId, unit.id, authRequestOptions());
       await load();
     } catch (err) {
       setError(apiErrorMessage(err, t('adminUnits.deleteFailed')));

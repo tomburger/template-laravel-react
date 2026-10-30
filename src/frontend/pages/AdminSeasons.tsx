@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
 import RightDrawer from '../components/RightDrawer';
-import { Season, apiErrorMessage, seasonsApi } from '../services/adminApi';
+import { getEndpoints } from '../services/endpoints/endpoints';
+import { Season, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
 const emptyForm = { name: '', start_date: '', end_date: '' };
 
 const AdminSeasons: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { listSeasons, createSeason, updateSeason, deleteSeason } = getEndpoints();
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,8 @@ const AdminSeasons: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      setSeasons(await seasonsApi.list());
+      const response = await listSeasons<{ data: { seasons: Season[] } }>(authRequestOptions());
+      setSeasons(response.data.seasons);
     } catch (err) {
       setError(apiErrorMessage(err, t('adminSeasons.loadFailed')));
     } finally {
@@ -49,9 +52,9 @@ const AdminSeasons: React.FC = () => {
       setSaving(true);
       setFormError(null);
       if (editing) {
-        await seasonsApi.update(editing.id, data);
+        await updateSeason(editing.id, data, authRequestOptions());
       } else {
-        await seasonsApi.create(data);
+        await createSeason(data, authRequestOptions());
       }
       setDrawerOpen(false);
       await load();
@@ -66,7 +69,7 @@ const AdminSeasons: React.FC = () => {
     if (!window.confirm(t('adminSeasons.confirmDelete', { name: season.name }))) return;
     try {
       setError(null);
-      await seasonsApi.remove(season.id);
+      await deleteSeason(season.id, authRequestOptions());
       await load();
     } catch (err) {
       setError(apiErrorMessage(err, t('adminSeasons.deleteFailed')));

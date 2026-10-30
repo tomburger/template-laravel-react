@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
 import RightDrawer from '../components/RightDrawer';
-import { Member, UserOption, apiErrorMessage, membersApi } from '../services/adminApi';
+import { getEndpoints } from '../services/endpoints/endpoints';
+import { Member, UserOption, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
 const emptyForm = { user_id: '', first_name: '', last_name: '', phone_number: '', category: '' };
 
 const AdminMembers: React.FC = () => {
   const { t } = useTranslation();
+  const { listMembers, listUsersThatAreNotMembersYet, createMember, updateMember, deleteMember } = getEndpoints();
   const [members, setMembers] = useState<Member[]>([]);
   const [candidates, setCandidates] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,9 +25,12 @@ const AdminMembers: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [loadedMembers, loadedCandidates] = await Promise.all([membersApi.list(), membersApi.candidates()]);
-      setMembers(loadedMembers);
-      setCandidates(loadedCandidates);
+      const [membersResponse, candidatesResponse] = await Promise.all([
+        listMembers<{ data: { members: Member[] } }>(authRequestOptions()),
+        listUsersThatAreNotMembersYet<{ data: { users: UserOption[] } }>(authRequestOptions()),
+      ]);
+      setMembers(membersResponse.data.members);
+      setCandidates(candidatesResponse.data.users);
     } catch (err) {
       setError(apiErrorMessage(err, t('adminMembers.loadFailed')));
     } finally {
@@ -65,9 +70,9 @@ const AdminMembers: React.FC = () => {
       setSaving(true);
       setFormError(null);
       if (editing) {
-        await membersApi.update(editing.id, data);
+        await updateMember(editing.id, data, authRequestOptions());
       } else {
-        await membersApi.create({ ...data, user_id: Number(form.user_id) });
+        await createMember({ ...data, user_id: Number(form.user_id) }, authRequestOptions());
       }
       setDrawerOpen(false);
       await load();
@@ -82,7 +87,7 @@ const AdminMembers: React.FC = () => {
     if (!window.confirm(t('adminMembers.confirmDelete', { name: `${member.first_name} ${member.last_name}` }))) return;
     try {
       setError(null);
-      await membersApi.remove(member.id);
+      await deleteMember(member.id, authRequestOptions());
       await load();
     } catch (err) {
       setError(apiErrorMessage(err, t('adminMembers.deleteFailed')));

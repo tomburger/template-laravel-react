@@ -66,6 +66,8 @@ App URLs:
 - Local development uses Vite live watching (`npm run dev`).
 - Do not run `npm run build` for routine checks unless a production build is explicitly needed.
 - Regenerate API docs when backend endpoints change: `cd src && php artisan scribe:generate --no-interaction --force`.
+- Then regenerate the frontend client: `cd src/frontend && npx orval --config orval.config.ts`. All frontend API calls go through the generated `getEndpoints()` (see `services/apiHelpers.ts` for the auth request options); do not hand-write axios clients.
+- Scribe may modify tracked files in `src/public/vendor/scribe`; discard those changes (`git checkout -- src/public/vendor`).
 
 ## Architecture
 

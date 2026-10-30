@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
 import RightDrawer from '../components/RightDrawer';
-import { Location, apiErrorMessage, locationsApi } from '../services/adminApi';
+import { getEndpoints } from '../services/endpoints/endpoints';
+import { Location, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
 const AdminLocations: React.FC = () => {
   const { t } = useTranslation();
+  const { listLocations, createLocation, updateLocation, deleteLocation } = getEndpoints();
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +22,8 @@ const AdminLocations: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      setLocations(await locationsApi.list());
+      const response = await listLocations<{ data: { locations: Location[] } }>(authRequestOptions());
+      setLocations(response.data.locations);
     } catch (err) {
       setError(apiErrorMessage(err, t('adminLocations.loadFailed')));
     } finally {
@@ -44,9 +47,9 @@ const AdminLocations: React.FC = () => {
       setSaving(true);
       setFormError(null);
       if (editing) {
-        await locationsApi.update(editing.id, { name });
+        await updateLocation(editing.id, { name }, authRequestOptions());
       } else {
-        await locationsApi.create({ name });
+        await createLocation({ name }, authRequestOptions());
       }
       setDrawerOpen(false);
       await load();
@@ -61,7 +64,7 @@ const AdminLocations: React.FC = () => {
     if (!window.confirm(t('adminLocations.confirmDelete', { name: location.name }))) return;
     try {
       setError(null);
-      await locationsApi.remove(location.id);
+      await deleteLocation(location.id, authRequestOptions());
       await load();
     } catch (err) {
       setError(apiErrorMessage(err, t('adminLocations.deleteFailed')));

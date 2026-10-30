@@ -4,9 +4,8 @@ import PageLayout from '../components/PageLayout';
 import { useAuth } from '../context/AuthContext';
 import DefaultAdminWarning from '../components/DefaultAdminWarning';
 import { getEndpoints } from '../services/endpoints/endpoints';
+import { authRequestOptions } from '../services/apiHelpers';
 import { useTranslation } from 'react-i18next';
-
-const AUTH_TOKEN_KEY = 'auth_token';
 
 interface AdminInfoResponse {
   users: {
@@ -31,12 +30,7 @@ const Admin: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const token = localStorage.getItem(AUTH_TOKEN_KEY);
-        const response = await adminDashboardInfo<{ data: AdminInfoResponse }>({
-          baseURL: '',
-          withCredentials: true,
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
+        const response = await adminDashboardInfo<{ data: AdminInfoResponse }>(authRequestOptions());
 
         setStats(response.data.users);
       } catch {

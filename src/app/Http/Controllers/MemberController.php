@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\MemberRequest;
+use App\Http\Requests\StoreMemberRequest;
+use App\Http\Requests\UpdateMemberRequest;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -54,7 +55,7 @@ class MemberController extends Controller
      * @bodyParam phone_number string Phone number.
      * @bodyParam category string Member category.
      */
-    public function store(MemberRequest $request): JsonResponse
+    public function store(StoreMemberRequest $request): JsonResponse
     {
         $data = $request->validated();
         $data['id'] = $data['user_id'];
@@ -76,7 +77,7 @@ class MemberController extends Controller
      * @bodyParam phone_number string Phone number.
      * @bodyParam category string Member category.
      */
-    public function update(MemberRequest $request, Member $member): JsonResponse
+    public function update(UpdateMemberRequest $request, Member $member): JsonResponse
     {
         $member->update($request->validated());
 

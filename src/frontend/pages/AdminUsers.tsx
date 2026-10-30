@@ -4,9 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import DefaultAdminWarning from '../components/DefaultAdminWarning';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
+import { authRequestOptions } from '../services/apiHelpers';
 import { useTranslation } from 'react-i18next';
-
-const AUTH_TOKEN_KEY = 'auth_token';
 
 type UserRow = {
   id: number;
@@ -45,21 +44,12 @@ const AdminUsers: React.FC = () => {
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [editFlags, setEditFlags] = useState({ is_admin: false, is_deactivated: false });
 
-  const requestOptions = () => {
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
-
-    return {
-      baseURL: '',
-      withCredentials: true,
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    };
-  };
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await listAllUsers<{ data: UsersResponse }>(requestOptions());
+      const response = await listAllUsers<{ data: UsersResponse }>(authRequestOptions());
       setUsers(response.data.users);
       const defaultAdminActive = response.data.users.some((item) => item.id === 1 && item.is_admin && !item.is_deactivated);
       setDefaultAdminActive(defaultAdminActive);
@@ -135,7 +125,7 @@ const AdminUsers: React.FC = () => {
       const response = await updateUserFlags<{ data: UpdateUserResponse }>(
         editingUser.id,
         editFlags,
-        requestOptions(),
+        authRequestOptions(),
       );
 
       setUsers((prevUsers) => (
@@ -159,7 +149,7 @@ const AdminUsers: React.FC = () => {
       setError(null);
       setNotice(null);
 
-      await resendVerificationEmailForUseradmin(user.id, requestOptions());
+      await resendVerificationEmailForUseradmin(user.id, authRequestOptions());
       setNotice(t('adminUsers.resent', { email: user.email }));
     } catch {
             setError(t('adminUsers.resendFailed'));

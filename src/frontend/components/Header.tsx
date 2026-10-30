@@ -2,9 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { APP_NAME } from '../config';
+import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 
 const Header: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, setLanguage } = useAuth();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -27,20 +30,32 @@ const Header: React.FC = () => {
           {APP_NAME}
         </span>
         <div className="d-flex align-items-center gap-2">
-          <span className="me-3">Welcome, {user?.name}!</span>
+          <span className="me-3">{t('header.welcome', { name: user?.name })}</span>
+          <select
+            className="form-select form-select-sm w-auto"
+            aria-label={t('header.language')}
+            value={i18n.resolvedLanguage}
+            onChange={(e) => setLanguage(e.target.value).catch(() => {})}
+          >
+            {SUPPORTED_LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.label}
+              </option>
+            ))}
+          </select>
           {user?.is_admin && (
             <button
               className="btn btn-outline-primary btn-sm me-2"
               onClick={() => navigate('/admin')}
             >
-              Admin
+              {t('header.admin')}
             </button>
           )}
           <button
             className="btn btn-outline-danger btn-sm"
             onClick={handleLogout}
           >
-            Logout
+            {t('header.logout')}
           </button>
         </div>
       </div>

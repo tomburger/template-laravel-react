@@ -305,4 +305,26 @@ class AuthController extends Controller
             'is_default_admin_active' => $this->isDefaultAdminActive(),
         ], 200);
     }
+
+    /**
+     * Update language
+     *
+     * Update the preferred language (locale code) of the authenticated user.
+     *
+     * @bodyParam language string required Locale code. Example: en
+     * @responseField user object Updated user data
+     */
+    public function updateLanguage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'language' => ['required', 'string', 'in:en,cs'],
+        ]);
+
+        $user = $request->user();
+        $user->update(['language' => $validated['language']]);
+
+        return response()->json([
+            'user' => $user,
+        ], 200);
+    }
 }

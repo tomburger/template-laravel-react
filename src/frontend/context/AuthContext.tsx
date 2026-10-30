@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import i18n, { LANGUAGE_KEY, isSupportedLanguage } from '../i18n';
 
 const AUTH_TOKEN_KEY = 'auth_token';
 
@@ -10,6 +11,7 @@ interface User {
   email_verified_at: string | null;
   is_admin: boolean;
   is_deactivated: boolean;
+  language: string;
   created_at: string;
   updated_at: string;
 }
@@ -29,6 +31,7 @@ interface AuthContextType {
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (email: string, token: string, password: string, passwordConfirmation: string) => Promise<void>;
   clearError: () => void;
+  setLanguage: (language: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -202,6 +205,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
   };
 
+  // The user's saved language takes precedence once logged in
+  useEffect(() => {
+    if (isAuthenticated && isSupportedLanguage(user?.language)) {
+      localStorage.setItem(LANGUAGE_KEY, user.language);
+      i18n.changeLanguage(user.language);
+    }
+  }, [isAuthenticated, user?.language]);
+
+  const setLanguage = async (language: string) => {
+    if (!isSupportedLanguage(language)) return;
+    localStorage.setItem(LANGUAGE_KEY, language);
+    await i18n.changeLanguage(language);
+
+    if (isAuthenticated) {
+      try {
+        const response = await apiClient.put('/user/language', { language });
+        setUser(response.data.user);
+      } catch (err: any) {
+        const message = err.response?.data?.message || 'Failed to update language';
+        setError(message);
+        throw new Error(message);
+      }
+    }
+  };
+
   const value: AuthContextType = {
     user,
     isDefaultAdminActive,
@@ -217,6 +245,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     forgotPassword,
     resetPassword,
     clearError,
+    setLanguage,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/user/language', [AuthController::class, 'updateLanguage']);
 });
 
 // Admin-only routes

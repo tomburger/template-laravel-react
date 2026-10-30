@@ -1,5 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import en from './locales/en';
+import cs from './locales/cs';
 
 export const LANGUAGE_KEY = 'language';
 
@@ -20,16 +22,8 @@ i18n.use(initReactI18next).init({
   fallbackLng: DEFAULT_LANGUAGE,
   interpolation: { escapeValue: false },
   resources: {
-    en: {
-      translation: {
-        header: { welcome: 'Welcome, {{name}}!', admin: 'Admin', logout: 'Logout', language: 'Language' },
-      },
-    },
-    cs: {
-      translation: {
-        header: { welcome: 'Vítejte, {{name}}!', admin: 'Administrace', logout: 'Odhlásit se', language: 'Jazyk' },
-      },
-    },
+    en: { translation: en },
+    cs: { translation: cs },
   },
 });
 

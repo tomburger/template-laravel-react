@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation, Trans } from 'react-i18next';
 
 const ResendVerification: React.FC = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -41,11 +43,11 @@ const ResendVerification: React.FC = () => {
                   <div className="mb-3">
                     <i className="bi bi-check-circle text-success" style={{ fontSize: '3rem' }}></i>
                   </div>
-                  <h2 className="card-title mb-3">Verification Email Sent</h2>
+                  <h2 className="card-title mb-3">                  {t('resendVerification.sentTitle')}</h2>
                   <p className="card-text mb-3">
-                    We've sent a new verification link to <strong>{email}</strong>. Please check your email.
+                                      <Trans i18nKey="resendVerification.sentText" values={{ email }} components={{ strong: <strong /> }} />
                   </p>
-                  <p className="text-muted small">Redirecting to login in a moment...</p>
+                                    <p className="text-muted small">{t('resendVerification.redirecting')}</p>
                 </div>
               </div>
             </div>
@@ -62,9 +64,9 @@ const ResendVerification: React.FC = () => {
           <div className="col-md-6 col-lg-5">
             <div className="card shadow-sm">
               <div className="card-body p-5">
-                <h1 className="card-title text-center mb-4">Resend Verification Email</h1>
+                <h1 className="card-title                 text-center mb-4">{t('resendVerification.title')}</h1>
                 <p className="text-muted text-center mb-4">
-                  Enter your email address and we'll send you a new verification link.
+                                  {t('resendVerification.description')}
                 </p>
 
                 {error && (
@@ -77,7 +79,7 @@ const ResendVerification: React.FC = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="email" className="form-label">
-                      Email
+                      {t('common.email')}
                     </label>
                     <input
                       type="email"
@@ -86,11 +88,11 @@ const ResendVerification: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onBlur={() => setTouched(true)}
-                      placeholder="Enter your email"
+                      placeholder={t('common.emailPlaceholder')}
                       disabled={loading}
                     />
                     {touched && !isEmailValid && (
-                      <div className="invalid-feedback d-block">Please enter a valid email</div>
+                      <div className="invalid-feedback d-block">{t('common.invalidEmail')}</div>
                     )}
                   </div>
 
@@ -103,10 +105,10 @@ const ResendVerification: React.FC = () => {
                       {loading ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Sending...
+                          {t('resendVerification.submitting')}
                         </>
                       ) : (
-                        'Send Verification Email'
+                        t('resendVerification.submit')
                       )}
                     </button>
                   </div>
@@ -115,7 +117,7 @@ const ResendVerification: React.FC = () => {
                 <div className="text-center">
                   <p>
                     <Link to="/login" className="text-decoration-none">
-                      Back to Login
+                      {t('common.backToLogin')}
                     </Link>
                   </p>
                 </div>

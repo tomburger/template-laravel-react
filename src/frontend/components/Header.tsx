@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { APP_NAME } from '../config';
 import { useTranslation } from 'react-i18next';
-import { SUPPORTED_LANGUAGES } from '../i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header: React.FC = () => {
-  const { user, logout, setLanguage } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -31,18 +31,7 @@ const Header: React.FC = () => {
         </span>
         <div className="d-flex align-items-center gap-2">
           <span className="me-3">{t('header.welcome', { name: user?.name })}</span>
-          <select
-            className="form-select form-select-sm w-auto"
-            aria-label={t('header.language')}
-            value={i18n.resolvedLanguage}
-            onChange={(e) => setLanguage(e.target.value).catch(() => {})}
-          >
-            {SUPPORTED_LANGUAGES.map((l) => (
-              <option key={l.code} value={l.code}>
-                {l.label}
-              </option>
-            ))}
-          </select>
+          <LanguageSwitcher />
           {user?.is_admin && (
             <button
               className="btn btn-outline-primary btn-sm me-2"

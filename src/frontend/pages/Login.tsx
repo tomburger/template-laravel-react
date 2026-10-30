@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,7 +42,7 @@ const Login: React.FC = () => {
           <div className="col-md-6 col-lg-5">
             <div className="card shadow-sm">
               <div className="card-body p-5">
-                <h1 className="card-title text-center mb-4">Login</h1>
+                <h1 className="card-title text-center mb-4">{t('login.title')}</h1>
 
                 {error && (
                   <div className="alert alert-danger alert-dismissible fade show" role="alert">
@@ -52,7 +54,7 @@ const Login: React.FC = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="email" className="form-label">
-                      Email
+                      {t('common.email')}
                     </label>
                     <input
                       type="email"
@@ -61,17 +63,17 @@ const Login: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onBlur={() => handleBlur('email')}
-                      placeholder="Enter your email"
+                      placeholder={t('common.emailPlaceholder')}
                       disabled={loading}
                     />
                     {touched.email && !isEmailValid && (
-                      <div className="invalid-feedback d-block">Please enter a valid email</div>
+                      <div className="invalid-feedback d-block">{t('common.invalidEmail')}</div>
                     )}
                   </div>
 
                   <div className="mb-3">
                     <label htmlFor="password" className="form-label">
-                      Password
+                      {t('common.password')}
                     </label>
                     <input
                       type="password"
@@ -80,11 +82,11 @@ const Login: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onBlur={() => handleBlur('password')}
-                      placeholder="Enter your password"
+                      placeholder={t('login.passwordPlaceholder')}
                       disabled={loading}
                     />
                     {touched.password && !isPasswordValid && (
-                      <div className="invalid-feedback d-block">Password must be at least 8 characters</div>
+                      <div className="invalid-feedback d-block">{t('common.passwordMin')}</div>
                     )}
                   </div>
 
@@ -97,10 +99,10 @@ const Login: React.FC = () => {
                       {loading ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Logging in...
+                          {t('login.submitting')}
                         </>
                       ) : (
-                        'Login'
+                        t('login.submit')
                       )}
                     </button>
                   </div>
@@ -109,13 +111,13 @@ const Login: React.FC = () => {
                 <div className="text-center">
                   <p className="mb-2">
                     <Link to="/forgot-password" className="text-decoration-none">
-                      Forgot password?
+                      {t('login.forgotPassword')}
                     </Link>
                   </p>
                   <p>
-                    Don't have an account?{' '}
+                    {t('login.noAccount')}{' '}
                     <Link to="/register" className="text-decoration-none">
-                      Register here
+                      {t('login.registerHere')}
                     </Link>
                   </p>
                 </div>

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation, Trans } from 'react-i18next';
 
 const ForgotPassword: React.FC = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -41,12 +43,12 @@ const ForgotPassword: React.FC = () => {
                   <div className="mb-3">
                     <i className="bi bi-check-circle text-success" style={{ fontSize: '3rem' }}></i>
                   </div>
-                  <h2 className="card-title mb-3">Check Your Email</h2>
+                  <h2 className="card-title mb-3">                  {t('forgotPassword.sentTitle')}</h2>
                   <p className="card-text mb-3">
-                    We've sent a password reset link to <strong>{email}</strong>. Please check your email and click the link to reset your password.
+                                      <Trans i18nKey="forgotPassword.sentText" values={{ email }} components={{ strong: <strong /> }} />
                   </p>
-                  <p className="text-muted small">The link will expire in 24 hours.</p>
-                  <p className="text-muted small">Redirecting to login in a moment...</p>
+                                    <p className="text-muted small">{t('forgotPassword.expires')}</p>
+                                    <p className="text-muted small">{t('forgotPassword.redirecting')}</p>
                 </div>
               </div>
             </div>
@@ -63,9 +65,9 @@ const ForgotPassword: React.FC = () => {
           <div className="col-md-6 col-lg-5">
             <div className="card shadow-sm">
               <div className="card-body p-5">
-                <h1 className="card-title text-center mb-4">Forgot Password</h1>
+                <h1 className="card-title                 text-center mb-4">{t('forgotPassword.title')}</h1>
                 <p className="text-muted text-center mb-4">
-                  Enter your email address and we'll send you a link to reset your password.
+                                  {t('forgotPassword.description')}
                 </p>
 
                 {error && (
@@ -78,7 +80,7 @@ const ForgotPassword: React.FC = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="email" className="form-label">
-                      Email
+                      {t('common.email')}
                     </label>
                     <input
                       type="email"
@@ -87,11 +89,11 @@ const ForgotPassword: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onBlur={() => setTouched(true)}
-                      placeholder="Enter your email"
+                      placeholder={t('common.emailPlaceholder')}
                       disabled={loading}
                     />
                     {touched && !isEmailValid && (
-                      <div className="invalid-feedback d-block">Please enter a valid email</div>
+                      <div className="invalid-feedback d-block">{t('common.invalidEmail')}</div>
                     )}
                   </div>
 
@@ -104,10 +106,10 @@ const ForgotPassword: React.FC = () => {
                       {loading ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Sending...
+                          {t('forgotPassword.submitting')}
                         </>
                       ) : (
-                        'Send Reset Link'
+                        t('forgotPassword.submit')
                       )}
                     </button>
                   </div>
@@ -115,9 +117,9 @@ const ForgotPassword: React.FC = () => {
 
                 <div className="text-center">
                   <p>
-                    Remember your password?{' '}
+                    {t('common.rememberPassword')}{' '}
                     <Link to="/login" className="text-decoration-none">
-                      Login here
+                      {t('common.loginHere')}
                     </Link>
                   </p>
                 </div>

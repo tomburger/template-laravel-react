@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation, Trans } from 'react-i18next';
 
 const Register: React.FC = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -42,7 +44,7 @@ const Register: React.FC = () => {
       setShowSuccess(true);
       setTimeout(() => {
         navigate('/login', {
-          state: { message: 'Registration successful! Please check your email to verify your account.' },
+          state: { message: t('register.successMessage') },
         });
       }, 3000);
     } catch {
@@ -63,11 +65,11 @@ const Register: React.FC = () => {
                   <div className="mb-3">
                     <i className="bi bi-check-circle text-success" style={{ fontSize: '3rem' }}></i>
                   </div>
-                  <h2 className="card-title mb-3">Registration Successful!</h2>
+                  <h2 className="card-title mb-3">                  {t('register.successTitle')}</h2>
                   <p className="card-text mb-3">
-                    We've sent a verification link to <strong>{formData.email}</strong>. Please check your email and click the link to verify your account.
+                                      <Trans i18nKey="register.successText" values={{ email: formData.email }} components={{ strong: <strong /> }} />
                   </p>
-                  <p className="text-muted small">Redirecting to login...</p>
+                                    <p className="text-muted small">{t('common.redirectingToLogin')}</p>
                 </div>
               </div>
             </div>
@@ -84,7 +86,7 @@ const Register: React.FC = () => {
           <div className="col-md-6 col-lg-5">
             <div className="card shadow-sm">
               <div className="card-body p-5">
-                <h1 className="card-title text-center mb-4">Register</h1>
+                <h1 className="card-title text-center mb-4">{t('register.title')}</h1>
 
                 {error && (
                   <div className="alert alert-danger alert-dismissible fade show" role="alert">
@@ -96,7 +98,7 @@ const Register: React.FC = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="name" className="form-label">
-                      Full Name
+                      {t('register.fullName')}
                     </label>
                     <input
                       type="text"
@@ -106,17 +108,17 @@ const Register: React.FC = () => {
                       value={formData.name}
                       onChange={handleChange}
                       onBlur={() => handleBlur('name')}
-                      placeholder="Enter your full name"
+                      placeholder={t('register.namePlaceholder')}
                       disabled={loading}
                     />
                     {touched.name && !isNameValid && (
-                      <div className="invalid-feedback d-block">Name is required</div>
+                      <div className="invalid-feedback d-block">{t('register.nameRequired')}</div>
                     )}
                   </div>
 
                   <div className="mb-3">
                     <label htmlFor="email" className="form-label">
-                      Email
+                      {t('common.email')}
                     </label>
                     <input
                       type="email"
@@ -126,17 +128,17 @@ const Register: React.FC = () => {
                       value={formData.email}
                       onChange={handleChange}
                       onBlur={() => handleBlur('email')}
-                      placeholder="Enter your email"
+                      placeholder={t('common.emailPlaceholder')}
                       disabled={loading}
                     />
                     {touched.email && !isEmailValid && (
-                      <div className="invalid-feedback d-block">Please enter a valid email</div>
+                      <div className="invalid-feedback d-block">{t('common.invalidEmail')}</div>
                     )}
                   </div>
 
                   <div className="mb-3">
                     <label htmlFor="password" className="form-label">
-                      Password
+                      {t('common.password')}
                     </label>
                     <input
                       type="password"
@@ -146,17 +148,17 @@ const Register: React.FC = () => {
                       value={formData.password}
                       onChange={handleChange}
                       onBlur={() => handleBlur('password')}
-                      placeholder="Enter your password (min 8 characters)"
+                      placeholder={t('register.passwordPlaceholder')}
                       disabled={loading}
                     />
                     {touched.password && !isPasswordValid && (
-                      <div className="invalid-feedback d-block">Password must be at least 8 characters</div>
+                      <div className="invalid-feedback d-block">{t('common.passwordMin')}</div>
                     )}
                   </div>
 
                   <div className="mb-3">
                     <label htmlFor="passwordConfirmation" className="form-label">
-                      Confirm Password
+                      {t('common.confirmPassword')}
                     </label>
                     <input
                       type="password"
@@ -166,11 +168,11 @@ const Register: React.FC = () => {
                       value={formData.passwordConfirmation}
                       onChange={handleChange}
                       onBlur={() => handleBlur('passwordConfirmation')}
-                      placeholder="Confirm your password"
+                      placeholder={t('register.confirmPlaceholder')}
                       disabled={loading}
                     />
                     {touched.passwordConfirmation && !isPasswordConfirmationValid && (
-                      <div className="invalid-feedback d-block">Passwords must match</div>
+                      <div className="invalid-feedback d-block">{t('common.passwordsMustMatch')}</div>
                     )}
                   </div>
 
@@ -183,10 +185,10 @@ const Register: React.FC = () => {
                       {loading ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Registering...
+                          {t('register.submitting')}
                         </>
                       ) : (
-                        'Register'
+                        t('register.submit')
                       )}
                     </button>
                   </div>
@@ -194,9 +196,9 @@ const Register: React.FC = () => {
 
                 <div className="text-center">
                   <p>
-                    Already have an account?{' '}
+                    {t('register.haveAccount')}{' '}
                     <Link to="/login" className="text-decoration-none">
-                      Login here
+                      {t('common.loginHere')}
                     </Link>
                   </p>
                 </div>

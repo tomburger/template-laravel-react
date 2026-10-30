@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const VerifyEmail: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
@@ -27,7 +29,7 @@ const VerifyEmail: React.FC = () => {
         setSuccess(true);
         setTimeout(() => {
           navigate('/login', {
-            state: { message: 'Email verified successfully! You can now login.' },
+            state: { message: t('verifyEmail.successMessage') },
           });
         }, 2000);
       } catch {
@@ -51,11 +53,11 @@ const VerifyEmail: React.FC = () => {
                   <>
                     <div className="mb-3">
                       <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Verifying...</span>
+                        <span className="visually-hidden">{t('verifyEmail.verifying')}</span>
                       </div>
                     </div>
-                    <h2 className="card-title mb-3">Verifying Your Email</h2>
-                    <p className="text-muted">Please wait while we verify your email address...</p>
+                    <h2 className="card-title mb-3">{t('verifyEmail.verifyingTitle')}</h2>
+                    <p className="text-muted">{t('verifyEmail.verifyingText')}</p>
                   </>
                 )}
 
@@ -64,8 +66,8 @@ const VerifyEmail: React.FC = () => {
                     <div className="mb-3">
                       <i className="bi bi-check-circle text-success" style={{ fontSize: '3rem' }}></i>
                     </div>
-                    <h2 className="card-title mb-3">Email Verified!</h2>
-                    <p className="text-muted">Your email has been verified successfully. Redirecting to login...</p>
+                    <h2 className="card-title mb-3">                    {t('verifyEmail.successTitle')}</h2>
+                                        <p className="text-muted">{t('verifyEmail.successText')}</p>
                   </>
                 )}
 
@@ -77,22 +79,22 @@ const VerifyEmail: React.FC = () => {
                     <div className="mb-3">
                       <i className="bi bi-exclamation-circle text-warning" style={{ fontSize: '3rem' }}></i>
                     </div>
-                    <h2 className="card-title mb-3">Verification Failed</h2>
+                    <h2 className="card-title mb-3">                    {t('verifyEmail.failedTitle')}</h2>
                     <p className="text-muted mb-3">
-                      The verification link is invalid or has expired. Please request a new verification email.
+                                          {t('verifyEmail.failedText')}
                     </p>
 
                     {showResendOption && (
                       <div className="d-grid gap-2 mb-3">
                         <Link to="/resend-verification" className="btn btn-primary">
-                          Request New Verification Email
+                                              {t('verifyEmail.requestNew')}
                         </Link>
                       </div>
                     )}
 
                     <p>
                       <Link to="/login" className="text-decoration-none">
-                        Back to Login
+                                            {t('common.backToLogin')}
                       </Link>
                     </p>
                   </>

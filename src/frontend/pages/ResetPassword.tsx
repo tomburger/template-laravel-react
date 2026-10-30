@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const ResetPassword: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
@@ -30,12 +32,12 @@ const ResetPassword: React.FC = () => {
                   <div className="mb-3">
                     <i className="bi bi-exclamation-circle text-warning" style={{ fontSize: '3rem' }}></i>
                   </div>
-                  <h2 className="card-title mb-3">Invalid Reset Link</h2>
+                  <h2 className="card-title mb-3">                  {t('resetPassword.invalidTitle')}</h2>
                   <p className="text-muted mb-3">
-                    The password reset link is missing or invalid. Please request a new one.
+                                      {t('resetPassword.invalidText')}
                   </p>
                   <Link to="/forgot-password" className="btn btn-primary">
-                    Request New Reset Link
+                                      {t('resetPassword.requestNew')}
                   </Link>
                 </div>
               </div>
@@ -56,7 +58,7 @@ const ResetPassword: React.FC = () => {
       setSuccess(true);
       setTimeout(() => {
         navigate('/login', {
-          state: { message: 'Password reset successful! Please login with your new password.' },
+          state: { message: t('resetPassword.successMessage') },
         });
       }, 2000);
     } catch {
@@ -77,8 +79,8 @@ const ResetPassword: React.FC = () => {
                   <div className="mb-3">
                     <i className="bi bi-check-circle text-success" style={{ fontSize: '3rem' }}></i>
                   </div>
-                  <h2 className="card-title mb-3">Password Reset Successful!</h2>
-                  <p className="text-muted">Your password has been reset. Redirecting to login...</p>
+                  <h2 className="card-title mb-3">                  {t('resetPassword.successTitle')}</h2>
+                                    <p className="text-muted">{t('resetPassword.successText')}</p>
                 </div>
               </div>
             </div>
@@ -95,7 +97,7 @@ const ResetPassword: React.FC = () => {
           <div className="col-md-6 col-lg-5">
             <div className="card shadow-sm">
               <div className="card-body p-5">
-                <h1 className="card-title text-center mb-4">Reset Password</h1>
+                <h1 className="card-title text-center mb-4">{t('resetPassword.title')}</h1>
 
                 {error && (
                   <div className="alert alert-danger alert-dismissible fade show" role="alert">
@@ -107,7 +109,7 @@ const ResetPassword: React.FC = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="password" className="form-label">
-                      New Password
+                      {t('resetPassword.newPassword')}
                     </label>
                     <input
                       type="password"
@@ -116,17 +118,17 @@ const ResetPassword: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onBlur={() => setTouched({ ...touched, password: true })}
-                      placeholder="Enter new password (min 8 characters)"
+                      placeholder={t('resetPassword.newPasswordPlaceholder')}
                       disabled={loading}
                     />
                     {touched.password && !isPasswordValid && (
-                      <div className="invalid-feedback d-block">Password must be at least 8 characters</div>
+                      <div className="invalid-feedback d-block">{t('common.passwordMin')}</div>
                     )}
                   </div>
 
                   <div className="mb-3">
                     <label htmlFor="passwordConfirmation" className="form-label">
-                      Confirm Password
+                      {t('common.confirmPassword')}
                     </label>
                     <input
                       type="password"
@@ -135,11 +137,11 @@ const ResetPassword: React.FC = () => {
                       value={passwordConfirmation}
                       onChange={(e) => setPasswordConfirmation(e.target.value)}
                       onBlur={() => setTouched({ ...touched, passwordConfirmation: true })}
-                      placeholder="Confirm your new password"
+                      placeholder={t('resetPassword.confirmPlaceholder')}
                       disabled={loading}
                     />
                     {touched.passwordConfirmation && !isPasswordConfirmationValid && (
-                      <div className="invalid-feedback d-block">Passwords must match</div>
+                      <div className="invalid-feedback d-block">{t('common.passwordsMustMatch')}</div>
                     )}
                   </div>
 
@@ -152,10 +154,10 @@ const ResetPassword: React.FC = () => {
                       {loading ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Resetting...
+                          {t('resetPassword.submitting')}
                         </>
                       ) : (
-                        'Reset Password'
+                        t('resetPassword.submit')
                       )}
                     </button>
                   </div>
@@ -163,9 +165,9 @@ const ResetPassword: React.FC = () => {
 
                 <div className="text-center">
                   <p>
-                    Remember your password?{' '}
+                    {t('common.rememberPassword')}{' '}
                     <Link to="/login" className="text-decoration-none">
-                      Login here
+                      {t('common.loginHere')}
                     </Link>
                   </p>
                 </div>

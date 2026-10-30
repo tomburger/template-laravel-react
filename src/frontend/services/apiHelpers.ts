@@ -64,3 +64,18 @@ export type UnitEnrollment = {
 };
 export type AvailableMember = { id: number; first_name: string; last_name: string; category: string | null };
 export type AvailableUnit = { id: number; code: string; category: string | null; location_name: string };
+export type AllocationStatus = 'pending' | 'confirmed' | 'paid' | 'cancelled';
+export type Allocation = {
+  id: number;
+  season_id: number;
+  member_season_id: number;
+  unit_season_id: number;
+  member_name: string;
+  member_category: string | null;
+  unit_code: string;
+  location_name: string;
+  unit_category: string | null;
+  status: AllocationStatus;
+  amount_due: string;
+  variable_symbol: string;
+};

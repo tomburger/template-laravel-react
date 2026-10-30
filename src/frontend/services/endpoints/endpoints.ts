@@ -10,6 +10,8 @@ import type {
   AxiosResponse
 } from 'axios'
 import type {
+  AllocateAUnitToAMemberBody,
+  ChangeAllocationStatusBody,
   CreateLocationBody,
   CreateMemberBody,
   CreatePricingRuleBody,
@@ -24,6 +26,7 @@ import type {
   RegisterANewUserBody,
   ResendVerificationEmailBody,
   ResetPasswordBody,
+  UpdateAllocationBody,
   UpdateLanguageBody,
   UpdateLocationBody,
   UpdateMemberBody,
@@ -269,6 +272,69 @@ const previewPrice = <TData = AxiosResponse<unknown>>(
       `/api/pricing-rules/preview`,{
     ...options,
         params: {...params, ...options?.params},}
+    );
+  }
+/**
+ * @summary List allocations of a season
+ */
+const listAllocationsOfASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/seasons/${seasonId}/allocations`,options
+    );
+  }
+/**
+ * Links an enrolled member to an enrolled unit. The price is resolved from the pricing rules
+and stored as the amount due, and a variable symbol is generated.
+ * @summary Allocate a unit to a member
+ */
+const allocateAUnitToAMember = <TData = AxiosResponse<unknown>>(
+    seasonId: number,
+    allocateAUnitToAMemberBody: AllocateAUnitToAMemberBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/seasons/${seasonId}/allocations`,
+      allocateAUnitToAMemberBody,options
+    );
+  }
+/**
+ * Changes the amount due, the variable symbol and the status. The status must follow the
+allowed changes; sending the current status leaves it unchanged.
+ * @summary Update allocation
+ */
+const updateAllocation = <TData = AxiosResponse<unknown>>(
+    allocationId: number,
+    updateAllocationBody: UpdateAllocationBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.put(
+      `/api/allocations/${allocationId}`,
+      updateAllocationBody,options
+    );
+  }
+/**
+ * Only pending or cancelled allocations can be deleted.
+ * @summary Delete allocation
+ */
+const deleteAllocation = <TData = AxiosResponse<unknown>>(
+    allocationId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/allocations/${allocationId}`,options
+    );
+  }
+/**
+ * Allowed changes: pending to confirmed or cancelled; confirmed to pending, paid or cancelled;
+paid to confirmed or cancelled. Cancelled is final.
+ * @summary Change allocation status
+ */
+const changeAllocationStatus = <TData = AxiosResponse<unknown>>(
+    allocationId: number,
+    changeAllocationStatusBody: ChangeAllocationStatusBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.put(
+      `/api/allocations/${allocationId}/status`,
+      changeAllocationStatusBody,options
     );
   }
 /**
@@ -535,7 +601,7 @@ const deleteUnit = <TData = AxiosResponse<unknown>>(
       `/api/locations/${locationId}/units/${id}`,options
     );
   }
-return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,previewPrice,listPricingRules,createPricingRule,updatePricingRule,deletePricingRule,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,listUnitsOfALocation,createUnit,updateUnit,deleteUnit}};
+return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,previewPrice,listAllocationsOfASeason,allocateAUnitToAMember,updateAllocation,deleteAllocation,changeAllocationStatus,listPricingRules,createPricingRule,updatePricingRule,deletePricingRule,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,listUnitsOfALocation,createUnit,updateUnit,deleteUnit}};
 export type RegisterANewUserResult = AxiosResponse<unknown>
 export type LoginUserResult = AxiosResponse<unknown>
 export type VerifyEmailResult = AxiosResponse<unknown>
@@ -556,6 +622,11 @@ export type CreateMemberResult = AxiosResponse<unknown>
 export type UpdateMemberResult = AxiosResponse<unknown>
 export type DeleteMemberResult = AxiosResponse<unknown>
 export type PreviewPriceResult = AxiosResponse<unknown>
+export type ListAllocationsOfASeasonResult = AxiosResponse<unknown>
+export type AllocateAUnitToAMemberResult = AxiosResponse<unknown>
+export type UpdateAllocationResult = AxiosResponse<unknown>
+export type DeleteAllocationResult = AxiosResponse<unknown>
+export type ChangeAllocationStatusResult = AxiosResponse<unknown>
 export type ListPricingRulesResult = AxiosResponse<unknown>
 export type CreatePricingRuleResult = AxiosResponse<unknown>
 export type UpdatePricingRuleResult = AxiosResponse<unknown>

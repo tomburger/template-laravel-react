@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MemberSeason extends Model
 {
@@ -19,5 +20,10 @@ class MemberSeason extends Model
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
+    }
+
+    public function allocations(): HasMany
+    {
+        return $this->hasMany(Allocation::class);
     }
 }

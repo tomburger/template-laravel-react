@@ -148,6 +148,31 @@ export type ListPricingRules401 = {
   message?: string;
 };
 
+export type ChangeAllocationStatusBody = {
+  /** The new status: pending, confirmed, paid or cancelled. */
+  status: string;
+};
+
+export type UpdateAllocationBody = {
+  /** Amount due in CZK. */
+  amount_due: number;
+  /** The status: pending, confirmed, paid or cancelled. */
+  status: string;
+  /** Variable symbol, up to 10 digits, unique. */
+  variable_symbol: string;
+};
+
+export type AllocateAUnitToAMemberBody = {
+  /** ID of the member's season enrollment. */
+  member_season_id: number;
+  /** ID of the unit's season enrollment. */
+  unit_season_id: number;
+};
+
+export type ListAllocationsOfASeason401 = {
+  message?: string;
+};
+
 export type PreviewPrice401 = {
   message?: string;
 };

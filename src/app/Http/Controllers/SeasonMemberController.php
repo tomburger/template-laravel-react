@@ -82,6 +82,10 @@ class SeasonMemberController extends Controller
     {
         abort_unless($memberSeason->season_id === $season->id, 404);
 
+        if ($memberSeason->allocations()->exists()) {
+            return response()->json(['message' => 'Member has allocations in this season and cannot be removed'], 409);
+        }
+
         $memberSeason->delete();
 
         return response()->json(['message' => 'Enrollment removed']);

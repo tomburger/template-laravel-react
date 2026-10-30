@@ -53,6 +53,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function member(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Member::class, 'id');
+    }
+
     public function isAdmin(): bool
     {
         return $this->is_admin === true;

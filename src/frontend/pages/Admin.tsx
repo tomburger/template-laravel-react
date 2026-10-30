@@ -123,6 +123,9 @@ const Admin: React.FC = () => {
                   <Link to="/admin/locations" className="btn btn-outline-primary btn-sm">
                     {t('admin.locationsAndUnits')}
                   </Link>
+                  <Link to="/admin/members" className="btn btn-outline-primary btn-sm">
+                    {t('admin.members')}
+                  </Link>
                 </div>
               </div>
             </div>

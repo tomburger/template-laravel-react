@@ -33,6 +33,33 @@ export const locationsApi = {
   remove: (id: number) => adminApi.delete(`/locations/${id}`),
 };
 
+export type Member = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  phone_number: string | null;
+  category: string | null;
+  email: string | null;
+  user_name: string | null;
+};
+export type MemberInput = {
+  first_name: string;
+  last_name: string;
+  phone_number: string | null;
+  category: string | null;
+};
+export type UserOption = { id: number; name: string; email: string };
+
+export const membersApi = {
+  list: () => adminApi.get<{ members: Member[] }>('/members').then((r) => r.data.members),
+  candidates: () => adminApi.get<{ users: UserOption[] }>('/members/candidates').then((r) => r.data.users),
+  create: (data: MemberInput & { user_id: number }) =>
+    adminApi.post<{ member: Member }>('/members', data).then((r) => r.data.member),
+  update: (id: number, data: MemberInput) =>
+    adminApi.put<{ member: Member }>(`/members/${id}`, data).then((r) => r.data.member),
+  remove: (id: number) => adminApi.delete(`/members/${id}`),
+};
+
 export type UnitInput = { code: string; category: string | null };
 
 export const unitsApi = {

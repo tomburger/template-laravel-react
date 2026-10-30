@@ -13,6 +13,7 @@ import Home from './pages/Home';
 import Admin from './pages/Admin';
 import AdminUsers from './pages/AdminUsers';
 import AdminLocations from './pages/AdminLocations';
+import AdminMembers from './pages/AdminMembers';
 import AdminUnits from './pages/AdminUnits';
 
 function App() {
@@ -74,6 +75,17 @@ function App() {
               <ProtectedRoute>
                 <AdminRoute>
                   <AdminUnits />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/members"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminMembers />
                 </AdminRoute>
               </ProtectedRoute>
             }

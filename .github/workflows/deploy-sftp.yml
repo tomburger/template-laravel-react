@@ -4,7 +4,7 @@ run-name: Deploy build #${{ github.run_number }} on ${{ github.ref_name }}
 on:
   push:
     branches:
-      - master
+      - prazelenina
   workflow_dispatch:
 
 concurrency:

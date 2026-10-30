@@ -6,7 +6,7 @@ import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { Season, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
-const emptyForm = { name: '', start_date: '', end_date: '' };
+const emptyForm = { name: '', start_date: '', end_date: '', copy_from_season_id: '' };
 
 const AdminSeasons: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -14,6 +14,7 @@ const AdminSeasons: React.FC = () => {
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<Season | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -41,7 +42,11 @@ const AdminSeasons: React.FC = () => {
 
   const openDrawer = (season: Season | null) => {
     setEditing(season);
-    setForm(season ? { name: season.name, start_date: season.start_date, end_date: season.end_date } : emptyForm);
+    setForm(
+      season
+        ? { name: season.name, start_date: season.start_date, end_date: season.end_date, copy_from_season_id: '' }
+        : emptyForm
+    );
     setFormError(null);
     setDrawerOpen(true);
   };
@@ -51,10 +56,20 @@ const AdminSeasons: React.FC = () => {
     try {
       setSaving(true);
       setFormError(null);
+      setNotice(null);
       if (editing) {
         await updateSeason(editing.id, data, authRequestOptions());
       } else {
-        await createSeason(data, authRequestOptions());
+        const response = await createSeason<{ data: { copied: { members: number; units: number } } }>(
+          {
+            ...data,
+            ...(form.copy_from_season_id ? { copy_from_season_id: Number(form.copy_from_season_id) } : {}),
+          },
+          authRequestOptions()
+        );
+        if (form.copy_from_season_id) {
+          setNotice(t('adminSeasons.copied', response.data.copied));
+        }
       }
       setDrawerOpen(false);
       await load();
@@ -96,6 +111,7 @@ const AdminSeasons: React.FC = () => {
           </div>
 
           {error && <div className="alert alert-danger">{error}</div>}
+          {notice && <div className="alert alert-success">{notice}</div>}
 
           {loading ? (
             <div className="d-flex align-items-center" role="status">
@@ -177,6 +193,18 @@ const AdminSeasons: React.FC = () => {
           <label className="form-label" htmlFor="season-end">{t('adminSeasons.endDate')}</label>
           <input id="season-end" type="date" className="form-control" value={form.end_date} min={form.start_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} />
         </div>
+        {!editing && (
+          <div className="mb-3">
+            <label className="form-label" htmlFor="season-copy">{t('adminSeasons.copyFrom')}</label>
+            <select id="season-copy" className="form-select" value={form.copy_from_season_id} onChange={(e) => setForm({ ...form, copy_from_season_id: e.target.value })}>
+              <option value="">{t('adminSeasons.copyNone')}</option>
+              {seasons.map((season) => (
+                <option key={season.id} value={season.id}>{season.name}</option>
+              ))}
+            </select>
+            <div className="form-text">{t('adminSeasons.copyHint')}</div>
+          </div>
+        )}
       </RightDrawer>
     </PageLayout>
   );

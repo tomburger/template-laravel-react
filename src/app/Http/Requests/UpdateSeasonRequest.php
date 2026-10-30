@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SeasonRequest extends FormRequest
+class UpdateSeasonRequest extends FormRequest
 {
     public function authorize(): bool
     {

@@ -82,6 +82,10 @@ const cs: typeof en = {
     saveFailed: 'Nepodařilo se uložit sezónu.',
     deleteFailed: 'Nepodařilo se smazat sezónu.',
     enrollments: 'Zápisy',
+    copyFrom: 'Zkopírovat zápisy z',
+    copyNone: 'Nekopírovat',
+    copyHint: 'Členové a jednotky zapsaní ve vybrané sezóně budou zapsáni i do nové sezóny.',
+    copied: 'Sezóna vytvořena. Zapsáno členů: {{members}}, jednotek: {{units}} ze zdrojové sezóny.',
   },
   adminSeasonDetail: {
     title: 'Sezóna {{season}}',

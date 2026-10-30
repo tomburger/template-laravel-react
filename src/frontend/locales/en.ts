@@ -80,6 +80,10 @@ const en = {
     saveFailed: 'Failed to save season.',
     deleteFailed: 'Failed to delete season.',
     enrollments: 'Enrollments',
+    copyFrom: 'Copy enrollments from',
+    copyNone: "Don't copy",
+    copyHint: 'Members and units enrolled in the selected season are enrolled in the new season too.',
+    copied: 'Season created. Enrolled {{members}} members and {{units}} units from the source season.',
   },
   adminSeasonDetail: {
     title: 'Season {{season}}',

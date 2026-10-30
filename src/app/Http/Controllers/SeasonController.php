@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SeasonRequest;
+use App\Http\Requests\StoreSeasonRequest;
+use App\Http\Requests\UpdateSeasonRequest;
+use App\Models\Member;
 use App\Models\Season;
+use App\Models\Unit;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class SeasonController extends Controller
 {
@@ -30,12 +34,39 @@ class SeasonController extends Controller
      * @bodyParam name string required Season name.
      * @bodyParam start_date string required Start date (Y-m-d).
      * @bodyParam end_date string required End date (Y-m-d), not before the start date.
+     * @bodyParam copy_from_season_id integer ID of a season whose member and unit enrollments are copied into the new season. Categories are re-snapshotted from the current member/unit categories.
      */
-    public function store(SeasonRequest $request): JsonResponse
+    public function store(StoreSeasonRequest $request): JsonResponse
     {
-        $season = Season::create($request->validated());
+        $data = $request->validated();
+        $sourceId = $data['copy_from_season_id'] ?? null;
+        unset($data['copy_from_season_id']);
 
-        return response()->json(['season' => $season], 201);
+        $copied = ['members' => 0, 'units' => 0];
+
+        $season = DB::transaction(function () use ($data, $sourceId, &$copied) {
+            $season = Season::create($data);
+
+            if ($sourceId !== null) {
+                $source = Season::findOrFail($sourceId);
+
+                $members = Member::whereIn('id', $source->memberSeasons()->select('member_id'))->get();
+                foreach ($members as $member) {
+                    $season->memberSeasons()->create(['member_id' => $member->id, 'category' => $member->category]);
+                }
+
+                $units = Unit::whereIn('id', $source->unitSeasons()->select('unit_id'))->get();
+                foreach ($units as $unit) {
+                    $season->unitSeasons()->create(['unit_id' => $unit->id, 'category' => $unit->category]);
+                }
+
+                $copied = ['members' => $members->count(), 'units' => $units->count()];
+            }
+
+            return $season;
+        });
+
+        return response()->json(['season' => $season, 'copied' => $copied], 201);
     }
 
     /**
@@ -48,7 +79,7 @@ class SeasonController extends Controller
      * @bodyParam start_date string required Start date (Y-m-d).
      * @bodyParam end_date string required End date (Y-m-d), not before the start date.
      */
-    public function update(SeasonRequest $request, Season $season): JsonResponse
+    public function update(UpdateSeasonRequest $request, Season $season): JsonResponse
     {
         $season->update($request->validated());
 

@@ -57,6 +57,11 @@ export type UpdateSeasonBody = {
 };
 
 export type CreateSeasonBody = {
+  /**
+   * ID of a season whose member and unit enrollments are copied into the new season. Categories are re-snapshotted from the current member/unit categories.
+   * @nullable
+   */
+  copy_from_season_id?: number | null;
   /** End date (Y-m-d), not before the start date. */
   end_date: string;
   /** Season name. */

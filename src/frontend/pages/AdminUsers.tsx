@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import DefaultAdminWarning from '../components/DefaultAdminWarning';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
+import { useTranslation } from 'react-i18next';
 
 const AUTH_TOKEN_KEY = 'auth_token';
 
@@ -28,8 +29,11 @@ type UpdateUserResponse = {
 
 type FilterValue = 'all' | 'active' | 'deactivated' | 'verified' | 'pending-verification' | 'admin';
 
+const FILTER_VALUES: FilterValue[] = ['all', 'active', 'deactivated', 'verified', 'pending-verification', 'admin'];
+
 const AdminUsers: React.FC = () => {
   const { user, isDefaultAdminActive, setDefaultAdminActive } = useAuth();
+  const { t, i18n } = useTranslation();
   const { listAllUsers, updateUserFlags, resendVerificationEmailForUseradmin } = getEndpoints();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +64,7 @@ const AdminUsers: React.FC = () => {
       const defaultAdminActive = response.data.users.some((item) => item.id === 1 && item.is_admin && !item.is_deactivated);
       setDefaultAdminActive(defaultAdminActive);
     } catch {
-      setError('Failed to load users.');
+      setError(t('adminUsers.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -140,10 +144,10 @@ const AdminUsers: React.FC = () => {
       if (response.data.user.id === 1) {
         setDefaultAdminActive(response.data.user.is_admin && !response.data.user.is_deactivated);
       }
-      setNotice(response.data.message || 'User updated.');
+      setNotice(response.data.message || t('adminUsers.updated'));
       setEditingUser(null);
     } catch {
-      setError('Failed to update user.');
+            setError(t('adminUsers.updateFailed'));
     } finally {
       setBusyUserId(null);
     }
@@ -156,9 +160,9 @@ const AdminUsers: React.FC = () => {
       setNotice(null);
 
       await resendVerificationEmailForUseradmin(user.id, requestOptions());
-      setNotice(`Verification email resent to ${user.email}.`);
+      setNotice(t('adminUsers.resent', { email: user.email }));
     } catch {
-      setError('Failed to resend verification email.');
+            setError(t('adminUsers.resendFailed'));
     } finally {
       setBusyUserId(null);
     }
@@ -177,40 +181,37 @@ const AdminUsers: React.FC = () => {
                 />
                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                   <div>
-                    <h1 className="h3 mb-1">User Register</h1>
-                    <p className="text-muted mb-0">Manage user access, account status, and email verification.</p>
-                  </div>
-                  <button className="btn btn-outline-secondary btn-sm" onClick={loadUsers} disabled={loading}>
-                    Refresh
-                  </button>
-                </div>
+                    <h1 className="h3 mb-1">                    {t('adminUsers.title')}</h1>
+                                        <p className="text-muted mb-0">{t('adminUsers.subtitle')}</p>
+                                      </div>
+                                      <button className="btn btn-outline-secondary btn-sm" onClick={loadUsers} disabled={loading}>
+                                        {t('adminUsers.refresh')}
+                                      </button>
+                                    </div>
 
-                <div className="row g-3 mb-4">
-                  <div className="col-md-8">
-                    <label className="form-label" htmlFor="user-search">Search users</label>
-                    <input
-                      id="user-search"
-                      className="form-control"
-                      placeholder="Search by name or email"
-                      value={search}
-                      onChange={(event) => setSearch(event.target.value)}
-                    />
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label" htmlFor="user-filter">Filter</label>
-                    <select
-                      id="user-filter"
-                      className="form-select"
-                      value={filter}
-                      onChange={(event) => setFilter(event.target.value as FilterValue)}
-                    >
-                      <option value="all">All users</option>
-                      <option value="active">Active</option>
-                      <option value="deactivated">Deactivated</option>
-                      <option value="verified">Verified</option>
-                      <option value="pending-verification">Pending verification</option>
-                      <option value="admin">Admins</option>
-                    </select>
+                                    <div className="row g-3 mb-4">
+                                      <div className="col-md-8">
+                                        <label className="form-label" htmlFor="user-search">{t('adminUsers.searchLabel')}</label>
+                                        <input
+                                          id="user-search"
+                                          className="form-control"
+                                          placeholder={t('adminUsers.searchPlaceholder')}
+                                          value={search}
+                                          onChange={(event) => setSearch(event.target.value)}
+                                        />
+                                      </div>
+                                      <div className="col-md-4">
+                                        <label className="form-label" htmlFor="user-filter">{t('adminUsers.filter')}</label>
+                                        <select
+                                          id="user-filter"
+                                          className="form-select"
+                                          value={filter}
+                                          onChange={(event) => setFilter(event.target.value as FilterValue)}
+                                        >
+                                          {FILTER_VALUES.map((value) => (
+                                            <option key={value} value={value}>{t(`adminUsers.filters.${value}`)}</option>
+                                          ))}
+                                        </select>
                   </div>
                 </div>
 
@@ -220,25 +221,25 @@ const AdminUsers: React.FC = () => {
                 {loading ? (
                   <div className="d-flex align-items-center" role="status">
                     <div className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
-                    <span>Loading users...</span>
+                    <span>{t('adminUsers.loadingUsers')}</span>
                   </div>
                 ) : (
                   <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
                       <thead className="table-light">
                         <tr>
-                          <th>Name</th>
-                          <th>Email</th>
-                          <th>Status</th>
-                          <th>Role</th>
-                          <th>Created</th>
-                          <th className="text-end">Actions</th>
+                          <th>{t('adminUsers.columns.name')}</th>
+                          <th>{t('adminUsers.columns.email')}</th>
+                          <th>{t('adminUsers.columns.status')}</th>
+                          <th>{t('adminUsers.columns.role')}</th>
+                          <th>{t('adminUsers.columns.created')}</th>
+                          <th className="text-end">{t('adminUsers.columns.actions')}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredUsers.length === 0 && (
                           <tr>
-                            <td colSpan={6} className="text-center text-muted py-4">No users match current filters.</td>
+                            <td colSpan={6} className="text-center text-muted py-4">{t('adminUsers.noMatch')}</td>
                           </tr>
                         )}
 
@@ -251,26 +252,26 @@ const AdminUsers: React.FC = () => {
                               <td>{user.email}</td>
                               <td>
                                 {user.is_deactivated ? (
-                                  <span className="badge bg-secondary">Deactivated</span>
+                                  <span className="badge bg-secondary">{t('adminUsers.deactivated')}</span>
                                 ) : (
-                                  <span className="badge bg-success">Active</span>
+                                  <span className="badge bg-success">{t('adminUsers.active')}</span>
                                 )}
                                 <span className="ms-2">
                                   {user.email_verified_at ? (
-                                    <span className="badge bg-primary">Verified</span>
+                                    <span className="badge bg-primary">{t('adminUsers.verified')}</span>
                                   ) : (
-                                    <span className="badge bg-warning text-dark">Pending</span>
+                                    <span className="badge bg-warning text-dark">{t('adminUsers.pending')}</span>
                                   )}
                                 </span>
                               </td>
                               <td>
                                 {user.is_admin ? (
-                                  <span className="badge bg-dark">Admin</span>
+                                  <span className="badge bg-dark">{t('adminUsers.admin')}</span>
                                 ) : (
-                                  <span className="badge bg-light text-dark border">User</span>
+                                  <span className="badge bg-light text-dark border">{t('adminUsers.user')}</span>
                                 )}
                               </td>
-                              <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                              <td>{new Date(user.created_at).toLocaleDateString(i18n.language)}</td>
                               <td className="text-end">
                                 <div className="d-flex justify-content-end flex-wrap gap-2">
                                   <button
@@ -278,8 +279,7 @@ const AdminUsers: React.FC = () => {
                                     onClick={() => setEditingUser(user)}
                                     disabled={isBusy}
                                   >
-                                    Edit
-                                  </button>
+                                    {t('adminUsers.edit')}                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -296,11 +296,11 @@ const AdminUsers: React.FC = () => {
         <RightDrawer
           isOpen={editingUser !== null}
           onClose={() => setEditingUser(null)}
-          title="Edit user"
+          title={t('adminUsers.editUser')}
           subtitle={editingUser?.email}
-          closeText="Close"
+          closeText={t('adminUsers.close')}
           disableClose={busyUserId === editingUser?.id}
-          ariaLabel="Edit user"
+          ariaLabel={t('adminUsers.editUser')}
           footer={
             <div className="d-flex justify-content-end gap-2">
               <button
@@ -309,7 +309,7 @@ const AdminUsers: React.FC = () => {
                 onClick={() => setEditingUser(null)}
                 disabled={busyUserId === editingUser?.id}
               >
-                Cancel
+                {t('adminUsers.cancel')}
               </button>
               <button
                 type="button"
@@ -317,7 +317,7 @@ const AdminUsers: React.FC = () => {
                 onClick={handleSaveUser}
                 disabled={busyUserId === editingUser?.id}
               >
-                {busyUserId === editingUser?.id ? 'Saving...' : 'Save changes'}
+                {busyUserId === editingUser?.id ? t('adminUsers.saving') : t('adminUsers.save')}
               </button>
             </div>
           }
@@ -325,15 +325,15 @@ const AdminUsers: React.FC = () => {
           {editingUser && (
             <>
               <div className="mb-4">
-                <label className="form-label" htmlFor="edit-user-name">Name</label>
+                <label className="form-label" htmlFor="edit-user-name">{t('adminUsers.name')}</label>
                 <input id="edit-user-name" className="form-control" value={editingUser.name} readOnly />
               </div>
               <div className="mb-4">
-                <label className="form-label" htmlFor="edit-user-email">Email</label>
+                <label className="form-label" htmlFor="edit-user-email">{t('adminUsers.email')}</label>
                 <input id="edit-user-email" type="email" className="form-control" value={editingUser.email} readOnly />
               </div>
               <div className="border rounded p-3 mb-4 bg-light-subtle">
-                <div className="fw-semibold mb-3">Access</div>
+                <div className="fw-semibold mb-3">{t('adminUsers.access')}</div>
                 <div className="form-check form-switch mb-3">
                   <input
                     id="edit-user-admin"
@@ -343,7 +343,7 @@ const AdminUsers: React.FC = () => {
                     onChange={(event) => setEditFlags((flags) => ({ ...flags, is_admin: event.target.checked }))}
                     disabled={editingUser.id === 1 && !editingUser.is_admin}
                   />
-                  <label className="form-check-label" htmlFor="edit-user-admin">Administrator</label>
+                  <label className="form-check-label" htmlFor="edit-user-admin">{t('adminUsers.administrator')}</label>
                 </div>
                 <div className="form-check form-switch">
                   <input
@@ -353,13 +353,13 @@ const AdminUsers: React.FC = () => {
                     checked={editFlags.is_deactivated}
                     onChange={(event) => setEditFlags((flags) => ({ ...flags, is_deactivated: event.target.checked }))}
                   />
-                  <label className="form-check-label" htmlFor="edit-user-deactivated">Deactivate account</label>
+                  <label className="form-check-label" htmlFor="edit-user-deactivated">{t('adminUsers.deactivateAccount')}</label>
                 </div>
               </div>
               <div className="border rounded p-3">
-                <div className="fw-semibold mb-1">Email verification</div>
+                <div className="fw-semibold                 mb-1">{t('adminUsers.emailVerification')}</div>
                 <p className="small text-muted mb-3">
-                  {editingUser.email_verified_at ? 'This email address has been verified.' : 'This email address is awaiting verification.'}
+                                  {editingUser.email_verified_at ? t('adminUsers.emailVerified') : t('adminUsers.emailAwaiting')}
                 </p>
                 <button
                   type="button"
@@ -367,7 +367,7 @@ const AdminUsers: React.FC = () => {
                   onClick={() => handleResendVerification(editingUser)}
                   disabled={busyUserId === editingUser.id || editingUser.email_verified_at !== null}
                 >
-                  Resend verification
+                  {t('adminUsers.resendVerification')}
                 </button>
               </div>
             </>

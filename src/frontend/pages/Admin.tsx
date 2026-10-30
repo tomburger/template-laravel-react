@@ -4,6 +4,7 @@ import PageLayout from '../components/PageLayout';
 import { useAuth } from '../context/AuthContext';
 import DefaultAdminWarning from '../components/DefaultAdminWarning';
 import { getEndpoints } from '../services/endpoints/endpoints';
+import { useTranslation } from 'react-i18next';
 
 const AUTH_TOKEN_KEY = 'auth_token';
 
@@ -18,6 +19,7 @@ interface AdminInfoResponse {
 
 const Admin: React.FC = () => {
   const { user, isDefaultAdminActive } = useAuth();
+  const { t } = useTranslation();
   const { adminDashboardInfo } = getEndpoints();
   const [stats, setStats] = useState<AdminInfoResponse['users'] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ const Admin: React.FC = () => {
 
         setStats(response.data.users);
       } catch {
-        setError('Failed to load admin info. Please try again.');
+        setError(t('admin.loadFailed'));
       } finally {
         setLoading(false);
       }
@@ -57,14 +59,14 @@ const Admin: React.FC = () => {
                   isDefaultAdminActive={isDefaultAdminActive}
                   isCurrentUserAdmin={user?.is_admin}
                 />
-                <h1 className="card-title mb-4">Admin Panel</h1>
+                <h1 className="card-title mb-4">                {t('admin.title')}</h1>
 
-                <h2 className="h4 mb-3">Users</h2>
+                                <h2 className="h4 mb-3">{t('admin.users')}</h2>
 
                 {loading && (
                   <div className="d-flex align-items-center" role="status">
                     <div className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
-                    <span>Loading user stats...</span>
+                    <span>{t('admin.loadingStats')}</span>
                   </div>
                 )}
 
@@ -79,25 +81,25 @@ const Admin: React.FC = () => {
                     <div className="row g-3 mb-4">
                       <div className="col-6 col-md-3">
                         <div className="border rounded-3 p-3 bg-white h-100">
-                          <div className="text-muted small">Total</div>
+                          <div className="text-muted small">{t('admin.total')}</div>
                           <div className="fs-4 fw-semibold">{stats.total}</div>
                         </div>
                       </div>
                       <div className="col-6 col-md-3">
                         <div className="border rounded-3 p-3 bg-white h-100">
-                          <div className="text-muted small">Active</div>
+                          <div className="text-muted small">{t('admin.active')}</div>
                           <div className="fs-4 fw-semibold text-success">{stats.active}</div>
                         </div>
                       </div>
                       <div className="col-6 col-md-3">
                         <div className="border rounded-3 p-3 bg-white h-100">
-                          <div className="text-muted small">Pending verification</div>
+                          <div className="text-muted small">{t('admin.pendingVerification')}</div>
                           <div className="fs-4 fw-semibold text-warning">{stats.pending_verification}</div>
                         </div>
                       </div>
                       <div className="col-6 col-md-3">
                         <div className="border rounded-3 p-3 bg-white h-100">
-                          <div className="text-muted small">Recent (7d)</div>
+                          <div className="text-muted small">{t('admin.recent')}</div>
                           <div className="fs-4 fw-semibold text-primary">{stats.recent}</div>
                         </div>
                       </div>
@@ -105,11 +107,11 @@ const Admin: React.FC = () => {
 
                     <div className="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-3 mb-0" role="status">
                       <div>
-                        <strong>Next:</strong> user register management.
-                        <span className="ms-2 text-muted">Search, filter, edit users, and resend verification emails.</span>
+                        <strong>{t('admin.next')}</strong> {t('admin.nextText')}
+                        <span className="ms-2 text-muted">{t('admin.nextHint')}</span>
                       </div>
                       <Link to="/admin/users" className="btn btn-primary btn-sm">
-                        Open User Register
+                        {t('common.openUserRegister')}
                       </Link>
                     </div>
                   </div>

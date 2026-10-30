@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -45,6 +46,7 @@ Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
 
     Route::get('/members/candidates', [MemberController::class, 'candidates']);
     Route::apiResource('members', MemberController::class)->except('show');
+    Route::apiResource('seasons', SeasonController::class)->except('show');
     Route::apiResource('locations', LocationController::class)->except('show');
     Route::apiResource('locations.units', UnitController::class)->except('show');
 });

@@ -60,6 +60,17 @@ export const membersApi = {
   remove: (id: number) => adminApi.delete(`/members/${id}`),
 };
 
+export type Season = { id: number; name: string; start_date: string; end_date: string };
+export type SeasonInput = { name: string; start_date: string; end_date: string };
+
+export const seasonsApi = {
+  list: () => adminApi.get<{ seasons: Season[] }>('/seasons').then((r) => r.data.seasons),
+  create: (data: SeasonInput) => adminApi.post<{ season: Season }>('/seasons', data).then((r) => r.data.season),
+  update: (id: number, data: SeasonInput) =>
+    adminApi.put<{ season: Season }>(`/seasons/${id}`, data).then((r) => r.data.season),
+  remove: (id: number) => adminApi.delete(`/seasons/${id}`),
+};
+
 export type UnitInput = { code: string; category: string | null };
 
 export const unitsApi = {

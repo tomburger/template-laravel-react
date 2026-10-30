@@ -19,6 +19,11 @@ class Season extends Model
         return $this->hasMany(UnitSeason::class);
     }
 
+    public function pricingRules(): HasMany
+    {
+        return $this->hasMany(PricingRule::class);
+    }
+
     protected function casts(): array
     {
         return [

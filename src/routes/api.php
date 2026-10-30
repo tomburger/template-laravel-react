@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\PricingRuleController;
 use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\SeasonMemberController;
 use App\Http\Controllers\SeasonUnitController;
@@ -48,6 +49,8 @@ Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
 
     Route::get('/members/candidates', [MemberController::class, 'candidates']);
     Route::apiResource('members', MemberController::class)->except('show');
+    Route::get('/pricing-rules/preview', [PricingRuleController::class, 'preview']);
+    Route::apiResource('pricing-rules', PricingRuleController::class)->except('show');
     Route::get('/seasons/{season}/members/available', [SeasonMemberController::class, 'available']);
     Route::get('/seasons/{season}/members', [SeasonMemberController::class, 'index']);
     Route::post('/seasons/{season}/members', [SeasonMemberController::class, 'store']);

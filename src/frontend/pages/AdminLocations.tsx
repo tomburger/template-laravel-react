@@ -75,6 +75,9 @@ const AdminLocations: React.FC = () => {
     <PageLayout>
       <div className="card shadow-sm">
         <div className="card-body p-4 p-md-5">
+          <p className="mb-2">
+            <Link to="/admin" className="text-decoration-none">&larr; {t('adminLocations.back')}</Link>
+          </p>
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div>
               <h1 className="h3 mb-1">{t('adminLocations.title')}</h1>

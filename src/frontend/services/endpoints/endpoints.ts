@@ -12,18 +12,22 @@ import type {
 import type {
   CreateLocationBody,
   CreateMemberBody,
+  CreatePricingRuleBody,
   CreateSeasonBody,
   CreateUnitBody,
   EnrollMemberInASeasonBody,
   EnrollUnitInASeasonBody,
   ForgotPasswordBody,
   LoginUserBody,
+  PreviewPriceBody,
+  PreviewPriceParams,
   RegisterANewUserBody,
   ResendVerificationEmailBody,
   ResetPasswordBody,
   UpdateLanguageBody,
   UpdateLocationBody,
   UpdateMemberBody,
+  UpdatePricingRuleBody,
   UpdateSeasonBody,
   UpdateUnitBody,
   UpdateUserFlagsBody,
@@ -254,6 +258,63 @@ const deleteMember = <TData = AxiosResponse<unknown>>(
     );
   }
 /**
+ * Shows which rule would apply, and the resulting price, for a season and categories.
+ * @summary Preview price
+ */
+const previewPrice = <TData = AxiosResponse<unknown>>(
+    previewPriceBody: PreviewPriceBody,
+    params: PreviewPriceParams, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/pricing-rules/preview`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+/**
+ * @summary List pricing rules
+ */
+const listPricingRules = <TData = AxiosResponse<unknown>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/pricing-rules`,options
+    );
+  }
+/**
+ * @summary Create pricing rule
+ */
+const createPricingRule = <TData = AxiosResponse<unknown>>(
+    createPricingRuleBody: CreatePricingRuleBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/pricing-rules`,
+      createPricingRuleBody,options
+    );
+  }
+/**
+ * @summary Update pricing rule
+ */
+const updatePricingRule = <TData = AxiosResponse<unknown>>(
+    id: number,
+    updatePricingRuleBody: UpdatePricingRuleBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.put(
+      `/api/pricing-rules/${id}`,
+      updatePricingRuleBody,options
+    );
+  }
+/**
+ * @summary Delete pricing rule
+ */
+const deletePricingRule = <TData = AxiosResponse<unknown>>(
+    id: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/pricing-rules/${id}`,options
+    );
+  }
+/**
  * @summary List members not yet enrolled in a season
  */
 const listMembersNotYetEnrolledInASeason = <TData = AxiosResponse<unknown>>(
@@ -474,7 +535,7 @@ const deleteUnit = <TData = AxiosResponse<unknown>>(
       `/api/locations/${locationId}/units/${id}`,options
     );
   }
-return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,listUnitsOfALocation,createUnit,updateUnit,deleteUnit}};
+return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,previewPrice,listPricingRules,createPricingRule,updatePricingRule,deletePricingRule,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,listUnitsOfALocation,createUnit,updateUnit,deleteUnit}};
 export type RegisterANewUserResult = AxiosResponse<unknown>
 export type LoginUserResult = AxiosResponse<unknown>
 export type VerifyEmailResult = AxiosResponse<unknown>
@@ -494,6 +555,11 @@ export type ListMembersResult = AxiosResponse<unknown>
 export type CreateMemberResult = AxiosResponse<unknown>
 export type UpdateMemberResult = AxiosResponse<unknown>
 export type DeleteMemberResult = AxiosResponse<unknown>
+export type PreviewPriceResult = AxiosResponse<unknown>
+export type ListPricingRulesResult = AxiosResponse<unknown>
+export type CreatePricingRuleResult = AxiosResponse<unknown>
+export type UpdatePricingRuleResult = AxiosResponse<unknown>
+export type DeletePricingRuleResult = AxiosResponse<unknown>
 export type ListMembersNotYetEnrolledInASeasonResult = AxiosResponse<unknown>
 export type ListMembersEnrolledInASeasonResult = AxiosResponse<unknown>
 export type EnrollMemberInASeasonResult = AxiosResponse<unknown>

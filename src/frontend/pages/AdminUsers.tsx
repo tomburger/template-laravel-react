@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import { useAuth } from '../context/AuthContext';
 import DefaultAdminWarning from '../components/DefaultAdminWarning';
@@ -169,6 +170,9 @@ const AdminUsers: React.FC = () => {
                   isCurrentUserAdmin={user?.is_admin}
                   showActionButton={false}
                 />
+                <p className="mb-2">
+                  <Link to="/admin" className="text-decoration-none">&larr; {t('adminUsers.back')}</Link>
+                </p>
                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                   <div>
                     <h1 className="h3 mb-1">                    {t('adminUsers.title')}</h1>

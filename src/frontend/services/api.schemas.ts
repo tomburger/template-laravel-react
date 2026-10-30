@@ -100,6 +100,88 @@ export type ListMembersNotYetEnrolledInASeason401 = {
   message?: string;
 };
 
+export type UpdatePricingRuleBody = {
+  /**
+   * Member category the rule applies to. Omit for all categories.
+   * @nullable
+   */
+  member_category?: string | null;
+  /** Price in CZK. */
+  price: number;
+  /** Higher priority wins when several rules match. */
+  priority: number;
+  /**
+   * Season the rule applies to. Omit for all seasons.
+   * @nullable
+   */
+  season_id?: number | null;
+  /**
+   * Unit category the rule applies to. Omit for all categories.
+   * @nullable
+   */
+  unit_category?: string | null;
+};
+
+export type CreatePricingRuleBody = {
+  /**
+   * Member category the rule applies to. Omit for all categories.
+   * @nullable
+   */
+  member_category?: string | null;
+  /** Price in CZK. */
+  price: number;
+  /** Higher priority wins when several rules match. */
+  priority: number;
+  /**
+   * Season the rule applies to. Omit for all seasons.
+   * @nullable
+   */
+  season_id?: number | null;
+  /**
+   * Unit category the rule applies to. Omit for all categories.
+   * @nullable
+   */
+  unit_category?: string | null;
+};
+
+export type ListPricingRules401 = {
+  message?: string;
+};
+
+export type PreviewPrice401 = {
+  message?: string;
+};
+
+export type PreviewPriceBody = {
+  /**
+   * Must not be greater than 255 characters.
+   * @nullable
+   */
+  member_category?: string | null;
+  /** Must match an existing stored value. */
+  season_id: number;
+  /**
+   * Must not be greater than 255 characters.
+   * @nullable
+   */
+  unit_category?: string | null;
+};
+
+export type PreviewPriceParams = {
+/**
+ * The season ID.
+ */
+season_id: number;
+/**
+ * Unit category.
+ */
+unit_category?: string;
+/**
+ * Member category.
+ */
+member_category?: string;
+};
+
 export type UpdateMemberBody = {
   /**
    * Member category.

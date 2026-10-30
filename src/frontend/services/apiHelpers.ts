@@ -37,6 +37,15 @@ export type Member = {
 };
 export type UserOption = { id: number; name: string; email: string };
 export type Season = { id: number; name: string; start_date: string; end_date: string };
+export type PricingRule = {
+  id: number;
+  season_id: number | null;
+  season_name: string | null;
+  unit_category: string | null;
+  member_category: string | null;
+  priority: number;
+  price: string;
+};
 export type MemberEnrollment = {
   id: number;
   season_id: number;

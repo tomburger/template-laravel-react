@@ -99,6 +99,10 @@ class SeasonController extends Controller
             return response()->json(['message' => 'Season has enrollments and cannot be deleted'], 409);
         }
 
+        if ($season->pricingRules()->exists()) {
+            return response()->json(['message' => 'Season has pricing rules and cannot be deleted'], 409);
+        }
+
         $season->delete();
 
         return response()->json(['message' => 'Season deleted']);

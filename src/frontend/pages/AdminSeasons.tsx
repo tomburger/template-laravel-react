@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { Season, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
@@ -10,6 +11,7 @@ const emptyForm = { name: '', start_date: '', end_date: '', copy_from_season_id:
 
 const AdminSeasons: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { confirm, dialog } = useConfirm();
   const { listSeasons, createSeason, updateSeason, deleteSeason } = getEndpoints();
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +83,7 @@ const AdminSeasons: React.FC = () => {
   };
 
   const remove = async (season: Season) => {
-    if (!window.confirm(t('adminSeasons.confirmDelete', { name: season.name }))) return;
+    if (!(await confirm({ message: t('adminSeasons.confirmDelete', { name: season.name }), confirmText: t('common.delete') }))) return;
     try {
       setError(null);
       await deleteSeason(season.id, authRequestOptions());
@@ -206,6 +208,7 @@ const AdminSeasons: React.FC = () => {
           </div>
         )}
       </RightDrawer>
+      {dialog}
     </PageLayout>
   );
 };

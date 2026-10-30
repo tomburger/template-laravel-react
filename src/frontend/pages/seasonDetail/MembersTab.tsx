@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { getEndpoints } from '../../services/endpoints/endpoints';
 import { Allocation, AvailableMember, MemberEnrollment, authRequestOptions } from '../../services/apiHelpers';
 import AllocationCell from './AllocationCell';
+import { useConfirm } from '../../components/useConfirm';
 import AllocationFilterSelect from './AllocationFilterSelect';
 import { AllocationFilter, AllocationsByEnrollment, RunAction, matchesFilter } from './shared';
 
@@ -32,6 +33,7 @@ const MembersTab: React.FC<Props> = ({
   onAllocate,
 }) => {
   const { t } = useTranslation();
+  const { confirm, dialog } = useConfirm();
   const { enrollMemberInASeason, removeMemberEnrollmentFromASeason } = getEndpoints();
   const [selectedMember, setSelectedMember] = useState('');
 
@@ -102,8 +104,8 @@ const MembersTab: React.FC<Props> = ({
                   <button
                     className="btn btn-sm btn-outline-danger"
                     disabled={busy}
-                    onClick={() => {
-                      if (!window.confirm(t('adminSeasonDetail.confirmRemove', { name: `${item.first_name} ${item.last_name}` }))) return;
+                    onClick={async () => {
+                      if (!(await confirm({ message: t('adminSeasonDetail.confirmRemove', { name: `${item.first_name} ${item.last_name}` }), confirmText: t('adminSeasonDetail.remove') }))) return;
                       run(
                         () => removeMemberEnrollmentFromASeason(seasonId, item.id, authRequestOptions()),
                         t('adminSeasonDetail.removeFailed')
@@ -118,6 +120,7 @@ const MembersTab: React.FC<Props> = ({
           </tbody>
         </table>
       </div>
+      {dialog}
     </>
   );
 };

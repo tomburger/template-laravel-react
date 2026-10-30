@@ -12,6 +12,7 @@ const en = {
     rememberPassword: 'Remember your password?',
     redirectingToLogin: 'Redirecting to login...',
     loading: 'Loading...',
+    confirm: 'Please confirm',
     openUserRegister: 'Open User Register',
     yes: 'Yes',
     no: 'No',

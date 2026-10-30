@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { Location, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
 const AdminLocations: React.FC = () => {
   const { t } = useTranslation();
+  const { confirm, dialog } = useConfirm();
   const { listLocations, createLocation, updateLocation, deleteLocation } = getEndpoints();
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,7 @@ const AdminLocations: React.FC = () => {
   };
 
   const remove = async (location: Location) => {
-    if (!window.confirm(t('adminLocations.confirmDelete', { name: location.name }))) return;
+    if (!(await confirm({ message: t('adminLocations.confirmDelete', { name: location.name }), confirmText: t('common.delete') }))) return;
     try {
       setError(null);
       await deleteLocation(location.id, authRequestOptions());
@@ -164,6 +166,7 @@ const AdminLocations: React.FC = () => {
           <input id="location-name" className="form-control" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
       </RightDrawer>
+      {dialog}
     </PageLayout>
   );
 };

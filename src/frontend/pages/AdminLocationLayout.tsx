@@ -3,20 +3,20 @@ import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
 import LocationLayoutViewer from '../components/LocationLayoutViewer';
-import ConfirmModal from '../components/ConfirmModal';
+import { useConfirm } from '../components/useConfirm';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { Location, Unit, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 import { SHAPE_KINDS, ShapeKind, buildShape, insertShape } from './locationLayout/svgShapes';
 
 const AdminLocationLayout: React.FC = () => {
   const { t } = useTranslation();
+  const { confirm, dialog } = useConfirm();
   const locationId = Number(useParams().locationId);
   const { listLocations, listUnitsOfALocation, getLocationLayout, saveLocationLayout, clearLocationLayout } = getEndpoints();
   const [location, setLocation] = useState<Location | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [confirmingClear, setConfirmingClear] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -107,6 +107,12 @@ const AdminLocationLayout: React.FC = () => {
 
   // Wipes the image and SVG, both in the editor and on the server
   const clear = async () => {
+    const confirmed = await confirm({
+      title: t('adminLocationLayout.clear'),
+      message: t('adminLocationLayout.confirmClear'),
+      confirmText: t('adminLocationLayout.clear'),
+    });
+    if (!confirmed) return;
     try {
       setSaving(true);
       setError(null);
@@ -118,7 +124,6 @@ const AdminLocationLayout: React.FC = () => {
       setError(apiErrorMessage(err, t('adminLocationLayout.clearFailed')));
     } finally {
       setSaving(false);
-      setConfirmingClear(false);
     }
   };
 
@@ -192,7 +197,7 @@ const AdminLocationLayout: React.FC = () => {
                 <button
                   type="button"
                   className="btn btn-outline-danger btn-sm"
-                  onClick={() => setConfirmingClear(true)}
+                  onClick={clear}
                   disabled={saving || (!imageUrl && svg.trim() === '' && savedSvg === '')}
                 >
                   {t('adminLocationLayout.clear')}
@@ -260,19 +265,7 @@ const AdminLocationLayout: React.FC = () => {
           )}
         </div>
       </div>
-
-      <ConfirmModal
-        isOpen={confirmingClear}
-        title={t('adminLocationLayout.clear')}
-        confirmText={t('adminLocationLayout.clear')}
-        cancelText={t('adminUsers.cancel')}
-        busy={saving}
-        danger
-        onConfirm={clear}
-        onCancel={() => setConfirmingClear(false)}
-      >
-        {t('adminLocationLayout.confirmClear')}
-      </ConfirmModal>
+      {dialog}
     </PageLayout>
   );
 };

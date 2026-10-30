@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { Location, Unit, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
 const AdminUnits: React.FC = () => {
   const { t } = useTranslation();
+  const { confirm, dialog } = useConfirm();
   const { listLocations, listUnitsOfALocation, createUnit, updateUnit, deleteUnit } = getEndpoints();
   const locationId = Number(useParams().locationId);
   const [location, setLocation] = useState<Location | null>(null);
@@ -68,7 +70,7 @@ const AdminUnits: React.FC = () => {
   };
 
   const remove = async (unit: Unit) => {
-    if (!window.confirm(t('adminUnits.confirmDelete', { code: unit.code }))) return;
+    if (!(await confirm({ message: t('adminUnits.confirmDelete', { code: unit.code }), confirmText: t('common.delete') }))) return;
     try {
       setError(null);
       await deleteUnit(locationId, unit.id, authRequestOptions());
@@ -169,6 +171,7 @@ const AdminUnits: React.FC = () => {
           <input id="unit-category" className="form-control" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
         </div>
       </RightDrawer>
+      {dialog}
     </PageLayout>
   );
 };

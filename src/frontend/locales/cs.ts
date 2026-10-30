@@ -14,6 +14,7 @@ const cs: typeof en = {
     rememberPassword: 'Pamatujete si své heslo?',
     redirectingToLogin: 'Přesměrování na přihlášení...',
     loading: 'Načítání...',
+    confirm: 'Potvrďte prosím',
     openUserRegister: 'Otevřít registr uživatelů',
     yes: 'Ano',
     no: 'Ne',

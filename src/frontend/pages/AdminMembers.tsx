@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { Member, UserOption, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
@@ -10,6 +11,7 @@ const emptyForm = { user_id: '', first_name: '', last_name: '', phone_number: ''
 
 const AdminMembers: React.FC = () => {
   const { t } = useTranslation();
+  const { confirm, dialog } = useConfirm();
   const { listMembers, listUsersThatAreNotMembersYet, createMember, updateMember, deleteMember } = getEndpoints();
   const [members, setMembers] = useState<Member[]>([]);
   const [candidates, setCandidates] = useState<UserOption[]>([]);
@@ -84,7 +86,7 @@ const AdminMembers: React.FC = () => {
   };
 
   const remove = async (member: Member) => {
-    if (!window.confirm(t('adminMembers.confirmDelete', { name: `${member.first_name} ${member.last_name}` }))) return;
+    if (!(await confirm({ message: t('adminMembers.confirmDelete', { name: `${member.first_name} ${member.last_name}` }), confirmText: t('common.delete') }))) return;
     try {
       setError(null);
       await deleteMember(member.id, authRequestOptions());
@@ -216,6 +218,7 @@ const AdminMembers: React.FC = () => {
           <input id="member-category" className="form-control" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
         </div>
       </RightDrawer>
+      {dialog}
     </PageLayout>
   );
 };

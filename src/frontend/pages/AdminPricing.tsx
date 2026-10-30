@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { PricingRule, Season, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
@@ -11,6 +12,7 @@ const emptyPreview = { season_id: '', unit_category: '', member_category: '' };
 
 const AdminPricing: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { confirm, dialog } = useConfirm();
   const { listPricingRules, createPricingRule, updatePricingRule, deletePricingRule, listSeasons, previewPrice } = getEndpoints();
   const [rules, setRules] = useState<PricingRule[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
@@ -92,7 +94,7 @@ const AdminPricing: React.FC = () => {
   };
 
   const remove = async (rule: PricingRule) => {
-    if (!window.confirm(t('adminPricing.confirmDelete'))) return;
+    if (!(await confirm({ message: t('adminPricing.confirmDelete'), confirmText: t('common.delete') }))) return;
     try {
       setError(null);
       await deletePricingRule(rule.id, authRequestOptions());
@@ -278,6 +280,7 @@ const AdminPricing: React.FC = () => {
           <input id="rule-price" type="number" min="0" step="0.01" className="form-control" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
         </div>
       </RightDrawer>
+      {dialog}
     </PageLayout>
   );
 };

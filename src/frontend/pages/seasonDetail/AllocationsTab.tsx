@@ -8,6 +8,7 @@ import {
   UnitEnrollment,
   authRequestOptions,
 } from '../../services/apiHelpers';
+import { useConfirm } from '../../components/useConfirm';
 import { RunAction, STATUS_BADGES, STATUS_TRANSITIONS } from './shared';
 
 interface Props {
@@ -34,6 +35,7 @@ const AllocationsTab: React.FC<Props> = ({
   onEditAllocation,
 }) => {
   const { t, i18n } = useTranslation();
+  const { confirm, dialog } = useConfirm();
   const { allocateAUnitToAMember, changeAllocationStatus, deleteAllocation } = getEndpoints();
   const [allocMember, setAllocMember] = useState(initialMemberId);
   const [allocUnit, setAllocUnit] = useState(initialUnitId);
@@ -151,8 +153,8 @@ const AllocationsTab: React.FC<Props> = ({
                       <button
                         className="btn btn-sm btn-outline-danger"
                         disabled={busy}
-                        onClick={() => {
-                          if (!window.confirm(t('adminSeasonDetail.confirmDeleteAllocation', { name: item.variable_symbol }))) return;
+                        onClick={async () => {
+                          if (!(await confirm({ message: t('adminSeasonDetail.confirmDeleteAllocation', { name: item.variable_symbol }), confirmText: t('common.delete') }))) return;
                           run(() => deleteAllocation(item.id, authRequestOptions()), t('adminSeasonDetail.deleteAllocationFailed'));
                         }}
                       >
@@ -166,6 +168,7 @@ const AllocationsTab: React.FC<Props> = ({
           </tbody>
         </table>
       </div>
+      {dialog}
     </>
   );
 };

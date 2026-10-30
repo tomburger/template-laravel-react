@@ -14,6 +14,8 @@ import type {
   CreateMemberBody,
   CreateSeasonBody,
   CreateUnitBody,
+  EnrollMemberInASeasonBody,
+  EnrollUnitInASeasonBody,
   ForgotPasswordBody,
   LoginUserBody,
   RegisterANewUserBody,
@@ -252,6 +254,94 @@ const deleteMember = <TData = AxiosResponse<unknown>>(
     );
   }
 /**
+ * @summary List members not yet enrolled in a season
+ */
+const listMembersNotYetEnrolledInASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/seasons/${seasonId}/members/available`,options
+    );
+  }
+/**
+ * @summary List members enrolled in a season
+ */
+const listMembersEnrolledInASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/seasons/${seasonId}/members`,options
+    );
+  }
+/**
+ * The member's current category is copied to the enrollment.
+ * @summary Enroll member in a season
+ */
+const enrollMemberInASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number,
+    enrollMemberInASeasonBody: EnrollMemberInASeasonBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/seasons/${seasonId}/members`,
+      enrollMemberInASeasonBody,options
+    );
+  }
+/**
+ * @summary Remove member enrollment from a season
+ */
+const removeMemberEnrollmentFromASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number,
+    memberSeasonId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/seasons/${seasonId}/members/${memberSeasonId}`,options
+    );
+  }
+/**
+ * @summary List units not yet enrolled in a season
+ */
+const listUnitsNotYetEnrolledInASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/seasons/${seasonId}/units/available`,options
+    );
+  }
+/**
+ * @summary List units enrolled in a season
+ */
+const listUnitsEnrolledInASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/seasons/${seasonId}/units`,options
+    );
+  }
+/**
+ * The unit's current category is copied to the enrollment.
+ * @summary Enroll unit in a season
+ */
+const enrollUnitInASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number,
+    enrollUnitInASeasonBody: EnrollUnitInASeasonBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/seasons/${seasonId}/units`,
+      enrollUnitInASeasonBody,options
+    );
+  }
+/**
+ * @summary Remove unit enrollment from a season
+ */
+const removeUnitEnrollmentFromASeason = <TData = AxiosResponse<unknown>>(
+    seasonId: number,
+    unitSeasonId: number, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/seasons/${seasonId}/units/${unitSeasonId}`,options
+    );
+  }
+/**
  * @summary List seasons
  */
 const listSeasons = <TData = AxiosResponse<unknown>>(
@@ -384,7 +474,7 @@ const deleteUnit = <TData = AxiosResponse<unknown>>(
       `/api/locations/${locationId}/units/${id}`,options
     );
   }
-return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,listUnitsOfALocation,createUnit,updateUnit,deleteUnit}};
+return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,listUnitsOfALocation,createUnit,updateUnit,deleteUnit}};
 export type RegisterANewUserResult = AxiosResponse<unknown>
 export type LoginUserResult = AxiosResponse<unknown>
 export type VerifyEmailResult = AxiosResponse<unknown>
@@ -404,6 +494,14 @@ export type ListMembersResult = AxiosResponse<unknown>
 export type CreateMemberResult = AxiosResponse<unknown>
 export type UpdateMemberResult = AxiosResponse<unknown>
 export type DeleteMemberResult = AxiosResponse<unknown>
+export type ListMembersNotYetEnrolledInASeasonResult = AxiosResponse<unknown>
+export type ListMembersEnrolledInASeasonResult = AxiosResponse<unknown>
+export type EnrollMemberInASeasonResult = AxiosResponse<unknown>
+export type RemoveMemberEnrollmentFromASeasonResult = AxiosResponse<unknown>
+export type ListUnitsNotYetEnrolledInASeasonResult = AxiosResponse<unknown>
+export type ListUnitsEnrolledInASeasonResult = AxiosResponse<unknown>
+export type EnrollUnitInASeasonResult = AxiosResponse<unknown>
+export type RemoveUnitEnrollmentFromASeasonResult = AxiosResponse<unknown>
 export type ListSeasonsResult = AxiosResponse<unknown>
 export type CreateSeasonResult = AxiosResponse<unknown>
 export type UpdateSeasonResult = AxiosResponse<unknown>

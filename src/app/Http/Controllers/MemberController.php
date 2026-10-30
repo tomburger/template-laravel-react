@@ -95,6 +95,10 @@ class MemberController extends Controller
      */
     public function destroy(Member $member): JsonResponse
     {
+        if ($member->seasons()->exists()) {
+            return response()->json(['message' => 'Member is enrolled in a season and cannot be deleted'], 409);
+        }
+
         $member->delete();
 
         return response()->json(['message' => 'Member deleted']);

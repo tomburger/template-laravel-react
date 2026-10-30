@@ -64,6 +64,10 @@ class SeasonController extends Controller
      */
     public function destroy(Season $season): JsonResponse
     {
+        if ($season->memberSeasons()->exists() || $season->unitSeasons()->exists()) {
+            return response()->json(['message' => 'Season has enrollments and cannot be deleted'], 409);
+        }
+
         $season->delete();
 
         return response()->json(['message' => 'Season deleted']);

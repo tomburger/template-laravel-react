@@ -71,6 +71,10 @@ class UnitController extends Controller
     {
         abort_unless($unit->location_id === $location->id, 404);
 
+        if ($unit->seasons()->exists()) {
+            return response()->json(['message' => 'Unit is enrolled in a season and cannot be deleted'], 409);
+        }
+
         $unit->delete();
 
         return response()->json(['message' => 'Unit deleted']);

@@ -3,10 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Season extends Model
 {
     protected $fillable = ['name', 'start_date', 'end_date'];
+
+    public function memberSeasons(): HasMany
+    {
+        return $this->hasMany(MemberSeason::class);
+    }
+
+    public function unitSeasons(): HasMany
+    {
+        return $this->hasMany(UnitSeason::class);
+    }
 
     protected function casts(): array
     {

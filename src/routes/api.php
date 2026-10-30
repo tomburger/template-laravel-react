@@ -5,6 +5,8 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\SeasonController;
+use App\Http\Controllers\SeasonMemberController;
+use App\Http\Controllers\SeasonUnitController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -46,6 +48,14 @@ Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
 
     Route::get('/members/candidates', [MemberController::class, 'candidates']);
     Route::apiResource('members', MemberController::class)->except('show');
+    Route::get('/seasons/{season}/members/available', [SeasonMemberController::class, 'available']);
+    Route::get('/seasons/{season}/members', [SeasonMemberController::class, 'index']);
+    Route::post('/seasons/{season}/members', [SeasonMemberController::class, 'store']);
+    Route::delete('/seasons/{season}/members/{memberSeason}', [SeasonMemberController::class, 'destroy']);
+    Route::get('/seasons/{season}/units/available', [SeasonUnitController::class, 'available']);
+    Route::get('/seasons/{season}/units', [SeasonUnitController::class, 'index']);
+    Route::post('/seasons/{season}/units', [SeasonUnitController::class, 'store']);
+    Route::delete('/seasons/{season}/units/{unitSeason}', [SeasonUnitController::class, 'destroy']);
     Route::apiResource('seasons', SeasonController::class)->except('show');
     Route::apiResource('locations', LocationController::class)->except('show');
     Route::apiResource('locations.units', UnitController::class)->except('show');

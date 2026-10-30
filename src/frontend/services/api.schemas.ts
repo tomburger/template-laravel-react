@@ -69,6 +69,32 @@ export type ListSeasons401 = {
   message?: string;
 };
 
+export type EnrollUnitInASeasonBody = {
+  /** ID of the unit to enroll. */
+  unit_id: number;
+};
+
+export type ListUnitsEnrolledInASeason401 = {
+  message?: string;
+};
+
+export type ListUnitsNotYetEnrolledInASeason401 = {
+  message?: string;
+};
+
+export type EnrollMemberInASeasonBody = {
+  /** ID of the member to enroll. */
+  member_id: number;
+};
+
+export type ListMembersEnrolledInASeason401 = {
+  message?: string;
+};
+
+export type ListMembersNotYetEnrolledInASeason401 = {
+  message?: string;
+};
+
 export type UpdateMemberBody = {
   /**
    * Member category.

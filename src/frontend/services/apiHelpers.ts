@@ -37,3 +37,21 @@ export type Member = {
 };
 export type UserOption = { id: number; name: string; email: string };
 export type Season = { id: number; name: string; start_date: string; end_date: string };
+export type MemberEnrollment = {
+  id: number;
+  season_id: number;
+  member_id: number;
+  first_name: string;
+  last_name: string;
+  category: string | null;
+};
+export type UnitEnrollment = {
+  id: number;
+  season_id: number;
+  unit_id: number;
+  code: string;
+  location_name: string;
+  category: string | null;
+};
+export type AvailableMember = { id: number; first_name: string; last_name: string; category: string | null };
+export type AvailableUnit = { id: number; code: string; category: string | null; location_name: string };

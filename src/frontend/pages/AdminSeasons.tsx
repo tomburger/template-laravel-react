@@ -126,6 +126,9 @@ const AdminSeasons: React.FC = () => {
                       <td>{formatDate(season.end_date)}</td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end flex-wrap gap-2">
+                          <Link to={`/admin/seasons/${season.id}`} className="btn btn-sm btn-outline-primary">
+                            {t('adminSeasons.enrollments')}
+                          </Link>
                           <button className="btn btn-sm btn-dark" onClick={() => openDrawer(season)}>
                             {t('adminUsers.edit')}
                           </button>

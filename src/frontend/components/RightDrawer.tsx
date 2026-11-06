@@ -25,6 +25,18 @@ const RightDrawer: React.FC<RightDrawerProps> = ({
   children,
   footer,
 }) => {
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const target = bodyRef.current?.querySelector<HTMLElement>(
+      'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    target?.focus();
+  }, [isOpen]);
+
   if (!isOpen) {
     return null;
   }
@@ -64,7 +76,7 @@ const RightDrawer: React.FC<RightDrawerProps> = ({
           </button>
         </div>
 
-        <div className="flex-grow-1 overflow-auto p-4">{children}</div>
+        <div ref={bodyRef} className="flex-grow-1 overflow-auto p-4">{children}</div>
 
         {footer && <div className="border-top px-4 py-3">{footer}</div>}
       </aside>

@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import ContentEditorsSelector from '../components/ContentEditorsSelector';
 import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
-import { Location, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import { Location, OwnerInput, UserOption, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import type { CreateLocationBody } from '../services/api.schemas';
 
 const AdminLocations: React.FC = () => {
   const { t } = useTranslation();
@@ -17,6 +19,7 @@ const AdminLocations: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<Location | null>(null);
   const [name, setName] = useState('');
+  const [owners, setOwners] = useState<UserOption[]>([]);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -40,6 +43,7 @@ const AdminLocations: React.FC = () => {
   const openDrawer = (location: Location | null) => {
     setEditing(location);
     setName(location?.name ?? '');
+    setOwners(location?.owners ?? []);
     setFormError(null);
     setDrawerOpen(true);
   };
@@ -48,10 +52,11 @@ const AdminLocations: React.FC = () => {
     try {
       setSaving(true);
       setFormError(null);
+      const data: CreateLocationBody & OwnerInput = { name, owner_ids: owners.map((owner) => owner.id) };
       if (editing) {
-        await updateLocation(editing.id, { name }, authRequestOptions());
+        await updateLocation(editing.id, data, authRequestOptions());
       } else {
-        await createLocation({ name }, authRequestOptions());
+        await createLocation(data, authRequestOptions());
       }
       setDrawerOpen(false);
       await load();
@@ -104,19 +109,21 @@ const AdminLocations: React.FC = () => {
                   <tr>
                     <th>{t('adminLocations.name')}</th>
                     <th>{t('adminLocations.units')}</th>
+                    <th>{t('owners.label')}</th>
                     <th className="text-end">{t('adminUsers.columns.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {locations.length === 0 && (
                     <tr>
-                      <td colSpan={3} className="text-center text-muted py-4">{t('adminLocations.empty')}</td>
+                      <td colSpan={4} className="text-center text-muted py-4">{t('adminLocations.empty')}</td>
                     </tr>
                   )}
                   {locations.map((location) => (
                     <tr key={location.id}>
                       <td>{location.name}</td>
                       <td>{location.units_count}</td>
+                      <td>{location.owners.length ? location.owners.map((owner) => owner.name).join(', ') : t('owners.none')}</td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end flex-wrap gap-2">
                           <Link to={`/admin/locations/${location.id}`} className="btn btn-sm btn-primary">
@@ -154,7 +161,7 @@ const AdminLocations: React.FC = () => {
             <button type="button" className="btn btn-outline-secondary" onClick={() => setDrawerOpen(false)} disabled={saving}>
               {t('adminUsers.cancel')}
             </button>
-            <button type="button" className="btn btn-dark" onClick={save} disabled={saving || name.trim() === ''}>
+            <button type="button" className="btn btn-dark" onClick={save} disabled={saving || name.trim() === '' || owners.length === 0}>
               {saving ? t('adminUsers.saving') : t('adminUsers.save')}
             </button>
           </div>
@@ -165,6 +172,8 @@ const AdminLocations: React.FC = () => {
           <label className="form-label" htmlFor="location-name">{t('adminLocations.name')}</label>
           <input id="location-name" className="form-control" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
+        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} label={t('owners.label')} emptyText={t('owners.none')} />
+        <div className="form-text">{t('owners.required')}</div>
       </RightDrawer>
       {dialog}
     </PageLayout>

@@ -28,6 +28,11 @@ const en = {
     noMatches: 'No matching users.',
     loadFailed: 'Failed to load users.',
   },
+  owners: {
+    label: 'Owners',
+    none: 'No owners selected.',
+    required: 'At least one owner is required.',
+  },
   adminLocations: {
     back: 'Back to admin panel',
     title: 'Locations',

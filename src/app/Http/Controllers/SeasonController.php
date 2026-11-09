@@ -23,7 +23,7 @@ class SeasonController extends Controller
     public function index(): JsonResponse
     {
         return response()->json([
-            'seasons' => Season::orderByDesc('start_date')->orderByDesc('id')->get(),
+            'seasons' => Season::with('owners:id,name,email')->orderByDesc('start_date')->orderByDesc('id')->get(),
         ]);
     }
 
@@ -42,12 +42,14 @@ class SeasonController extends Controller
     {
         $data = $request->validated();
         $sourceId = $data['copy_from_season_id'] ?? null;
-        unset($data['copy_from_season_id']);
+        $ownerIds = $data['owner_ids'];
+        unset($data['copy_from_season_id'], $data['owner_ids']);
 
         $copied = ['members' => 0, 'units' => 0];
 
-        $season = DB::transaction(function () use ($data, $sourceId, &$copied) {
+        $season = DB::transaction(function () use ($data, $sourceId, $ownerIds, &$copied) {
             $season = Season::create($data);
+            $season->owners()->sync($ownerIds);
 
             if ($sourceId !== null) {
                 $source = Season::findOrFail($sourceId);
@@ -68,7 +70,7 @@ class SeasonController extends Controller
             return $season;
         });
 
-        return response()->json(['season' => $season, 'copied' => $copied], 201);
+        return response()->json(['season' => $season->load('owners:id,name,email'), 'copied' => $copied], 201);
     }
 
     /**
@@ -84,9 +86,16 @@ class SeasonController extends Controller
      */
     public function update(UpdateSeasonRequest $request, Season $season): JsonResponse
     {
-        $season->update($request->validated());
+        $data = $request->validated();
+        $ownerIds = $data['owner_ids'];
+        unset($data['owner_ids']);
 
-        return response()->json(['season' => $season]);
+        DB::transaction(function () use ($season, $data, $ownerIds) {
+            $season->update($data);
+            $season->owners()->sync($ownerIds);
+        });
+
+        return response()->json(['season' => $season->load('owners:id,name,email')]);
     }
 
     /**

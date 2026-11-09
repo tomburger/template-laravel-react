@@ -24,7 +24,7 @@ export const apiErrorMessage = (err: any, fallback: string): string => {
 };
 
 // Response shapes (the OpenAPI spec does not describe responses, so Orval returns unknown)
-export type Location = { id: number; name: string; units_count: number };
+export type Location = { id: number; name: string; units_count: number; owners: UserOption[] };
 export type Unit = { id: number; location_id: number; code: string; category: string | null };
 export type Member = {
   id: number;
@@ -36,9 +36,10 @@ export type Member = {
   user_name: string | null;
 };
 export type UserOption = { id: number; name: string; email: string };
+export type OwnerInput = { owner_ids: number[] };
 export const SEASON_STATUSES = ['preparation', 'reserved', 'open', 'closed'] as const;
 export type SeasonStatus = typeof SEASON_STATUSES[number];
-export type Season = { id: number; name: string; start_date: string; end_date: string; status: SeasonStatus };
+export type Season = { id: number; name: string; start_date: string; end_date: string; status: SeasonStatus; owners: UserOption[] };
 export type PricingRule = {
   id: number;
   season_id: number | null;

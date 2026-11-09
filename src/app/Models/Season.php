@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Season extends Model
@@ -17,6 +18,11 @@ class Season extends Model
     protected $attributes = ['status' => self::STATUS_PREPARATION];
 
     protected $fillable = ['name', 'start_date', 'end_date', 'status'];
+
+    public function owners(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
+    }
 
     public function memberSeasons(): HasMany
     {

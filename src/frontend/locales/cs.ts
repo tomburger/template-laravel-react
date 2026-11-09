@@ -30,6 +30,11 @@ const cs: typeof en = {
     noMatches: 'Žádní odpovídající uživatelé.',
     loadFailed: 'Načtení uživatelů se nezdařilo.',
   },
+  owners: {
+    label: 'Vlastníci',
+    none: 'Nejsou vybráni žádní vlastníci.',
+    required: 'Je vyžadován alespoň jeden vlastník.',
+  },
   adminLocations: {
     back: 'Zpět do administrace',
     title: 'Lokality',

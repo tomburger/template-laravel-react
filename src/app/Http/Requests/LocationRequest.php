@@ -18,6 +18,8 @@ class LocationRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'owner_ids' => 'required|array|min:1',
+            'owner_ids.*' => 'required|integer|distinct|exists:users,id',
         ];
     }
 }

@@ -7,11 +7,13 @@ interface ContentEditorsSelectorProps {
   value: UserOption[];
   onChange: (users: UserOption[]) => void;
   disabled?: boolean;
+  label?: string;
+  emptyText?: string;
 }
 
 type AvailableUser = UserOption & { is_admin: boolean };
 
-const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, onChange, disabled = false }) => {
+const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, onChange, disabled = false, label, emptyText }) => {
   const { t } = useTranslation();
   const inputId = useId();
   const [availableUsers, setAvailableUsers] = useState<AvailableUser[]>([]);
@@ -80,7 +82,7 @@ const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, 
       if (!event.currentTarget.contains(event.relatedTarget)) setIsFocused(false);
     }}>
       <div className="d-flex align-items-center justify-content-between mb-2">
-        <label className="form-label fw-semibold mb-0" htmlFor={inputId}>{t('contentEditorsSelector.label')}</label>
+        <label className="form-label fw-semibold mb-0" htmlFor={inputId}>{label ?? t('contentEditorsSelector.label')}</label>
         <span className="badge text-bg-light border text-secondary">
           {t('contentEditorsSelector.selected', { count: value.length })}
         </span>
@@ -105,7 +107,7 @@ const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, 
               )}
             </span>
           )) : (
-            <span className="text-muted small fst-italic">{t('contentEditorsSelector.none')}</span>
+            <span className="text-muted small fst-italic">{emptyText ?? t('contentEditorsSelector.none')}</span>
           )}
         </div>
 

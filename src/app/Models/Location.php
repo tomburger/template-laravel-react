@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Location extends Model
@@ -11,6 +12,11 @@ class Location extends Model
 
     // Layout data is fetched through its own endpoint, not with every location list
     protected $hidden = ['layout_svg', 'layout_image_path'];
+
+    public function owners(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
+    }
 
     public function units(): HasMany
     {

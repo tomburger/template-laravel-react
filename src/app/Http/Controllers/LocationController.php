@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LocationRequest;
 use App\Models\Location;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class LocationController extends Controller
 {
@@ -18,7 +19,7 @@ class LocationController extends Controller
     public function index(): JsonResponse
     {
         return response()->json([
-            'locations' => Location::withCount('units')->orderBy('name')->get(),
+            'locations' => Location::with('owners:id,name,email')->withCount('units')->orderBy('name')->get(),
         ]);
     }
 
@@ -31,9 +32,15 @@ class LocationController extends Controller
      */
     public function store(LocationRequest $request): JsonResponse
     {
-        $location = Location::create($request->validated());
+        $data = $request->validated();
+        $location = DB::transaction(function () use ($data) {
+            $location = Location::create(['name' => $data['name']]);
+            $location->owners()->sync($data['owner_ids']);
 
-        return response()->json(['location' => $location->loadCount('units')], 201);
+            return $location;
+        });
+
+        return response()->json(['location' => $location->load('owners:id,name,email')->loadCount('units')], 201);
     }
 
     /**
@@ -46,9 +53,13 @@ class LocationController extends Controller
      */
     public function update(LocationRequest $request, Location $location): JsonResponse
     {
-        $location->update($request->validated());
+        $data = $request->validated();
+        DB::transaction(function () use ($location, $data) {
+            $location->update(['name' => $data['name']]);
+            $location->owners()->sync($data['owner_ids']);
+        });
 
-        return response()->json(['location' => $location->loadCount('units')]);
+        return response()->json(['location' => $location->load('owners:id,name,email')->loadCount('units')]);
     }
 
     /**

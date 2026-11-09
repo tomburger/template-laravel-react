@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import ContentEditorsSelector from '../components/ContentEditorsSelector';
 import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
-import { SEASON_STATUSES, Season, SeasonStatus, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import { SEASON_STATUSES, OwnerInput, Season, SeasonStatus, UserOption, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import type { CreateSeasonBody } from '../services/api.schemas';
 
 const emptyForm: { name: string; start_date: string; end_date: string; status: SeasonStatus; copy_from_season_id: string } = {
   name: '', start_date: '', end_date: '', status: 'preparation', copy_from_season_id: '',
@@ -23,6 +25,7 @@ const AdminSeasons: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<Season | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [owners, setOwners] = useState<UserOption[]>([]);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -52,12 +55,16 @@ const AdminSeasons: React.FC = () => {
         ? { name: season.name, start_date: season.start_date, end_date: season.end_date, status: season.status, copy_from_season_id: '' }
         : emptyForm
     );
+    setOwners(season?.owners ?? []);
     setFormError(null);
     setDrawerOpen(true);
   };
 
   const save = async () => {
-    const data = { name: form.name.trim(), start_date: form.start_date, end_date: form.end_date, status: form.status };
+    const data: CreateSeasonBody & OwnerInput = {
+      name: form.name.trim(), start_date: form.start_date, end_date: form.end_date, status: form.status,
+      owner_ids: owners.map((owner) => owner.id),
+    };
     try {
       setSaving(true);
       setFormError(null);
@@ -96,7 +103,7 @@ const AdminSeasons: React.FC = () => {
     }
   };
 
-  const canSave = form.name.trim() !== '' && form.start_date !== '' && form.end_date !== '';
+  const canSave = form.name.trim() !== '' && form.start_date !== '' && form.end_date !== '' && owners.length > 0;
   const filteredSeasons = seasons.filter((season) => statusFilter === 'all' || season.status === statusFilter);
 
   return (
@@ -153,13 +160,14 @@ const AdminSeasons: React.FC = () => {
                     <th>{t('adminSeasons.startDate')}</th>
                     <th>{t('adminSeasons.endDate')}</th>
                     <th>{t('adminSeasons.status')}</th>
+                    <th>{t('owners.label')}</th>
                     <th className="text-end">{t('adminUsers.columns.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSeasons.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="text-center text-muted py-4">
+                      <td colSpan={6} className="text-center text-muted py-4">
                         {t(seasons.length === 0 ? 'adminSeasons.empty' : 'adminSeasons.noMatch')}
                       </td>
                     </tr>
@@ -170,6 +178,7 @@ const AdminSeasons: React.FC = () => {
                       <td>{formatDate(season.start_date)}</td>
                       <td>{formatDate(season.end_date)}</td>
                       <td>{t(`adminSeasons.statuses.${season.status}`)}</td>
+                      <td>{season.owners.length ? season.owners.map((owner) => owner.name).join(', ') : t('owners.none')}</td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end flex-wrap gap-2">
                           <Link to={`/admin/seasons/${season.id}`} className="btn btn-sm btn-outline-primary">
@@ -234,6 +243,8 @@ const AdminSeasons: React.FC = () => {
             ))}
           </select>
         </div>
+        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} label={t('owners.label')} emptyText={t('owners.none')} />
+        <div className="form-text mb-3">{t('owners.required')}</div>
         {!editing && (
           <div className="mb-3">
             <label className="form-label" htmlFor="season-copy">{t('adminSeasons.copyFrom')}</label>

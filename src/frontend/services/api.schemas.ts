@@ -75,6 +75,8 @@ export type UpdateSeasonBody = {
   name: string;
   /** Start date (Y-m-d). */
   start_date: string;
+  /** Status: preparation, reserved, open or closed. If omitted, the current status is retained. */
+  status?: string;
 };
 
 export type CreateSeasonBody = {
@@ -89,6 +91,8 @@ export type CreateSeasonBody = {
   name: string;
   /** Start date (Y-m-d). */
   start_date: string;
+  /** Status: preparation, reserved, open or closed. Defaults to preparation. */
+  status?: string;
 };
 
 export type ListSeasons401 = {

@@ -119,7 +119,9 @@ const AdminSeasonDetail: React.FC = () => {
           </p>
           <h1 className="h3 mb-1">{t('adminSeasonDetail.title', { season: season?.name ?? '' })}</h1>
           {season && (
-            <p className="text-muted">{formatDate(season.start_date)} – {formatDate(season.end_date)}</p>
+            <p className="text-muted">
+              {formatDate(season.start_date)} – {formatDate(season.end_date)} · {t('adminSeasons.status')}: {t(`adminSeasons.statuses.${season.status}`)}
+            </p>
           )}
 
           {error && <div className="alert alert-danger">{error}</div>}

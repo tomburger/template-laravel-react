@@ -18,6 +18,7 @@ class SeasonController extends Controller
      * @endpoint
      * @authenticated
      * @responseField seasons object[] Seasons, newest first
+     * @responseField seasons[].status string Status: preparation, reserved, open or closed.
      */
     public function index(): JsonResponse
     {
@@ -34,6 +35,7 @@ class SeasonController extends Controller
      * @bodyParam name string required Season name.
      * @bodyParam start_date string required Start date (Y-m-d).
      * @bodyParam end_date string required End date (Y-m-d), not before the start date.
+     * @bodyParam status string Status: preparation, reserved, open or closed. Defaults to preparation. Example: preparation
      * @bodyParam copy_from_season_id integer ID of a season whose member and unit enrollments are copied into the new season. Categories are re-snapshotted from the current member/unit categories.
      */
     public function store(StoreSeasonRequest $request): JsonResponse
@@ -78,6 +80,7 @@ class SeasonController extends Controller
      * @bodyParam name string required Season name.
      * @bodyParam start_date string required Start date (Y-m-d).
      * @bodyParam end_date string required End date (Y-m-d), not before the start date.
+     * @bodyParam status string Status: preparation, reserved, open or closed. If omitted, the current status is retained. Example: open
      */
     public function update(UpdateSeasonRequest $request, Season $season): JsonResponse
     {

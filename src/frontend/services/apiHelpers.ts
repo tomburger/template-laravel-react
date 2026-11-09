@@ -36,7 +36,9 @@ export type Member = {
   user_name: string | null;
 };
 export type UserOption = { id: number; name: string; email: string };
-export type Season = { id: number; name: string; start_date: string; end_date: string };
+export const SEASON_STATUSES = ['preparation', 'reserved', 'open', 'closed'] as const;
+export type SeasonStatus = typeof SEASON_STATUSES[number];
+export type Season = { id: number; name: string; start_date: string; end_date: string; status: SeasonStatus };
 export type PricingRule = {
   id: number;
   season_id: number | null;

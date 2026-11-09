@@ -7,7 +7,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Season extends Model
 {
-    protected $fillable = ['name', 'start_date', 'end_date'];
+    public const STATUS_PREPARATION = 'preparation';
+    public const STATUS_RESERVED = 'reserved';
+    public const STATUS_OPEN = 'open';
+    public const STATUS_CLOSED = 'closed';
+
+    public const STATUSES = [self::STATUS_PREPARATION, self::STATUS_RESERVED, self::STATUS_OPEN, self::STATUS_CLOSED];
+
+    protected $attributes = ['status' => self::STATUS_PREPARATION];
+
+    protected $fillable = ['name', 'start_date', 'end_date', 'status'];
 
     public function memberSeasons(): HasMany
     {

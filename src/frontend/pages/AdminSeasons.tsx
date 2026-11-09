@@ -5,9 +5,11 @@ import PageLayout from '../components/PageLayout';
 import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
-import { Season, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import { SEASON_STATUSES, Season, SeasonStatus, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
-const emptyForm = { name: '', start_date: '', end_date: '', copy_from_season_id: '' };
+const emptyForm: { name: string; start_date: string; end_date: string; status: SeasonStatus; copy_from_season_id: string } = {
+  name: '', start_date: '', end_date: '', status: 'preparation', copy_from_season_id: '',
+};
 
 const AdminSeasons: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -17,6 +19,7 @@ const AdminSeasons: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<SeasonStatus | 'all'>('all');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<Season | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -46,7 +49,7 @@ const AdminSeasons: React.FC = () => {
     setEditing(season);
     setForm(
       season
-        ? { name: season.name, start_date: season.start_date, end_date: season.end_date, copy_from_season_id: '' }
+        ? { name: season.name, start_date: season.start_date, end_date: season.end_date, status: season.status, copy_from_season_id: '' }
         : emptyForm
     );
     setFormError(null);
@@ -54,7 +57,7 @@ const AdminSeasons: React.FC = () => {
   };
 
   const save = async () => {
-    const data = { name: form.name.trim(), start_date: form.start_date, end_date: form.end_date };
+    const data = { name: form.name.trim(), start_date: form.start_date, end_date: form.end_date, status: form.status };
     try {
       setSaving(true);
       setFormError(null);
@@ -94,6 +97,7 @@ const AdminSeasons: React.FC = () => {
   };
 
   const canSave = form.name.trim() !== '' && form.start_date !== '' && form.end_date !== '';
+  const filteredSeasons = seasons.filter((season) => statusFilter === 'all' || season.status === statusFilter);
 
   return (
     <PageLayout>
@@ -112,6 +116,26 @@ const AdminSeasons: React.FC = () => {
             </button>
           </div>
 
+          <div className="row g-3 mb-4">
+            <div className="col-md-4">
+              <label className="form-label" htmlFor="season-filter">{t('adminSeasons.filter')}</label>
+              <select id="season-filter" className="form-select" value={statusFilter} onChange={(event) => {
+                const value = event.target.value;
+                if (value === 'all') {
+                  setStatusFilter(value);
+                } else {
+                  const status = SEASON_STATUSES.find((item) => item === value);
+                  if (status) setStatusFilter(status);
+                }
+              }}>
+                <option value="all">{t('adminSeasons.allSeasons')}</option>
+                {SEASON_STATUSES.map((status) => (
+                  <option key={status} value={status}>{t(`adminSeasons.statuses.${status}`)}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {error && <div className="alert alert-danger">{error}</div>}
           {notice && <div className="alert alert-success">{notice}</div>}
 
@@ -128,20 +152,24 @@ const AdminSeasons: React.FC = () => {
                     <th>{t('adminSeasons.name')}</th>
                     <th>{t('adminSeasons.startDate')}</th>
                     <th>{t('adminSeasons.endDate')}</th>
+                    <th>{t('adminSeasons.status')}</th>
                     <th className="text-end">{t('adminUsers.columns.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {seasons.length === 0 && (
+                  {filteredSeasons.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="text-center text-muted py-4">{t('adminSeasons.empty')}</td>
+                      <td colSpan={5} className="text-center text-muted py-4">
+                        {t(seasons.length === 0 ? 'adminSeasons.empty' : 'adminSeasons.noMatch')}
+                      </td>
                     </tr>
                   )}
-                  {seasons.map((season) => (
+                  {filteredSeasons.map((season) => (
                     <tr key={season.id}>
                       <td>{season.name}</td>
                       <td>{formatDate(season.start_date)}</td>
                       <td>{formatDate(season.end_date)}</td>
+                      <td>{t(`adminSeasons.statuses.${season.status}`)}</td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end flex-wrap gap-2">
                           <Link to={`/admin/seasons/${season.id}`} className="btn btn-sm btn-outline-primary">
@@ -194,6 +222,17 @@ const AdminSeasons: React.FC = () => {
         <div className="mb-3">
           <label className="form-label" htmlFor="season-end">{t('adminSeasons.endDate')}</label>
           <input id="season-end" type="date" className="form-control" value={form.end_date} min={form.start_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} />
+        </div>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="season-status">{t('adminSeasons.status')}</label>
+          <select id="season-status" className="form-select" value={form.status} onChange={(e) => {
+            const status = SEASON_STATUSES.find((item) => item === e.target.value);
+            if (status) setForm({ ...form, status });
+          }}>
+            {SEASON_STATUSES.map((status) => (
+              <option key={status} value={status}>{t(`adminSeasons.statuses.${status}`)}</option>
+            ))}
+          </select>
         </div>
         {!editing && (
           <div className="mb-3">

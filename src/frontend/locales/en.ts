@@ -18,6 +18,16 @@ const en = {
     no: 'No',
     delete: 'Delete',
   },
+  contentEditorsSelector: {
+    label: 'Content editors',
+    selected: 'Selected: {{count}}',
+    none: 'No content editors selected.',
+    remove: 'Remove {{name}}',
+    searchPlaceholder: 'Search users by name or email',
+    hint: 'Search and select users. Press Backspace to remove the last selection.',
+    noMatches: 'No matching users.',
+    loadFailed: 'Failed to load users.',
+  },
   adminLocations: {
     back: 'Back to admin panel',
     title: 'Locations',

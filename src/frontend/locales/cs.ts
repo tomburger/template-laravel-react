@@ -20,6 +20,16 @@ const cs: typeof en = {
     no: 'Ne',
     delete: 'Smazat',
   },
+  contentEditorsSelector: {
+    label: 'Editoři obsahu',
+    selected: 'Vybráno: {{count}}',
+    none: 'Nejsou vybráni žádní editoři obsahu.',
+    remove: 'Odebrat {{name}}',
+    searchPlaceholder: 'Hledat uživatele podle jména nebo e-mailu',
+    hint: 'Vyhledejte a vyberte uživatele. Klávesou Backspace odeberete poslední výběr.',
+    noMatches: 'Žádní odpovídající uživatelé.',
+    loadFailed: 'Načtení uživatelů se nezdařilo.',
+  },
   adminLocations: {
     back: 'Zpět do administrace',
     title: 'Lokality',

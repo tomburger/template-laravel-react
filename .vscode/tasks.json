@@ -1,0 +1,44 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Laravel Development Server",
+            "type": "shell",
+            "command": "php artisan serve",
+            "options": { "cwd": "${workspaceFolder}/src" },
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^$",
+                    "endsPattern": "Server running on"
+                }
+            },
+            "presentation": { "group": "dev", "panel": "dedicated" }
+        },
+        {
+            "label": "Vite Dev Server",
+            "type": "shell",
+            "command": "npm run dev",
+            "options": { "cwd": "${workspaceFolder}/src" },
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": { "regexp": "^$" },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^$",
+                    "endsPattern": "Local:"
+                }
+            },
+            "presentation": { "group": "dev", "panel": "dedicated" }
+        },
+        {
+            "label": "Start local environment",
+            "dependsOn": ["Laravel Development Server", "Vite Dev Server"],
+            "dependsOrder": "parallel",
+            "runOptions": { "runOn": "default" },
+            "problemMatcher": []
+        }
+    ]
+}

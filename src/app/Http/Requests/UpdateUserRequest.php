@@ -23,6 +23,7 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'is_admin' => 'sometimes|boolean',
+            'is_manager' => 'sometimes|boolean',
             'is_deactivated' => 'sometimes|boolean',
         ];
     }

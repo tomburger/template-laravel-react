@@ -13,6 +13,7 @@ type UserRow = {
   name: string;
   email: string;
   is_admin: boolean;
+  is_manager: boolean;
   is_deactivated: boolean;
   email_verified_at: string | null;
   created_at: string;
@@ -27,9 +28,9 @@ type UpdateUserResponse = {
   message?: string;
 };
 
-type FilterValue = 'all' | 'active' | 'deactivated' | 'verified' | 'pending-verification' | 'admin';
+type FilterValue = 'all' | 'active' | 'deactivated' | 'verified' | 'pending-verification' | 'admin' | 'manager';
 
-const FILTER_VALUES: FilterValue[] = ['all', 'active', 'deactivated', 'verified', 'pending-verification', 'admin'];
+const FILTER_VALUES: FilterValue[] = ['all', 'active', 'deactivated', 'verified', 'pending-verification', 'admin', 'manager'];
 
 const AdminUsers: React.FC = () => {
   const { user, isDefaultAdminActive, setDefaultAdminActive } = useAuth();
@@ -43,7 +44,7 @@ const AdminUsers: React.FC = () => {
   const [filter, setFilter] = useState<FilterValue>('all');
   const [busyUserId, setBusyUserId] = useState<number | null>(null);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
-  const [editFlags, setEditFlags] = useState({ is_admin: false, is_deactivated: false });
+  const [editFlags, setEditFlags] = useState({ is_admin: false, is_manager: false, is_deactivated: false });
 
 
   const loadUsers = async () => {
@@ -69,6 +70,7 @@ const AdminUsers: React.FC = () => {
     if (editingUser) {
       setEditFlags({
         is_admin: editingUser.is_admin,
+        is_manager: editingUser.is_manager,
         is_deactivated: editingUser.is_deactivated,
       });
     }
@@ -98,6 +100,8 @@ const AdminUsers: React.FC = () => {
           return user.email_verified_at === null;
         case 'admin':
           return user.is_admin;
+        case 'manager':
+          return user.is_manager;
         default:
           return true;
       }
@@ -259,9 +263,13 @@ const AdminUsers: React.FC = () => {
                                 </span>
                               </td>
                               <td>
-                                {user.is_admin ? (
+                                {user.is_admin && (
                                   <span className="badge bg-dark">{t('adminUsers.admin')}</span>
-                                ) : (
+                                )}
+                                {user.is_manager && (
+                                  <span className={`badge bg-info${user.is_admin ? ' ms-2' : ''}`}>{t('adminUsers.manager')}</span>
+                                )}
+                                {!user.is_admin && !user.is_manager && (
                                   <span className="badge bg-light text-dark border">{t('adminUsers.user')}</span>
                                 )}
                               </td>
@@ -337,7 +345,17 @@ const AdminUsers: React.FC = () => {
                     onChange={(event) => setEditFlags((flags) => ({ ...flags, is_admin: event.target.checked }))}
                     disabled={editingUser.id === 1 && !editingUser.is_admin}
                   />
-                  <label className="form-check-label" htmlFor="edit-user-admin">{t('adminUsers.administrator')}</label>
+                  <label className="form-check-label" htmlFor="edit-user-admin">{t('adminUsers.admin')}</label>
+                </div>
+                <div className="form-check form-switch mb-3">
+                  <input
+                    id="edit-user-manager"
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={editFlags.is_manager}
+                    onChange={(event) => setEditFlags((flags) => ({ ...flags, is_manager: event.target.checked }))}
+                  />
+                  <label className="form-check-label" htmlFor="edit-user-manager">{t('adminUsers.manager')}</label>
                 </div>
                 <div className="form-check form-switch">
                   <input

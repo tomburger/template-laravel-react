@@ -49,6 +49,7 @@ class User extends Authenticatable
             'password_reset_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_manager' => 'boolean',
             'is_deactivated' => 'boolean',
         ];
     }
@@ -61,6 +62,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->is_admin === true;
+    }
+
+    public function isManager(): bool
+    {
+        return $this->is_manager === true;
     }
 
     /**

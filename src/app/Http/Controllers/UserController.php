@@ -26,7 +26,7 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
-        $users = User::all(['id', 'name', 'email', 'is_admin', 'is_deactivated', 'email_verified_at', 'created_at']);
+        $users = User::all(['id', 'name', 'email', 'is_admin', 'is_manager', 'is_deactivated', 'email_verified_at', 'created_at']);
 
         return response()->json([
             'users' => $users,
@@ -66,13 +66,14 @@ class UserController extends Controller
     /**
      * Update user flags
      *
-     * Update the is_admin and/or is_deactivated flags for a user. Only admins can access this endpoint.
+     * Update user access and account status flags. Only admins can access this endpoint.
      * An admin cannot remove their own admin status.
      *
      * @endpoint
      * @authenticated
      * @urlParam id integer required The user ID. Example: 1
      * @bodyParam is_admin boolean Set whether the user is an admin.
+     * @bodyParam is_manager boolean Set whether the user is a manager.
      * @bodyParam is_deactivated boolean Set whether the user is deactivated.
      * @responseField user object Updated user data
      * @responseField message string Success message
@@ -94,7 +95,7 @@ class UserController extends Controller
             ], 403);
         }
 
-        $data = $request->only(['is_admin', 'is_deactivated']);
+        $data = $request->validated();
         $user->forceFill($data)->save();
         $updatedUser = $user->fresh();
 
@@ -104,6 +105,7 @@ class UserController extends Controller
                 'name' => $updatedUser->name,
                 'email' => $updatedUser->email,
                 'is_admin' => $updatedUser->is_admin,
+                'is_manager' => $updatedUser->is_manager,
                 'is_deactivated' => $updatedUser->is_deactivated,
                 'email_verified_at' => $updatedUser->email_verified_at,
                 'created_at' => $updatedUser->created_at,

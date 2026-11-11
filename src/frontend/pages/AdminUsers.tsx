@@ -33,7 +33,7 @@ type FilterValue = 'all' | 'active' | 'deactivated' | 'verified' | 'pending-veri
 const FILTER_VALUES: FilterValue[] = ['all', 'active', 'deactivated', 'verified', 'pending-verification', 'admin', 'manager'];
 
 const AdminUsers: React.FC = () => {
-  const { user, isDefaultAdminActive, setDefaultAdminActive } = useAuth();
+  const { user: currentUser, isDefaultAdminActive, setDefaultAdminActive, updateCurrentUserFlags } = useAuth();
   const { t, i18n } = useTranslation();
   const { listAllUsers, updateUserFlags, resendVerificationEmailForUseradmin } = getEndpoints();
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -136,6 +136,7 @@ const AdminUsers: React.FC = () => {
       setUsers((prevUsers) => (
         prevUsers.map((item) => (item.id === editingUser.id ? response.data.user : item))
       ));
+      updateCurrentUserFlags(response.data.user);
       if (response.data.user.id === 1) {
         setDefaultAdminActive(response.data.user.is_admin && !response.data.user.is_deactivated);
       }
@@ -171,7 +172,7 @@ const AdminUsers: React.FC = () => {
               <div className="card-body p-4 p-md-5">
                 <DefaultAdminWarning
                   isDefaultAdminActive={shouldShowDefaultAdminWarning}
-                  isCurrentUserAdmin={user?.is_admin}
+                  isCurrentUserAdmin={currentUser?.is_admin}
                   showActionButton={false}
                 />
                 <p className="mb-2">
@@ -276,12 +277,12 @@ const AdminUsers: React.FC = () => {
                               <td>{new Date(user.created_at).toLocaleDateString(i18n.language)}</td>
                               <td className="text-end">
                                 <div className="d-flex justify-content-end flex-wrap gap-2">
-                                  <button
+                                  {currentUser?.is_admin && <button
                                     className="btn btn-sm btn-dark"
                                     onClick={() => setEditingUser(user)}
                                     disabled={isBusy}
                                   >
-                                    {t('adminUsers.edit')}                                  </button>
+                                    {t('adminUsers.edit')}                                  </button>}
                                 </div>
                               </td>
                             </tr>

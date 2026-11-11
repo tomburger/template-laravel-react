@@ -11,6 +11,8 @@ interface User {
   email_verified_at: string | null;
   is_admin: boolean;
   is_manager: boolean;
+  is_location_owner: boolean;
+  is_season_owner: boolean;
   is_deactivated: boolean;
   language: string;
   created_at: string;
@@ -21,6 +23,7 @@ interface AuthContextType {
   user: User | null;
   isDefaultAdminActive: boolean;
   setDefaultAdminActive: (isActive: boolean) => void;
+  updateCurrentUserFlags: (flags: Pick<User, 'id' | 'is_admin' | 'is_manager' | 'is_deactivated'>) => void;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
@@ -206,6 +209,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
   };
 
+  const updateCurrentUserFlags = (flags: Pick<User, 'id' | 'is_admin' | 'is_manager' | 'is_deactivated'>) => {
+    setUser((current) => current?.id === flags.id
+      ? { ...current, is_admin: flags.is_admin, is_manager: flags.is_manager, is_deactivated: flags.is_deactivated }
+      : current);
+  };
+
   // The user's saved language takes precedence once logged in
   useEffect(() => {
     if (isAuthenticated && isSupportedLanguage(user?.language)) {
@@ -235,6 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     isDefaultAdminActive,
     setDefaultAdminActive: setIsDefaultAdminActive,
+    updateCurrentUserFlags,
     isAuthenticated,
     loading,
     error,

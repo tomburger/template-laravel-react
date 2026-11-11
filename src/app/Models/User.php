@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -67,6 +68,26 @@ class User extends Authenticatable
     public function isManager(): bool
     {
         return $this->is_manager === true;
+    }
+
+    public function ownedLocations(): BelongsToMany
+    {
+        return $this->belongsToMany(Location::class);
+    }
+
+    public function ownedSeasons(): BelongsToMany
+    {
+        return $this->belongsToMany(Season::class);
+    }
+
+    public function getIsLocationOwnerAttribute(): bool
+    {
+        return $this->ownedLocations()->exists();
+    }
+
+    public function getIsSeasonOwnerAttribute(): bool
+    {
+        return $this->ownedSeasons()->exists();
     }
 
     /**

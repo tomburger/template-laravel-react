@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useAuth } from '../context/AuthContext';
 import ContentEditorsSelector from '../components/ContentEditorsSelector';
 import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
@@ -14,6 +15,7 @@ const emptyForm: { name: string; start_date: string; end_date: string; status: S
 };
 
 const AdminSeasons: React.FC = () => {
+  const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const { confirm, dialog } = useConfirm();
   const { listSeasons, createSeason, updateSeason, deleteSeason } = getEndpoints();
@@ -61,9 +63,9 @@ const AdminSeasons: React.FC = () => {
   };
 
   const save = async () => {
-    const data: CreateSeasonBody & OwnerInput = {
+    const data: CreateSeasonBody & Partial<OwnerInput> = {
       name: form.name.trim(), start_date: form.start_date, end_date: form.end_date, status: form.status,
-      owner_ids: owners.map((owner) => owner.id),
+      ...(user?.is_manager ? { owner_ids: owners.map((owner) => owner.id) } : {}),
     };
     try {
       setSaving(true);
@@ -103,7 +105,7 @@ const AdminSeasons: React.FC = () => {
     }
   };
 
-  const canSave = form.name.trim() !== '' && form.start_date !== '' && form.end_date !== '' && owners.length > 0;
+  const canSave = form.name.trim() !== '' && form.start_date !== '' && form.end_date !== '' && (!user?.is_manager || owners.length > 0);
   const filteredSeasons = seasons.filter((season) => statusFilter === 'all' || season.status === statusFilter);
 
   return (
@@ -118,9 +120,9 @@ const AdminSeasons: React.FC = () => {
               <h1 className="h3 mb-1">{t('adminSeasons.title')}</h1>
               <p className="text-muted mb-0">{t('adminSeasons.subtitle')}</p>
             </div>
-            <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
+            {user?.is_manager && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
               {t('adminSeasons.add')}
-            </button>
+            </button>}
           </div>
 
           <div className="row g-3 mb-4">
@@ -184,12 +186,12 @@ const AdminSeasons: React.FC = () => {
                           <Link to={`/admin/seasons/${season.id}`} className="btn btn-sm btn-outline-primary">
                             {t('adminSeasons.enrollments')}
                           </Link>
-                          <button className="btn btn-sm btn-dark" onClick={() => openDrawer(season)}>
+                          {(user?.is_manager || season.owners.some((owner) => owner.id === user?.id)) && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(season)}>
                             {t('adminUsers.edit')}
-                          </button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => remove(season)}>
+                          </button>}
+                          {user?.is_manager && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(season)}>
                             {t('common.delete')}
-                          </button>
+                          </button>}
                         </div>
                       </td>
                     </tr>
@@ -243,8 +245,10 @@ const AdminSeasons: React.FC = () => {
             ))}
           </select>
         </div>
-        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} label={t('owners.label')} emptyText={t('owners.none')} />
-        <div className="form-text mb-3">{t('owners.required')}</div>
+        {user?.is_manager && <>
+          <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} label={t('owners.label')} emptyText={t('owners.none')} />
+          <div className="form-text mb-3">{t('owners.required')}</div>
+        </>}
         {!editing && (
           <div className="mb-3">
             <label className="form-label" htmlFor="season-copy">{t('adminSeasons.copyFrom')}</label>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
@@ -10,6 +11,7 @@ import { Member, UserOption, apiErrorMessage, authRequestOptions } from '../serv
 const emptyForm = { user_id: '', first_name: '', last_name: '', phone_number: '', category: '' };
 
 const AdminMembers: React.FC = () => {
+  const { user } = useAuth();
   const { t } = useTranslation();
   const { confirm, dialog } = useConfirm();
   const { listMembers, listUsersThatAreNotMembersYet, createMember, updateMember, deleteMember } = getEndpoints();
@@ -27,12 +29,12 @@ const AdminMembers: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [membersResponse, candidatesResponse] = await Promise.all([
-        listMembers<{ data: { members: Member[] } }>(authRequestOptions()),
-        listUsersThatAreNotMembersYet<{ data: { users: UserOption[] } }>(authRequestOptions()),
-      ]);
+      const membersResponse = await listMembers<{ data: { members: Member[] } }>(authRequestOptions());
       setMembers(membersResponse.data.members);
-      setCandidates(candidatesResponse.data.users);
+      if (user?.is_manager) {
+        const candidatesResponse = await listUsersThatAreNotMembersYet<{ data: { users: UserOption[] } }>(authRequestOptions());
+        setCandidates(candidatesResponse.data.users);
+      }
     } catch (err) {
       setError(apiErrorMessage(err, t('adminMembers.loadFailed')));
     } finally {
@@ -111,9 +113,9 @@ const AdminMembers: React.FC = () => {
               <h1 className="h3 mb-1">{t('adminMembers.title')}</h1>
               <p className="text-muted mb-0">{t('adminMembers.subtitle')}</p>
             </div>
-            <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
+            {user?.is_manager && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
               {t('adminMembers.add')}
-            </button>
+            </button>}
           </div>
 
           {error && <div className="alert alert-danger">{error}</div>}
@@ -149,12 +151,12 @@ const AdminMembers: React.FC = () => {
                       <td>{member.category}</td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end flex-wrap gap-2">
-                          <button className="btn btn-sm btn-dark" onClick={() => openDrawer(member)}>
+                          {user?.is_manager && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(member)}>
                             {t('adminUsers.edit')}
-                          </button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => remove(member)}>
+                          </button>}
+                          {user?.is_manager && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(member)}>
                             {t('common.delete')}
-                          </button>
+                          </button>}
                         </div>
                       </td>
                     </tr>

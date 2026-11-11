@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useAuth } from '../context/AuthContext';
 import LocationLayoutViewer from '../components/LocationLayoutViewer';
 import { useConfirm } from '../components/useConfirm';
 import { getEndpoints } from '../services/endpoints/endpoints';
@@ -9,6 +10,7 @@ import { Location, Unit, apiErrorMessage, authRequestOptions } from '../services
 import { SHAPE_KINDS, ShapeKind, buildShape, insertShape } from './locationLayout/svgShapes';
 
 const AdminLocationLayout: React.FC = () => {
+  const { user } = useAuth();
   const { t } = useTranslation();
   const { confirm, dialog } = useConfirm();
   const locationId = Number(useParams().locationId);
@@ -27,6 +29,7 @@ const AdminLocationLayout: React.FC = () => {
   // Changing the key remounts the file input, which is the only way to empty it
   const [inputKey, setInputKey] = useState(0);
 
+  const canEdit = location?.owners.some((owner) => owner.id === user?.id) ?? false;
   const dirty = pendingFile !== null || svg !== savedSvg;
 
   useEffect(() => {
@@ -168,6 +171,10 @@ const AdminLocationLayout: React.FC = () => {
               <div className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
               <span>{t('common.loading')}</span>
             </div>
+          ) : !canEdit ? (
+            imageUrl ? <LocationLayoutViewer imageUrl={imageUrl} svg={svg} units={units} /> : (
+              <div className="text-center text-muted py-5 border rounded">{t('adminLocationLayout.placeholder')}</div>
+            )
           ) : (
             <>
               <div className="mb-3">

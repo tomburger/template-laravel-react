@@ -25,6 +25,10 @@ const Admin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user?.is_admin) {
+      setLoading(false);
+      return;
+    }
     const fetchAdminInfo = async () => {
       try {
         setLoading(true);
@@ -41,7 +45,7 @@ const Admin: React.FC = () => {
     };
 
     fetchAdminInfo();
-  }, []);
+  }, [user?.is_admin]);
 
   return (
     <PageLayout>
@@ -55,7 +59,7 @@ const Admin: React.FC = () => {
                 />
                 <h1 className="card-title mb-4">                {t('admin.title')}</h1>
 
-                                <h2 className="h4 mb-3">{t('admin.users')}</h2>
+                <h2 className="h4 mb-3">{t('admin.users')}</h2>
 
                 {loading && (
                   <div className="d-flex align-items-center" role="status">
@@ -111,21 +115,27 @@ const Admin: React.FC = () => {
                   </div>
                 )}
 
+                {!user?.is_admin && (
+                  <Link to="/admin/users" className="btn btn-primary btn-sm">
+                    {t('common.openUserRegister')}
+                  </Link>
+                )}
+
                 <hr className="my-4" />
                 <h2 className="h4 mb-3">{t('admin.reservations')}</h2>
                 <div className="d-flex flex-wrap gap-2">
                   <Link to="/admin/locations" className="btn btn-outline-primary btn-sm">
                     {t('admin.locationsAndUnits')}
                   </Link>
-                  <Link to="/admin/members" className="btn btn-outline-primary btn-sm">
+                  {(user?.is_manager || user?.is_location_owner || user?.is_season_owner) && <Link to="/admin/members" className="btn btn-outline-primary btn-sm">
                     {t('admin.members')}
-                  </Link>
+                  </Link>}
                   <Link to="/admin/seasons" className="btn btn-outline-primary btn-sm">
                     {t('admin.seasons')}
                   </Link>
-                  <Link to="/admin/pricing" className="btn btn-outline-primary btn-sm">
+                  {user?.is_admin && <Link to="/admin/pricing" className="btn btn-outline-primary btn-sm">
                     {t('admin.pricing')}
-                  </Link>
+                  </Link>}
                 </div>
               </div>
             </div>

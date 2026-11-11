@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 interface AdminRouteProps {
   children: React.ReactNode;
+  adminOnly?: boolean;
+  membersOnly?: boolean;
 }
 
-const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
+const AdminRoute: React.FC<AdminRouteProps> = ({ children, adminOnly = false, membersOnly = false }) => {
   const { isAuthenticated, loading, user } = useAuth();
   const { t } = useTranslation();
 
@@ -20,13 +22,17 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
 
-  if (!isAuthenticated || !user?.is_admin) {
+  const canAccess = user && !user.is_deactivated && (adminOnly
+    ? user.is_admin
+    : (!membersOnly && user.is_admin) || user.is_manager || user.is_location_owner || user.is_season_owner);
+
+  if (!isAuthenticated || !canAccess) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100" style={{ backgroundColor: '#f8f9fa' }}>
         <div className="text-center">
           <h1 className="display-4 mb-4">          {t('adminRoute.title')}</h1>
                     <p className="lead mb-4">{t('adminRoute.noPermission')}</p>
-                    <p className="text-muted">{t('adminRoute.adminsOnly')}</p>
+                    {adminOnly && <p className="text-muted">{t('adminRoute.adminsOnly')}</p>}
         </div>
       </div>
     );

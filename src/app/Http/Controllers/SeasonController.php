@@ -87,12 +87,14 @@ class SeasonController extends Controller
     public function update(UpdateSeasonRequest $request, Season $season): JsonResponse
     {
         $data = $request->validated();
-        $ownerIds = $data['owner_ids'];
+        $ownerIds = $data['owner_ids'] ?? null;
         unset($data['owner_ids']);
 
         DB::transaction(function () use ($season, $data, $ownerIds) {
             $season->update($data);
-            $season->owners()->sync($ownerIds);
+            if ($ownerIds !== null) {
+                $season->owners()->sync($ownerIds);
+            }
         });
 
         return response()->json(['season' => $season->load('owners:id,name,email')]);

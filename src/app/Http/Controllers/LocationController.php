@@ -56,7 +56,9 @@ class LocationController extends Controller
         $data = $request->validated();
         DB::transaction(function () use ($location, $data) {
             $location->update(['name' => $data['name']]);
-            $location->owners()->sync($data['owner_ids']);
+            if (isset($data['owner_ids'])) {
+                $location->owners()->sync($data['owner_ids']);
+            }
         });
 
         return response()->json(['location' => $location->load('owners:id,name,email')->loadCount('units')]);

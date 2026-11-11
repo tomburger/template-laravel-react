@@ -42,36 +42,53 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user/language', [AuthController::class, 'updateLanguage']);
 });
 
-// Admin-only routes
-Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
-    Route::get('/admin/info', [UserController::class, 'adminInfo']);
-    Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users/{id}', [UserController::class, 'update']);
-    Route::post('/users/{id}/resend-verification-email', [UserController::class, 'resendVerificationEmail']);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/admin/info', [UserController::class, 'adminInfo'])->middleware('management_access:admin');
+    Route::get('/users', [UserController::class, 'index'])->middleware('management_access:read');
+    Route::post('/users/{id}', [UserController::class, 'update'])->middleware('management_access:admin');
+    Route::post('/users/{id}/resend-verification-email', [UserController::class, 'resendVerificationEmail'])->middleware('management_access:admin');
 
-    Route::get('/members/candidates', [MemberController::class, 'candidates']);
-    Route::apiResource('members', MemberController::class)->except('show');
-    Route::get('/pricing-rules/preview', [PricingRuleController::class, 'preview']);
-    Route::get('/seasons/{season}/allocations', [AllocationController::class, 'index']);
-    Route::post('/seasons/{season}/allocations', [AllocationController::class, 'store']);
-    Route::put('/allocations/{allocation}', [AllocationController::class, 'update']);
-    Route::put('/allocations/{allocation}/status', [AllocationController::class, 'updateStatus']);
-    Route::delete('/allocations/{allocation}', [AllocationController::class, 'destroy']);
-    Route::apiResource('pricing-rules', PricingRuleController::class)->except('show');
-    Route::get('/seasons/{season}/members/available', [SeasonMemberController::class, 'available']);
-    Route::get('/seasons/{season}/members', [SeasonMemberController::class, 'index']);
-    Route::post('/seasons/{season}/members', [SeasonMemberController::class, 'store']);
-    Route::delete('/seasons/{season}/members/{memberSeason}', [SeasonMemberController::class, 'destroy']);
-    Route::get('/seasons/{season}/units/available', [SeasonUnitController::class, 'available']);
-    Route::get('/seasons/{season}/units', [SeasonUnitController::class, 'index']);
-    Route::post('/seasons/{season}/units', [SeasonUnitController::class, 'store']);
-    Route::delete('/seasons/{season}/units/{unitSeason}', [SeasonUnitController::class, 'destroy']);
-    Route::apiResource('seasons', SeasonController::class)->except('show');
-    Route::apiResource('locations', LocationController::class)->except('show');
-    Route::get('/locations/{location}/layout', [LocationLayoutController::class, 'show']);
-    Route::post('/locations/{location}/layout', [LocationLayoutController::class, 'update']);
-    Route::delete('/locations/{location}/layout', [LocationLayoutController::class, 'destroy']);
-    Route::apiResource('locations.units', UnitController::class)->except('show');
+    Route::get('/members/candidates', [MemberController::class, 'candidates'])->middleware('management_access:manager');
+    Route::get('/members', [MemberController::class, 'index'])->middleware('management_access:read-members');
+    Route::post('/members', [MemberController::class, 'store'])->middleware('management_access:manager');
+    Route::put('/members/{member}', [MemberController::class, 'update'])->middleware('management_access:manager');
+    Route::patch('/members/{member}', [MemberController::class, 'update'])->middleware('management_access:manager');
+    Route::delete('/members/{member}', [MemberController::class, 'destroy'])->middleware('management_access:manager');
+
+    Route::middleware('is_admin')->group(function () {
+        Route::get('/pricing-rules/preview', [PricingRuleController::class, 'preview']);
+        Route::apiResource('pricing-rules', PricingRuleController::class)->except('show');
+    });
+
+    Route::get('/seasons/{season}/allocations', [AllocationController::class, 'index'])->middleware('management_access:read');
+    Route::post('/seasons/{season}/allocations', [AllocationController::class, 'store'])->middleware('management_access:own-season');
+    Route::put('/allocations/{allocation}', [AllocationController::class, 'update'])->middleware('management_access:own-allocation');
+    Route::put('/allocations/{allocation}/status', [AllocationController::class, 'updateStatus'])->middleware('management_access:own-allocation');
+    Route::delete('/allocations/{allocation}', [AllocationController::class, 'destroy'])->middleware('management_access:own-allocation');
+    Route::get('/seasons/{season}/members/available', [SeasonMemberController::class, 'available'])->middleware('management_access:own-season');
+    Route::get('/seasons/{season}/members', [SeasonMemberController::class, 'index'])->middleware('management_access:read');
+    Route::post('/seasons/{season}/members', [SeasonMemberController::class, 'store'])->middleware('management_access:own-season');
+    Route::delete('/seasons/{season}/members/{memberSeason}', [SeasonMemberController::class, 'destroy'])->middleware('management_access:own-season');
+    Route::get('/seasons/{season}/units/available', [SeasonUnitController::class, 'available'])->middleware('management_access:own-season');
+    Route::get('/seasons/{season}/units', [SeasonUnitController::class, 'index'])->middleware('management_access:read');
+    Route::post('/seasons/{season}/units', [SeasonUnitController::class, 'store'])->middleware('management_access:own-season');
+    Route::delete('/seasons/{season}/units/{unitSeason}', [SeasonUnitController::class, 'destroy'])->middleware('management_access:own-season');
+
+    Route::get('/seasons', [SeasonController::class, 'index'])->middleware('management_access:read');
+    Route::post('/seasons', [SeasonController::class, 'store'])->middleware('management_access:manager');
+    Route::match(['put', 'patch'], '/seasons/{season}', [SeasonController::class, 'update'])->middleware('management_access:edit-season');
+    Route::delete('/seasons/{season}', [SeasonController::class, 'destroy'])->middleware('management_access:manager');
+    Route::get('/locations', [LocationController::class, 'index'])->middleware('management_access:read');
+    Route::post('/locations', [LocationController::class, 'store'])->middleware('management_access:manager');
+    Route::match(['put', 'patch'], '/locations/{location}', [LocationController::class, 'update'])->middleware('management_access:edit-location');
+    Route::delete('/locations/{location}', [LocationController::class, 'destroy'])->middleware('management_access:manager');
+    Route::get('/locations/{location}/layout', [LocationLayoutController::class, 'show'])->middleware('management_access:read');
+    Route::post('/locations/{location}/layout', [LocationLayoutController::class, 'update'])->middleware('management_access:own-location');
+    Route::delete('/locations/{location}/layout', [LocationLayoutController::class, 'destroy'])->middleware('management_access:own-location');
+    Route::get('/locations/{location}/units', [UnitController::class, 'index'])->middleware('management_access:read');
+    Route::post('/locations/{location}/units', [UnitController::class, 'store'])->middleware('management_access:own-location');
+    Route::match(['put', 'patch'], '/locations/{location}/units/{unit}', [UnitController::class, 'update'])->middleware('management_access:own-location');
+    Route::delete('/locations/{location}/units/{unit}', [UnitController::class, 'destroy'])->middleware('management_access:own-location');
 });
 
 // Health check

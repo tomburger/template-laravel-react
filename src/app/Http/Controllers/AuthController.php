@@ -64,7 +64,7 @@ class AuthController extends Controller
         $this->mailService->send($user->email, $user->name, new VerifyEmailMailable($user, $token));
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->append(['is_location_owner', 'is_season_owner']),
             'is_default_admin_active' => $this->isDefaultAdminActive(),
             'message' => 'User registered successfully. Please check your email to verify your account.',
         ], 201);
@@ -106,7 +106,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->append(['is_location_owner', 'is_season_owner']),
             'is_default_admin_active' => $this->isDefaultAdminActive(),
             'token' => $token,
             'message' => 'Login successful',
@@ -160,7 +160,7 @@ class AuthController extends Controller
         $user->markEmailAsVerified();
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->append(['is_location_owner', 'is_season_owner']),
             'is_default_admin_active' => $this->isDefaultAdminActive(),
             'message' => 'Email verified successfully',
         ], 200);
@@ -301,7 +301,7 @@ class AuthController extends Controller
     public function user(Request $request): JsonResponse
     {
         return response()->json([
-            'user' => $request->user(),
+            'user' => $request->user()->append(['is_location_owner', 'is_season_owner']),
             'is_default_admin_active' => $this->isDefaultAdminActive(),
         ], 200);
     }
@@ -324,7 +324,7 @@ class AuthController extends Controller
         $user->update(['language' => $validated['language']]);
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->append(['is_location_owner', 'is_season_owner']),
         ], 200);
     }
 }

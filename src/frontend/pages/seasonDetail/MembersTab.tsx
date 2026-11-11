@@ -9,6 +9,7 @@ import { AllocationFilter, AllocationsByEnrollment, RunAction, matchesFilter } f
 
 interface Props {
   seasonId: number;
+  canEdit: boolean;
   busy: boolean;
   run: RunAction;
   enrollments: MemberEnrollment[];
@@ -22,6 +23,7 @@ interface Props {
 
 const MembersTab: React.FC<Props> = ({
   seasonId,
+  canEdit,
   busy,
   run,
   enrollments,
@@ -41,7 +43,7 @@ const MembersTab: React.FC<Props> = ({
 
   return (
     <>
-      <div className="d-flex flex-wrap gap-2 mb-3">
+      {canEdit && <div className="d-flex flex-wrap gap-2 mb-3">
         <select
           className="form-select w-auto"
           aria-label={t('adminSeasonDetail.selectMember')}
@@ -67,7 +69,7 @@ const MembersTab: React.FC<Props> = ({
         >
           {t('adminSeasonDetail.enroll')}
         </button>
-      </div>
+      </div>}
       <AllocationFilterSelect id="member-allocation-filter" value={filter} onChange={onFilterChange} />
       <div className="table-responsive">
         <table className="table table-hover align-middle mb-0">
@@ -96,12 +98,13 @@ const MembersTab: React.FC<Props> = ({
                     items={allocationsByMember.get(item.id)}
                     label={(a) => `${a.location_name} / ${a.unit_code}`}
                     busy={busy}
+                    canEdit={canEdit}
                     onEdit={onEditAllocation}
                     onAllocate={() => onAllocate(item.id)}
                   />
                 </td>
                 <td className="text-end">
-                  <button
+                  {canEdit && <button
                     className="btn btn-sm btn-outline-danger"
                     disabled={busy}
                     onClick={async () => {
@@ -113,7 +116,7 @@ const MembersTab: React.FC<Props> = ({
                     }}
                   >
                     {t('adminSeasonDetail.remove')}
-                  </button>
+                  </button>}
                 </td>
               </tr>
             ))}

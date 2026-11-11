@@ -89,3 +89,21 @@ Authorization header format:
 ```
 Authorization: Bearer {token}
 ```
+
+## Management access
+
+Roles combine: users may be administrators, managers, and owners of individual
+locations or seasons at the same time. Users without these roles have no
+management access. Deactivated users cannot use management endpoints.
+
+- Administrators manage user flags and verification and can view locations and seasons.
+- Managers manage members, create, edit and delete locations and seasons, and
+  assign their owners. They can view users.
+- Location owners can edit their locations, units and layouts, but cannot change
+  owners or delete locations.
+- Season owners can edit their seasons, manage enrollments and allocations,
+  but cannot change owners or delete seasons.
+- Owners can also view users, members, locations and seasons they do not own.
+
+Pricing remains administrator-only for now. Location layout images remain public
+as before. User accounts are created through self-registration.

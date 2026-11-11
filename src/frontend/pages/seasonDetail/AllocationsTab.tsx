@@ -13,6 +13,7 @@ import { RunAction, STATUS_BADGES, STATUS_TRANSITIONS } from './shared';
 
 interface Props {
   seasonId: number;
+  canEdit: boolean;
   busy: boolean;
   run: RunAction;
   memberEnrollments: MemberEnrollment[];
@@ -25,6 +26,7 @@ interface Props {
 
 const AllocationsTab: React.FC<Props> = ({
   seasonId,
+  canEdit,
   busy,
   run,
   memberEnrollments,
@@ -51,7 +53,7 @@ const AllocationsTab: React.FC<Props> = ({
 
   return (
     <>
-      <div className="d-flex flex-wrap gap-2 mb-3">
+      {canEdit && <div className="d-flex flex-wrap gap-2 mb-3">
         <select
           className="form-select w-auto"
           aria-label={t('adminSeasonDetail.selectMember')}
@@ -95,7 +97,7 @@ const AllocationsTab: React.FC<Props> = ({
         >
           {t('adminSeasonDetail.allocate')}
         </button>
-      </div>
+      </div>}
       <div className="table-responsive">
         <table className="table table-hover align-middle mb-0">
           <thead className="table-light">
@@ -124,7 +126,7 @@ const AllocationsTab: React.FC<Props> = ({
                   <span className={`badge ${STATUS_BADGES[item.status]}`}>{t(`adminSeasonDetail.statuses.${item.status}`)}</span>
                 </td>
                 <td className="text-end">
-                  <div className="d-flex justify-content-end flex-wrap gap-2">
+                  {canEdit && <div className="d-flex justify-content-end flex-wrap gap-2">
                     <button className="btn btn-sm btn-dark" disabled={busy} onClick={() => onEditAllocation(item)}>
                       {t('adminUsers.edit')}
                     </button>
@@ -161,7 +163,7 @@ const AllocationsTab: React.FC<Props> = ({
                         {t('common.delete')}
                       </button>
                     )}
-                  </div>
+                  </div>}
                 </td>
               </tr>
             ))}

@@ -23,7 +23,7 @@ class UpdateSeasonRequest extends FormRequest
             'start_date' => 'required|date_format:Y-m-d',
             'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
             'status' => ['sometimes', 'required', 'string', Rule::in(Season::STATUSES)],
-            'owner_ids' => 'required|array|min:1',
+            'owner_ids' => $this->user()->isManager() ? 'required|array|min:1' : 'prohibited',
             'owner_ids.*' => 'required|integer|distinct|exists:users,id',
         ];
     }

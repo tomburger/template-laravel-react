@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useAuth } from '../context/AuthContext';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import {
   Allocation,
@@ -22,6 +23,7 @@ import { AllocationFilter, AllocationsByEnrollment } from './seasonDetail/shared
 type Tab = 'members' | 'units' | 'allocations';
 
 const AdminSeasonDetail: React.FC = () => {
+  const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const seasonId = Number(useParams().seasonId);
   const {
@@ -48,25 +50,30 @@ const AdminSeasonDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const canEdit = season?.owners.some((owner) => owner.id === user?.id) ?? false;
 
   const load = async () => {
     try {
       setLoading(true);
       setError(null);
       const options = authRequestOptions();
-      const [seasons, members, freeMembers, units, freeUnits, allocationList] = await Promise.all([
-        listSeasons<{ data: { seasons: Season[] } }>(options),
+      const seasons = await listSeasons<{ data: { seasons: Season[] } }>(options);
+      const selectedSeason = seasons.data.seasons.find((item) => item.id === seasonId) ?? null;
+      const isOwner = selectedSeason?.owners.some((owner) => owner.id === user?.id) ?? false;
+      const [members, units, allocationList] = await Promise.all([
         listMembersEnrolledInASeason<{ data: { enrollments: MemberEnrollment[] } }>(seasonId, options),
-        listMembersNotYetEnrolledInASeason<{ data: { members: AvailableMember[] } }>(seasonId, options),
         listUnitsEnrolledInASeason<{ data: { enrollments: UnitEnrollment[] } }>(seasonId, options),
-        listUnitsNotYetEnrolledInASeason<{ data: { units: AvailableUnit[] } }>(seasonId, options),
         listAllocationsOfASeason<{ data: { allocations: Allocation[] } }>(seasonId, options),
       ]);
-      setSeason(seasons.data.seasons.find((item) => item.id === seasonId) ?? null);
+      const [freeMembers, freeUnits] = isOwner ? await Promise.all([
+        listMembersNotYetEnrolledInASeason<{ data: { members: AvailableMember[] } }>(seasonId, options),
+        listUnitsNotYetEnrolledInASeason<{ data: { units: AvailableUnit[] } }>(seasonId, options),
+      ]) : [null, null];
+      setSeason(selectedSeason);
       setMemberEnrollments(members.data.enrollments);
-      setAvailableMembers(freeMembers.data.members);
+      setAvailableMembers(freeMembers?.data.members ?? []);
       setUnitEnrollments(units.data.enrollments);
-      setAvailableUnits(freeUnits.data.units);
+      setAvailableUnits(freeUnits?.data.units ?? []);
       setAllocations(allocationList.data.allocations);
       setPreselect({ memberSeasonId: '', unitSeasonId: '' });
     } catch (err) {
@@ -152,6 +159,7 @@ const AdminSeasonDetail: React.FC = () => {
           ) : tab === 'members' ? (
             <MembersTab
               seasonId={seasonId}
+              canEdit={canEdit}
               busy={busy}
               run={run}
               enrollments={memberEnrollments}
@@ -165,6 +173,7 @@ const AdminSeasonDetail: React.FC = () => {
           ) : tab === 'units' ? (
             <UnitsTab
               seasonId={seasonId}
+              canEdit={canEdit}
               busy={busy}
               run={run}
               enrollments={unitEnrollments}
@@ -178,6 +187,7 @@ const AdminSeasonDetail: React.FC = () => {
           ) : (
             <AllocationsTab
               seasonId={seasonId}
+              canEdit={canEdit}
               busy={busy}
               run={run}
               memberEnrollments={memberEnrollments}

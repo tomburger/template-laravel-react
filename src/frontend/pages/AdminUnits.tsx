@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../components/useConfirm';
 import RightDrawer from '../components/RightDrawer';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { Location, Unit, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 
 const AdminUnits: React.FC = () => {
+  const { user } = useAuth();
   const { t } = useTranslation();
   const { confirm, dialog } = useConfirm();
   const { listLocations, listUnitsOfALocation, createUnit, updateUnit, deleteUnit } = getEndpoints();
@@ -21,6 +23,7 @@ const AdminUnits: React.FC = () => {
   const [form, setForm] = useState({ code: '', category: '' });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const canEdit = location?.owners.some((owner) => owner.id === user?.id) ?? false;
 
   const load = async () => {
     try {
@@ -92,9 +95,9 @@ const AdminUnits: React.FC = () => {
               <h1 className="h3 mb-1">{t('adminUnits.title', { location: location?.name ?? '' })}</h1>
               <p className="text-muted mb-0">{t('adminUnits.subtitle')}</p>
             </div>
-            <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
+            {canEdit && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
               {t('adminUnits.add')}
-            </button>
+            </button>}
           </div>
 
           {error && <div className="alert alert-danger">{error}</div>}
@@ -126,12 +129,12 @@ const AdminUnits: React.FC = () => {
                       <td>{unit.category}</td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end flex-wrap gap-2">
-                          <button className="btn btn-sm btn-dark" onClick={() => openDrawer(unit)}>
+                          {canEdit && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(unit)}>
                             {t('adminUsers.edit')}
-                          </button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => remove(unit)}>
+                          </button>}
+                          {canEdit && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(unit)}>
                             {t('common.delete')}
-                          </button>
+                          </button>}
                         </div>
                       </td>
                     </tr>

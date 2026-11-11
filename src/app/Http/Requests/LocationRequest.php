@@ -18,7 +18,8 @@ class LocationRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'owner_ids' => $this->user()->isManager() ? 'required|array|min:1' : 'prohibited',
+            // Scribe inspects rules without an authenticated user.
+            'owner_ids' => ($this->user()?->isManager() ?? true) ? 'required|array|min:1' : 'prohibited',
             'owner_ids.*' => 'required|integer|distinct|exists:users,id',
         ];
     }

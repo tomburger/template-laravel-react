@@ -24,6 +24,7 @@ interface AuthContextType {
   isDefaultAdminActive: boolean;
   setDefaultAdminActive: (isActive: boolean) => void;
   updateCurrentUserFlags: (flags: Pick<User, 'id' | 'is_admin' | 'is_manager' | 'is_deactivated'>) => void;
+  updateCurrentUserName: (name: string) => void;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
@@ -215,6 +216,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       : current);
   };
 
+  const updateCurrentUserName = (name: string) => {
+    setUser((current) => current ? { ...current, name } : current);
+  };
+
   // The user's saved language takes precedence once logged in
   useEffect(() => {
     if (isAuthenticated && isSupportedLanguage(user?.language)) {
@@ -245,6 +250,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isDefaultAdminActive,
     setDefaultAdminActive: setIsDefaultAdminActive,
     updateCurrentUserFlags,
+    updateCurrentUserName,
     isAuthenticated,
     loading,
     error,

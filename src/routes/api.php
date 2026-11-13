@@ -7,6 +7,7 @@ use App\Http\Controllers\LocationLayoutController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\PricingRuleController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\SeasonMemberController;
 use App\Http\Controllers\SeasonUnitController;
@@ -39,6 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/user/profile', [ProfileController::class, 'show']);
+    Route::put('/user/profile', [ProfileController::class, 'update']);
     Route::put('/user/language', [AuthController::class, 'updateLanguage']);
 });
 

@@ -107,3 +107,7 @@ management access. Deactivated users cannot use management endpoints.
 
 Pricing remains administrator-only for now. Location layout images remain public
 as before. User accounts are created through self-registration.
+
+Authenticated users can edit their own display name and create or update their
+own member details from the dashboard. Member categories remain manager-controlled
+because they affect pricing.

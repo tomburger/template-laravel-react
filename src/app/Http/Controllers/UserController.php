@@ -92,6 +92,7 @@ class UserController extends Controller
         if ($request->user()->id === $user->id && $request->has('is_admin') && $request->boolean('is_admin') === false) {
             return response()->json([
                 'message' => 'You cannot remove your own admin status',
+                'code' => 'cannot_remove_own_admin',
             ], 403);
         }
 

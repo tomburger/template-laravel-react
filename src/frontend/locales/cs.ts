@@ -208,8 +208,8 @@ const cs: typeof en = {
   },
   defaultAdminWarning: {
     title: 'Bezpečnostní upozornění:',
-    using: 'Používáte výchozí administrátorský účet.',
-    advice: 'Vytvořte nového administrátora, poté tomuto účtu odeberte administrátorská práva a deaktivujte jej.',
+    using: 'Výchozí administrátorský účet je aktivní.',
+    advice: 'Ujistěte se, že je dostupný jiný administrátorský účet, poté výchozímu účtu odeberte administrátorská práva a deaktivujte jej.',
   },
   home: {
     title: 'Přehled',
@@ -257,6 +257,7 @@ const cs: typeof en = {
     },
     loadFailed: 'Načtení uživatelů se nezdařilo.',
     updateFailed: 'Aktualizace uživatele se nezdařila.',
+    cannotRemoveOwnAdmin: 'Nemůžete odebrat své vlastní oprávnění administrátora. Požádejte o tuto změnu jiného administrátora.',
     updated: 'Uživatel byl aktualizován.',
     resendFailed: 'Opětovné odeslání ověřovacího e-mailu se nezdařilo.',
     resent: 'Ověřovací e-mail byl znovu odeslán na adresu {{email}}.',

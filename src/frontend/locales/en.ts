@@ -206,8 +206,8 @@ const en = {
   },
   defaultAdminWarning: {
     title: 'Security warning:',
-    using: 'You are using the default admin account.',
-    advice: 'Create a new non-default admin user, then remove admin access and deactivate this account.',
+    using: 'The default admin account is active.',
+    advice: 'Ensure another admin account is available, then remove admin access and deactivate the default account.',
   },
   home: {
     title: 'Dashboard',
@@ -255,6 +255,7 @@ const en = {
     },
     loadFailed: 'Failed to load users.',
     updateFailed: 'Failed to update user.',
+    cannotRemoveOwnAdmin: 'You cannot remove your own admin status. Ask another admin to make this change.',
     updated: 'User updated.',
     resendFailed: 'Failed to resend verification email.',
     resent: 'Verification email resent to {{email}}.',

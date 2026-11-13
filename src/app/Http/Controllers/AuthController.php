@@ -25,7 +25,6 @@ class AuthController extends Controller
     private function isDefaultAdminActive(): bool
     {
         return User::where('id', 1)
-            ->where('is_admin', true)
             ->where('is_deactivated', false)
             ->exists();
     }
@@ -42,6 +41,7 @@ class AuthController extends Controller
      * @endpoint
      * @unauthenticated
      * @responseField user object User data
+     * @responseField is_default_admin_active boolean Whether the default account is active, regardless of its admin role.
      * @responseField message string Success message
      */
     public function register(RegisterRequest $request): JsonResponse
@@ -78,6 +78,7 @@ class AuthController extends Controller
      * @endpoint
      * @unauthenticated
      * @responseField user object User data
+     * @responseField is_default_admin_active boolean Whether the default account is active, regardless of its admin role.
      * @responseField message string Success message
      * @responseField token string Authentication token
      */
@@ -139,6 +140,7 @@ class AuthController extends Controller
      * @endpoint
      * @unauthenticated
      * @responseField user object User data
+     * @responseField is_default_admin_active boolean Whether the default account is active, regardless of its admin role.
      * @responseField message string Success message
      */
     public function verifyEmail(VerifyEmailRequest $request): JsonResponse
@@ -297,6 +299,7 @@ class AuthController extends Controller
      * @endpoint
      * @authenticated
      * @responseField user object User data
+     * @responseField is_default_admin_active boolean Whether the default account is active, regardless of its admin role.
      */
     public function user(Request $request): JsonResponse
     {

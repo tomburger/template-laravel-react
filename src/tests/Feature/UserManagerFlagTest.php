@@ -68,4 +68,16 @@ class UserManagerFlagTest extends TestCase
 
         $this->assertFalse($user->fresh()->is_manager);
     }
+
+    public function test_admin_cannot_remove_their_own_admin_status(): void
+    {
+        $admin = User::findOrFail(1);
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/users/{$admin->id}", ['is_admin' => false])
+            ->assertForbidden()
+            ->assertJsonPath('code', 'cannot_remove_own_admin');
+
+        $this->assertTrue($admin->fresh()->is_admin);
+    }
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { isAxiosError } from 'axios';
 import { Link } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import { useAuth } from '../context/AuthContext';
@@ -45,6 +46,7 @@ const AdminUsers: React.FC = () => {
   const [busyUserId, setBusyUserId] = useState<number | null>(null);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [editFlags, setEditFlags] = useState({ is_admin: false, is_manager: false, is_deactivated: false });
+  const [editError, setEditError] = useState<string | null>(null);
 
 
   const loadUsers = async () => {
@@ -53,7 +55,7 @@ const AdminUsers: React.FC = () => {
       setError(null);
       const response = await listAllUsers<{ data: UsersResponse }>(authRequestOptions());
       setUsers(response.data.users);
-      const defaultAdminActive = response.data.users.some((item) => item.id === 1 && item.is_admin && !item.is_deactivated);
+      const defaultAdminActive = response.data.users.some((item) => item.id === 1 && !item.is_deactivated);
       setDefaultAdminActive(defaultAdminActive);
     } catch {
       setError(t('adminUsers.loadFailed'));
@@ -67,6 +69,7 @@ const AdminUsers: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    setEditError(null);
     if (editingUser) {
       setEditFlags({
         is_admin: editingUser.is_admin,
@@ -109,7 +112,7 @@ const AdminUsers: React.FC = () => {
   }, [users, search, filter]);
 
   const defaultAdminActiveFromUsers = useMemo(
-    () => users.some((item) => item.id === 1 && item.is_admin && !item.is_deactivated),
+    () => users.some((item) => item.id === 1 && !item.is_deactivated),
     [users],
   );
 
@@ -125,6 +128,7 @@ const AdminUsers: React.FC = () => {
     try {
       setBusyUserId(editingUser.id);
       setError(null);
+      setEditError(null);
       setNotice(null);
 
       const response = await updateUserFlags<{ data: UpdateUserResponse }>(
@@ -138,12 +142,15 @@ const AdminUsers: React.FC = () => {
       ));
       updateCurrentUserFlags(response.data.user);
       if (response.data.user.id === 1) {
-        setDefaultAdminActive(response.data.user.is_admin && !response.data.user.is_deactivated);
+        setDefaultAdminActive(!response.data.user.is_deactivated);
       }
       setNotice(response.data.message || t('adminUsers.updated'));
       setEditingUser(null);
-    } catch {
-            setError(t('adminUsers.updateFailed'));
+    } catch (err) {
+      const isOwnAdminRemoval = isAxiosError<{ code?: string }>(err)
+        && err.response?.status === 403
+        && err.response.data?.code === 'cannot_remove_own_admin';
+      setEditError(t(isOwnAdminRemoval ? 'adminUsers.cannotRemoveOwnAdmin' : 'adminUsers.updateFailed'));
     } finally {
       setBusyUserId(null);
     }
@@ -327,6 +334,7 @@ const AdminUsers: React.FC = () => {
         >
           {editingUser && (
             <>
+              {editError && <div className="alert alert-danger" role="alert">{editError}</div>}
               <div className="mb-4">
                 <label className="form-label" htmlFor="edit-user-name">{t('adminUsers.name')}</label>
                 <input id="edit-user-name" className="form-control" value={editingUser.name} readOnly />

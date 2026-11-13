@@ -183,9 +183,9 @@ const AdminSeasons: React.FC = () => {
                       <td>{season.owners.length ? season.owners.map((owner) => owner.name).join(', ') : t('owners.none')}</td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end flex-wrap gap-2">
-                          <Link to={`/admin/seasons/${season.id}`} className="btn btn-sm btn-outline-primary">
-                            {t('adminSeasons.enrollments')}
-                          </Link>
+                          {season.owners.some((owner) => owner.id === user?.id) && <Link to={`/admin/seasons/${season.id}`} className="btn btn-sm btn-outline-primary">
+                            {t('adminSeasons.dashboard')}
+                          </Link>}
                           {(user?.is_manager || season.owners.some((owner) => owner.id === user?.id)) && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(season)}>
                             {t('adminUsers.edit')}
                           </button>}

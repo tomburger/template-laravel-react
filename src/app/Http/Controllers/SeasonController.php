@@ -8,7 +8,9 @@ use App\Models\Member;
 use App\Models\Season;
 use App\Models\Unit;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class SeasonController extends Controller
 {
@@ -96,6 +98,27 @@ class SeasonController extends Controller
                 $season->owners()->sync($ownerIds);
             }
         });
+
+        return response()->json(['season' => $season->load('owners:id,name,email')]);
+    }
+
+    /**
+     * Update season status without changing other season details.
+     * Only owners of the season can use this endpoint.
+     *
+     * @endpoint
+     * @authenticated
+     * @urlParam season integer required The season ID.
+     * @bodyParam status string required Status: preparation, reserved, open or closed. Example: open
+     * @responseField season object Updated season including owners.
+     */
+    public function updateStatus(Request $request, Season $season): JsonResponse
+    {
+        $data = $request->validate([
+            'status' => ['required', 'string', Rule::in(Season::STATUSES)],
+        ]);
+
+        $season->update($data);
 
         return response()->json(['season' => $season->load('owners:id,name,email')]);
     }

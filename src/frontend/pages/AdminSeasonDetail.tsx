@@ -50,7 +50,7 @@ const AdminSeasonDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const canEdit = season?.owners.some((owner) => owner.id === user?.id) ?? false;
+  const canEdit = season?.id === seasonId && season.owners.some((owner) => owner.id === user?.id);
 
   const load = async () => {
     try {
@@ -60,20 +60,25 @@ const AdminSeasonDetail: React.FC = () => {
       const seasons = await listSeasons<{ data: { seasons: Season[] } }>(options);
       const selectedSeason = seasons.data.seasons.find((item) => item.id === seasonId) ?? null;
       const isOwner = selectedSeason?.owners.some((owner) => owner.id === user?.id) ?? false;
+      if (!selectedSeason || !isOwner) {
+        setSeason(null);
+        setError(t(selectedSeason ? 'adminSeasonDetail.ownersOnly' : 'adminSeasonDashboard.notFound'));
+        return;
+      }
       const [members, units, allocationList] = await Promise.all([
         listMembersEnrolledInASeason<{ data: { enrollments: MemberEnrollment[] } }>(seasonId, options),
         listUnitsEnrolledInASeason<{ data: { enrollments: UnitEnrollment[] } }>(seasonId, options),
         listAllocationsOfASeason<{ data: { allocations: Allocation[] } }>(seasonId, options),
       ]);
-      const [freeMembers, freeUnits] = isOwner ? await Promise.all([
+      const [freeMembers, freeUnits] = await Promise.all([
         listMembersNotYetEnrolledInASeason<{ data: { members: AvailableMember[] } }>(seasonId, options),
         listUnitsNotYetEnrolledInASeason<{ data: { units: AvailableUnit[] } }>(seasonId, options),
-      ]) : [null, null];
+      ]);
       setSeason(selectedSeason);
       setMemberEnrollments(members.data.enrollments);
-      setAvailableMembers(freeMembers?.data.members ?? []);
+      setAvailableMembers(freeMembers.data.members);
       setUnitEnrollments(units.data.enrollments);
-      setAvailableUnits(freeUnits?.data.units ?? []);
+      setAvailableUnits(freeUnits.data.units);
       setAllocations(allocationList.data.allocations);
       setPreselect({ memberSeasonId: '', unitSeasonId: '' });
     } catch (err) {
@@ -122,17 +127,19 @@ const AdminSeasonDetail: React.FC = () => {
       <div className="card shadow-sm">
         <div className="card-body p-4 p-md-5">
           <p className="mb-2">
-            <Link to="/admin/seasons" className="text-decoration-none">&larr; {t('adminSeasonDetail.back')}</Link>
+            <Link to={`/admin/seasons/${seasonId}`} className="text-decoration-none">&larr; {t('adminSeasonDashboard.backToDashboard')}</Link>
           </p>
-          <h1 className="h3 mb-1">{t('adminSeasonDetail.title', { season: season?.name ?? '' })}</h1>
-          {season && (
+          <h1 className="h3 mb-1">{t('adminSeasonDetail.title', { season: canEdit ? season?.name : '' })}</h1>
+          {season && canEdit && (
             <p className="text-muted">
               {formatDate(season.start_date)} – {formatDate(season.end_date)} · {t('adminSeasons.status')}: {t(`adminSeasons.statuses.${season.status}`)}
             </p>
           )}
 
           {error && <div className="alert alert-danger">{error}</div>}
+          {loading && !canEdit && <div role="status">{t('common.loading')}</div>}
 
+          {season && canEdit && <>
           <ul className="nav nav-tabs mb-3">
             <li className="nav-item">
               <button className={`nav-link ${tab === 'members' ? 'active' : ''}`} onClick={() => setTab('members')}>
@@ -198,6 +205,7 @@ const AdminSeasonDetail: React.FC = () => {
               onEditAllocation={setEditingAllocation}
             />
           )}
+          </>}
         </div>
       </div>
 

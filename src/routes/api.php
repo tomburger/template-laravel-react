@@ -79,6 +79,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/seasons', [SeasonController::class, 'index'])->middleware('management_access:read');
     Route::post('/seasons', [SeasonController::class, 'store'])->middleware('management_access:manager');
+    Route::patch('/seasons/{season}/status', [SeasonController::class, 'updateStatus'])->middleware('management_access:own-season');
     Route::match(['put', 'patch'], '/seasons/{season}', [SeasonController::class, 'update'])->middleware('management_access:edit-season');
     Route::delete('/seasons/{season}', [SeasonController::class, 'destroy'])->middleware('management_access:manager');
     Route::get('/locations', [LocationController::class, 'index'])->middleware('management_access:read');

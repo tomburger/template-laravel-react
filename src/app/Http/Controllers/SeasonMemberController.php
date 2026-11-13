@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\MemberSeason;
 use App\Models\Season;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SeasonMemberController extends Controller
 {
@@ -16,7 +17,7 @@ class SeasonMemberController extends Controller
      * @endpoint
      * @authenticated
      * @urlParam season integer required The season ID.
-     * @responseField enrollments object[] Enrollments with the member's name and the category snapshot
+     * @responseField enrollments object[] Enrollments with the member's name, season category and current member category.
      */
     public function index(Season $season): JsonResponse
     {
@@ -71,6 +72,30 @@ class SeasonMemberController extends Controller
     }
 
     /**
+     * Update a member's category for this season.
+     *
+     * This does not change the member's category or existing allocation amounts.
+     *
+     * @endpoint
+     * @authenticated
+     * @urlParam season integer required The season ID.
+     * @urlParam memberSeason integer required The enrollment ID.
+     * @bodyParam category string nullable required Season-specific category, or null.
+     * @responseField enrollment object Updated enrollment.
+     */
+    public function update(Request $request, Season $season, MemberSeason $memberSeason): JsonResponse
+    {
+        abort_unless($memberSeason->season_id === $season->id, 404);
+
+        $data = $request->validate([
+            'category' => 'present|nullable|string|max:100',
+        ]);
+        $memberSeason->update($data);
+
+        return response()->json(['enrollment' => $this->present($memberSeason->load('member'))]);
+    }
+
+    /**
      * Remove member enrollment from a season
      *
      * @endpoint
@@ -103,6 +128,7 @@ class SeasonMemberController extends Controller
             'first_name' => $item->member->first_name,
             'last_name' => $item->member->last_name,
             'category' => $item->category,
+            'member_category' => $item->member->category,
         ];
     }
 }

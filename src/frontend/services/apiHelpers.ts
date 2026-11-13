@@ -56,6 +56,7 @@ export type MemberEnrollment = {
   first_name: string;
   last_name: string;
   category: string | null;
+  member_category: string | null;
 };
 export type UnitEnrollment = {
   id: number;

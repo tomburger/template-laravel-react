@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
+import { useConfirm } from '../components/useConfirm';
 import { useAuth } from '../context/AuthContext';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import {
@@ -25,6 +26,7 @@ type Tab = 'members' | 'units' | 'allocations';
 const AdminSeasonDetail: React.FC = () => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
+  const { confirm: confirmMemberRemoval, dialog: memberRemovalDialog } = useConfirm();
   const seasonId = Number(useParams().seasonId);
   const {
     listSeasons,
@@ -176,6 +178,11 @@ const AdminSeasonDetail: React.FC = () => {
               onFilterChange={setMemberFilter}
               onEditAllocation={setEditingAllocation}
               onAllocate={(id) => startAllocation(String(id), '')}
+              onChanged={load}
+              onConfirmRemove={(name) => confirmMemberRemoval({
+                message: t('adminSeasonDetail.confirmRemove', { name }),
+                confirmText: t('adminSeasonDetail.remove'),
+              })}
             />
           ) : tab === 'units' ? (
             <UnitsTab
@@ -217,6 +224,7 @@ const AdminSeasonDetail: React.FC = () => {
           load();
         }}
       />
+      {memberRemovalDialog}
     </PageLayout>
   );
 };

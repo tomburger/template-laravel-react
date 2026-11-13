@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { getEndpoints } from '../../services/endpoints/endpoints';
-import { Allocation, AvailableMember, MemberEnrollment, authRequestOptions } from '../../services/apiHelpers';
+import { Allocation, AvailableMember, MemberEnrollment, apiErrorMessage, authRequestOptions } from '../../services/apiHelpers';
 import AllocationCell from './AllocationCell';
-import { useConfirm } from '../../components/useConfirm';
+import RightDrawer from '../../components/RightDrawer';
 import AllocationFilterSelect from './AllocationFilterSelect';
 import { AllocationFilter, AllocationsByEnrollment, RunAction, matchesFilter } from './shared';
 
@@ -19,6 +20,8 @@ interface Props {
   onFilterChange: (filter: AllocationFilter) => void;
   onEditAllocation: (allocation: Allocation) => void;
   onAllocate: (memberSeasonId: number) => void;
+  onChanged: () => void;
+  onConfirmRemove: (name: string) => Promise<boolean>;
 }
 
 const MembersTab: React.FC<Props> = ({
@@ -33,13 +36,59 @@ const MembersTab: React.FC<Props> = ({
   onFilterChange,
   onEditAllocation,
   onAllocate,
+  onChanged,
+  onConfirmRemove,
 }) => {
   const { t } = useTranslation();
-  const { confirm, dialog } = useConfirm();
   const { enrollMemberInASeason, removeMemberEnrollmentFromASeason } = getEndpoints();
   const [selectedMember, setSelectedMember] = useState('');
+  const [editing, setEditing] = useState<MemberEnrollment | null>(null);
+  const [category, setCategory] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const visible = enrollments.filter((item) => matchesFilter(filter, allocationsByMember.has(item.id)));
+
+  const openEditor = (item: MemberEnrollment) => {
+    setEditing(item);
+    setCategory(item.category ?? '');
+    setFormError(null);
+  };
+
+  const save = async () => {
+    if (!editing || saving) return;
+    try {
+      setSaving(true);
+      setFormError(null);
+      await axios.patch(
+        `/api/seasons/${seasonId}/members/${editing.id}`,
+        { category: category.trim() || null },
+        authRequestOptions(),
+      );
+      setEditing(null);
+      onChanged();
+    } catch (err) {
+      setFormError(apiErrorMessage(err, t('adminSeasonDetail.memberCategorySaveFailed')));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async () => {
+    if (!editing || saving) return;
+    if (!(await onConfirmRemove(`${editing.first_name} ${editing.last_name}`))) return;
+    try {
+      setSaving(true);
+      setFormError(null);
+      await removeMemberEnrollmentFromASeason(seasonId, editing.id, authRequestOptions());
+      setEditing(null);
+      onChanged();
+    } catch (err) {
+      setFormError(apiErrorMessage(err, t('adminSeasonDetail.removeFailed')));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <>
@@ -76,7 +125,7 @@ const MembersTab: React.FC<Props> = ({
           <thead className="table-light">
             <tr>
               <th>{t('adminMembers.name')}</th>
-              <th>{t('adminSeasonDetail.categorySnapshot')}</th>
+              <th>{t('adminSeasonDetail.seasonCategory')}</th>
               <th>{t('adminSeasonDetail.allocation')}</th>
               <th className="text-end">{t('adminUsers.columns.actions')}</th>
             </tr>
@@ -92,7 +141,14 @@ const MembersTab: React.FC<Props> = ({
             {visible.map((item) => (
               <tr key={item.id}>
                 <td>{item.last_name} {item.first_name}</td>
-                <td>{item.category}</td>
+                <td>
+                  {item.category || t('adminSeasonDashboard.noCategory')}
+                  {(item.category || null) !== (item.member_category || null) && (
+                    <div className="small text-muted">
+                      {t('adminSeasonDetail.memberCategoryValue', { category: item.member_category || t('adminSeasonDashboard.noCategory') })}
+                    </div>
+                  )}
+                </td>
                 <td>
                   <AllocationCell
                     items={allocationsByMember.get(item.id)}
@@ -105,17 +161,11 @@ const MembersTab: React.FC<Props> = ({
                 </td>
                 <td className="text-end">
                   {canEdit && <button
-                    className="btn btn-sm btn-outline-danger"
-                    disabled={busy}
-                    onClick={async () => {
-                      if (!(await confirm({ message: t('adminSeasonDetail.confirmRemove', { name: `${item.first_name} ${item.last_name}` }), confirmText: t('adminSeasonDetail.remove') }))) return;
-                      run(
-                        () => removeMemberEnrollmentFromASeason(seasonId, item.id, authRequestOptions()),
-                        t('adminSeasonDetail.removeFailed')
-                      );
-                    }}
+                    className="btn btn-sm btn-dark"
+                    disabled={busy || saving}
+                    onClick={() => openEditor(item)}
                   >
-                    {t('adminSeasonDetail.remove')}
+                    {t('adminUsers.edit')}
                   </button>}
                 </td>
               </tr>
@@ -123,7 +173,51 @@ const MembersTab: React.FC<Props> = ({
           </tbody>
         </table>
       </div>
-      {dialog}
+      <RightDrawer
+        isOpen={editing !== null}
+        onClose={() => setEditing(null)}
+        title={t('adminSeasonDetail.editMemberEnrollment')}
+        subtitle={editing ? `${editing.first_name} ${editing.last_name}` : undefined}
+        closeText={t('adminUsers.close')}
+        ariaLabel={t('adminSeasonDetail.editMemberEnrollment')}
+        disableClose={saving}
+        footer={
+          <div className="d-flex flex-column gap-3">
+            <div className="d-flex justify-content-end gap-2">
+              <button type="button" className="btn btn-outline-secondary" onClick={() => setEditing(null)} disabled={saving}>
+                {t('adminUsers.cancel')}
+              </button>
+              <button type="button" className="btn btn-dark" onClick={save} disabled={saving}>
+                {saving ? t('adminUsers.saving') : t('adminUsers.save')}
+              </button>
+            </div>
+            <button type="button" className="btn btn-danger w-100" onClick={remove} disabled={saving}>
+              {t('adminSeasonDetail.remove')}
+            </button>
+          </div>
+        }
+      >
+        {formError && <div className="alert alert-danger" role="alert">{formError}</div>}
+        {editing && (
+          <>
+            <div className="mb-3">
+              <label className="form-label" htmlFor="enrollment-category">{t('adminSeasonDetail.seasonCategory')}</label>
+              <input
+                id="enrollment-category"
+                className="form-control"
+                value={category}
+                maxLength={100}
+                onChange={(event) => setCategory(event.target.value)}
+                disabled={saving}
+              />
+              <div className="form-text">{t('adminSeasonDetail.categoryPricingHint')}</div>
+            </div>
+            <div className="text-muted small">
+              {t('adminSeasonDetail.memberCategoryValue', { category: editing.member_category || t('adminSeasonDashboard.noCategory') })}
+            </div>
+          </>
+        )}
+      </RightDrawer>
     </>
   );
 };

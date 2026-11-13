@@ -34,6 +34,7 @@ const cs: typeof en = {
     label: 'Vlastníci',
     none: 'Nejsou vybráni žádní vlastníci.',
     required: 'Je vyžadován alespoň jeden vlastník.',
+    readOnly: 'Vlastníky mohou měnit pouze manažeři.',
   },
   adminLocations: {
     back: 'Zpět do administrace',

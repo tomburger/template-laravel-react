@@ -7,22 +7,29 @@ interface ContentEditorsSelectorProps {
   value: UserOption[];
   onChange: (users: UserOption[]) => void;
   disabled?: boolean;
+  readOnly?: boolean;
   label?: string;
   emptyText?: string;
 }
 
 type AvailableUser = UserOption & { is_admin: boolean };
 
-const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, onChange, disabled = false, label, emptyText }) => {
+const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, onChange, disabled = false, readOnly = false, label, emptyText }) => {
   const { t } = useTranslation();
   const inputId = useId();
   const [availableUsers, setAvailableUsers] = useState<AvailableUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!readOnly);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
+    if (readOnly) {
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
     let isCancelled = false;
 
     const loadUsers = async () => {
@@ -46,7 +53,7 @@ const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, 
 
     loadUsers();
     return () => { isCancelled = true; };
-  }, [t]);
+  }, [readOnly, t]);
 
   const selectedIds = useMemo(() => new Set(value.map((user) => user.id)), [value]);
   const normalizedQuery = query.trim().toLowerCase();
@@ -56,7 +63,7 @@ const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, 
       .filter((user) => `${user.name} ${user.email}`.toLowerCase().includes(normalizedQuery))
       .slice(0, 8)
   ), [availableUsers, normalizedQuery, selectedIds]);
-  const showDropdown = !disabled && isFocused && (normalizedQuery.length > 0 || filteredUsers.length > 0);
+  const showDropdown = !disabled && !readOnly && isFocused && (normalizedQuery.length > 0 || filteredUsers.length > 0);
 
   const selectUser = (user: UserOption) => {
     if (!selectedIds.has(user.id)) {
@@ -68,6 +75,7 @@ const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, 
   const removeUser = (userId: number) => onChange(value.filter((user) => user.id !== userId));
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (disabled || readOnly) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       if (filteredUsers.length > 0) selectUser(filteredUsers[0]);
@@ -82,7 +90,9 @@ const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, 
       if (!event.currentTarget.contains(event.relatedTarget)) setIsFocused(false);
     }}>
       <div className="d-flex align-items-center justify-content-between mb-2">
-        <label className="form-label fw-semibold mb-0" htmlFor={inputId}>{label ?? t('contentEditorsSelector.label')}</label>
+        {readOnly
+          ? <span className="form-label fw-semibold mb-0">{label ?? t('contentEditorsSelector.label')}</span>
+          : <label className="form-label fw-semibold mb-0" htmlFor={inputId}>{label ?? t('contentEditorsSelector.label')}</label>}
         <span className="badge text-bg-light border text-secondary">
           {t('contentEditorsSelector.selected', { count: value.length })}
         </span>
@@ -94,7 +104,7 @@ const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, 
             <span key={user.id} className="badge rounded-pill text-bg-dark d-inline-flex align-items-center gap-2 px-3 py-2">
               <span>{user.name}</span>
               <span className="opacity-75">{user.email}</span>
-              {!disabled && (
+              {!disabled && !readOnly && (
                 <button
                   type="button"
                   className="btn btn-sm border-0 p-0 text-white"
@@ -111,18 +121,20 @@ const ContentEditorsSelector: React.FC<ContentEditorsSelectorProps> = ({ value, 
           )}
         </div>
 
-        <input
-          id={inputId}
-          type="text"
-          className="form-control form-control-lg"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onKeyDown={handleKeyDown}
-          placeholder={t('contentEditorsSelector.searchPlaceholder')}
-          disabled={disabled || isLoading}
-        />
-        <div className="form-text mt-2">{t('contentEditorsSelector.hint')}</div>
+        {!readOnly && (
+          <input
+            id={inputId}
+            type="text"
+            className="form-control form-control-lg"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onKeyDown={handleKeyDown}
+            placeholder={t('contentEditorsSelector.searchPlaceholder')}
+            disabled={disabled || isLoading}
+          />
+        )}
+        <div className="form-text mt-2">{t(readOnly ? 'owners.readOnly' : 'contentEditorsSelector.hint')}</div>
         {error && <div className="alert alert-danger mt-3 mb-0 py-2">{error}</div>}
         {isLoading && <div className="text-muted small mt-2">{t('common.loading')}</div>}
 

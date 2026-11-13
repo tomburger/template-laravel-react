@@ -245,10 +245,8 @@ const AdminSeasons: React.FC = () => {
             ))}
           </select>
         </div>
-        {user?.is_manager && <>
-          <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} label={t('owners.label')} emptyText={t('owners.none')} />
-          <div className="form-text mb-3">{t('owners.required')}</div>
-        </>}
+        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} readOnly={!user?.is_manager} label={t('owners.label')} emptyText={t('owners.none')} />
+        {user?.is_manager && <div className="form-text mb-3">{t('owners.required')}</div>}
         {!editing && (
           <div className="mb-3">
             <label className="form-label" htmlFor="season-copy">{t('adminSeasons.copyFrom')}</label>

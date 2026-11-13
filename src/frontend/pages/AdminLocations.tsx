@@ -177,10 +177,8 @@ const AdminLocations: React.FC = () => {
           <label className="form-label" htmlFor="location-name">{t('adminLocations.name')}</label>
           <input id="location-name" className="form-control" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        {user?.is_manager && <>
-          <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} label={t('owners.label')} emptyText={t('owners.none')} />
-          <div className="form-text">{t('owners.required')}</div>
-        </>}
+        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} readOnly={!user?.is_manager} label={t('owners.label')} emptyText={t('owners.none')} />
+        {user?.is_manager && <div className="form-text">{t('owners.required')}</div>}
       </RightDrawer>
       {dialog}
     </PageLayout>

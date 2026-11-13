@@ -32,6 +32,7 @@ const en = {
     label: 'Owners',
     none: 'No owners selected.',
     required: 'At least one owner is required.',
+    readOnly: 'Only managers can change owners.',
   },
   adminLocations: {
     back: 'Back to admin panel',

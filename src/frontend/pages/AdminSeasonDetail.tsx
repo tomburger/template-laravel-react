@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
 import { useConfirm } from '../components/useConfirm';
@@ -26,8 +26,10 @@ type Tab = 'members' | 'units' | 'allocations';
 const AdminSeasonDetail: React.FC = () => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
-  const { confirm: confirmMemberRemoval, dialog: memberRemovalDialog } = useConfirm();
+  const { confirm: confirmRemoval, dialog: removalDialog } = useConfirm();
   const seasonId = Number(useParams().seasonId);
+  const [searchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab');
   const {
     listSeasons,
     listMembersEnrolledInASeason,
@@ -37,7 +39,7 @@ const AdminSeasonDetail: React.FC = () => {
     listAllocationsOfASeason,
   } = getEndpoints();
 
-  const [tab, setTab] = useState<Tab>('members');
+  const [tab, setTab] = useState<Tab>(requestedTab === 'units' ? 'units' : 'members');
   const [season, setSeason] = useState<Season | null>(null);
   const [memberEnrollments, setMemberEnrollments] = useState<MemberEnrollment[]>([]);
   const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([]);
@@ -93,6 +95,10 @@ const AdminSeasonDetail: React.FC = () => {
   useEffect(() => {
     load();
   }, [seasonId]);
+
+  useEffect(() => {
+    setTab(requestedTab === 'units' ? 'units' : 'members');
+  }, [requestedTab]);
 
   // Runs a mutation, then reloads; shows the server message on failure
   const run = async (action: () => Promise<unknown>, fallback: string) => {
@@ -179,7 +185,7 @@ const AdminSeasonDetail: React.FC = () => {
               onEditAllocation={setEditingAllocation}
               onAllocate={(id) => startAllocation(String(id), '')}
               onChanged={load}
-              onConfirmRemove={(name) => confirmMemberRemoval({
+              onConfirmRemove={(name) => confirmRemoval({
                 message: t('adminSeasonDetail.confirmRemove', { name }),
                 confirmText: t('adminSeasonDetail.remove'),
               })}
@@ -197,6 +203,11 @@ const AdminSeasonDetail: React.FC = () => {
               onFilterChange={setUnitFilter}
               onEditAllocation={setEditingAllocation}
               onAllocate={(id) => startAllocation('', String(id))}
+              onChanged={load}
+              onConfirmRemove={(name) => confirmRemoval({
+                message: t('adminSeasonDetail.confirmRemove', { name }),
+                confirmText: t('adminSeasonDetail.remove'),
+              })}
             />
           ) : (
             <AllocationsTab
@@ -224,7 +235,7 @@ const AdminSeasonDetail: React.FC = () => {
           load();
         }}
       />
-      {memberRemovalDialog}
+      {removalDialog}
     </PageLayout>
   );
 };

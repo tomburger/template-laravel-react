@@ -7,6 +7,7 @@ use App\Models\Season;
 use App\Models\Unit;
 use App\Models\UnitSeason;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SeasonUnitController extends Controller
 {
@@ -16,7 +17,7 @@ class SeasonUnitController extends Controller
      * @endpoint
      * @authenticated
      * @urlParam season integer required The season ID.
-     * @responseField enrollments object[] Enrollments with the unit's code, location name and the category snapshot
+     * @responseField enrollments object[] Enrollments with the unit's code, location name, season category and current unit category.
      */
     public function index(Season $season): JsonResponse
     {
@@ -78,6 +79,30 @@ class SeasonUnitController extends Controller
     }
 
     /**
+     * Update a unit's category for this season.
+     *
+     * This does not change the unit's category or existing allocation amounts.
+     *
+     * @endpoint
+     * @authenticated
+     * @urlParam season integer required The season ID.
+     * @urlParam unitSeason integer required The enrollment ID.
+     * @bodyParam category string nullable required Season-specific category, or null.
+     * @responseField enrollment object Updated enrollment.
+     */
+    public function update(Request $request, Season $season, UnitSeason $unitSeason): JsonResponse
+    {
+        abort_unless($unitSeason->season_id === $season->id, 404);
+
+        $data = $request->validate([
+            'category' => 'present|nullable|string|max:100',
+        ]);
+        $unitSeason->update($data);
+
+        return response()->json(['enrollment' => $this->present($unitSeason->load('unit.location'))]);
+    }
+
+    /**
      * Remove unit enrollment from a season
      *
      * @endpoint
@@ -110,6 +135,7 @@ class SeasonUnitController extends Controller
             'code' => $item->unit->code,
             'location_name' => $item->unit->location->name,
             'category' => $item->category,
+            'unit_category' => $item->unit->category,
         ];
     }
 }

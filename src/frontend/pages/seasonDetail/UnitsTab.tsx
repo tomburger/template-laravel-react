@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { getEndpoints } from '../../services/endpoints/endpoints';
 import { Allocation, AvailableUnit, UnitEnrollment, authRequestOptions } from '../../services/apiHelpers';
 import AllocationCell from './AllocationCell';
-import { useConfirm } from '../../components/useConfirm';
+import EnrollmentCategoryDrawer from './EnrollmentCategoryDrawer';
 import AllocationFilterSelect from './AllocationFilterSelect';
 import { AllocationFilter, AllocationsByEnrollment, RunAction, matchesFilter } from './shared';
 
@@ -19,6 +19,8 @@ interface Props {
   onFilterChange: (filter: AllocationFilter) => void;
   onEditAllocation: (allocation: Allocation) => void;
   onAllocate: (unitSeasonId: number) => void;
+  onChanged: () => void;
+  onConfirmRemove: (name: string) => Promise<boolean>;
 }
 
 const UnitsTab: React.FC<Props> = ({
@@ -33,11 +35,13 @@ const UnitsTab: React.FC<Props> = ({
   onFilterChange,
   onEditAllocation,
   onAllocate,
+  onChanged,
+  onConfirmRemove,
 }) => {
   const { t } = useTranslation();
-  const { confirm, dialog } = useConfirm();
   const { enrollUnitInASeason, removeUnitEnrollmentFromASeason } = getEndpoints();
   const [selectedUnit, setSelectedUnit] = useState('');
+  const [editing, setEditing] = useState<UnitEnrollment | null>(null);
 
   const visible = enrollments.filter((item) => matchesFilter(filter, allocationsByUnit.has(item.id)));
 
@@ -77,7 +81,7 @@ const UnitsTab: React.FC<Props> = ({
             <tr>
               <th>{t('adminLocations.name')}</th>
               <th>{t('adminUnits.code')}</th>
-              <th>{t('adminSeasonDetail.categorySnapshot')}</th>
+              <th>{t('adminSeasonDetail.seasonCategory')}</th>
               <th>{t('adminSeasonDetail.allocation')}</th>
               <th className="text-end">{t('adminUsers.columns.actions')}</th>
             </tr>
@@ -94,7 +98,14 @@ const UnitsTab: React.FC<Props> = ({
               <tr key={item.id}>
                 <td>{item.location_name}</td>
                 <td>{item.code}</td>
-                <td>{item.category}</td>
+                <td>
+                  {item.category || t('adminSeasonDashboard.noCategory')}
+                  {(item.category || null) !== (item.unit_category || null) && (
+                    <div className="small text-muted">
+                      {t('adminSeasonDetail.unitCategoryValue', { category: item.unit_category || t('adminSeasonDashboard.noCategory') })}
+                    </div>
+                  )}
+                </td>
                 <td>
                   <AllocationCell
                     items={allocationsByUnit.get(item.id)}
@@ -107,17 +118,11 @@ const UnitsTab: React.FC<Props> = ({
                 </td>
                 <td className="text-end">
                   {canEdit && <button
-                    className="btn btn-sm btn-outline-danger"
+                    className="btn btn-sm btn-dark"
                     disabled={busy}
-                    onClick={async () => {
-                      if (!(await confirm({ message: t('adminSeasonDetail.confirmRemove', { name: item.code }), confirmText: t('adminSeasonDetail.remove') }))) return;
-                      run(
-                        () => removeUnitEnrollmentFromASeason(seasonId, item.id, authRequestOptions()),
-                        t('adminSeasonDetail.removeFailed')
-                      );
-                    }}
+                    onClick={() => setEditing(item)}
                   >
-                    {t('adminSeasonDetail.remove')}
+                    {t('adminUsers.edit')}
                   </button>}
                 </td>
               </tr>
@@ -125,7 +130,19 @@ const UnitsTab: React.FC<Props> = ({
           </tbody>
         </table>
       </div>
-      {dialog}
+      <EnrollmentCategoryDrawer
+        seasonId={seasonId}
+        kind="units"
+        enrollment={editing}
+        title={t('adminSeasonDetail.editUnitEnrollment')}
+        name={editing ? `${editing.location_name} / ${editing.code}` : ''}
+        currentCategory={editing?.unit_category ?? null}
+        currentCategoryLabel="adminSeasonDetail.unitCategoryValue"
+        onClose={() => setEditing(null)}
+        onChanged={onChanged}
+        onRemove={(id) => removeUnitEnrollmentFromASeason(seasonId, id, authRequestOptions())}
+        onConfirmRemove={onConfirmRemove}
+      />
     </>
   );
 };

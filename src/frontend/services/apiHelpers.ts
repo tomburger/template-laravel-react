@@ -65,6 +65,7 @@ export type UnitEnrollment = {
   code: string;
   location_name: string;
   category: string | null;
+  unit_category: string | null;
 };
 export type AvailableMember = { id: number; first_name: string; last_name: string; category: string | null };
 export type AvailableUnit = { id: number; code: string; category: string | null; location_name: string };

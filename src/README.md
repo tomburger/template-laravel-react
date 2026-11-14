@@ -112,6 +112,6 @@ Authenticated users can edit their own display name and create or update their
 own member details from the dashboard. Member categories remain manager-controlled
 because they affect pricing.
 
-Season owners can adjust an enrolled member's category for that season without
-changing the member's general category. The adjusted category is used for new
+Season owners can adjust an enrolled member's or unit's category for that season
+without changing its general category. The adjusted category is used for new
 allocations; existing allocation amounts are not recalculated.

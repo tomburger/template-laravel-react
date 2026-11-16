@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/PageLayout';
 import { useAuth } from '../context/AuthContext';
 import { getEndpoints } from '../services/endpoints/endpoints';
-import { MemberEnrollment, UnitEnrollment, SEASON_STATUSES, Season, SeasonStatus, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import { Allocation, MemberEnrollment, UnitEnrollment, SEASON_STATUSES, Season, SeasonStatus, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import AllocationSummary from './seasonDetail/AllocationSummary';
 
 interface EnrollmentSummaryProps {
   headingId: string;
@@ -103,6 +104,10 @@ const AdminSeasonDashboard: React.FC = () => {
   const [unitsLoading, setUnitsLoading] = useState(false);
   const [unitsError, setUnitsError] = useState<string | null>(null);
   const [unitsReload, setUnitsReload] = useState(0);
+  const [allocations, setAllocations] = useState<Allocation[] | null>(null);
+  const [allocationsLoading, setAllocationsLoading] = useState(false);
+  const [allocationsError, setAllocationsError] = useState<string | null>(null);
+  const [allocationsReload, setAllocationsReload] = useState(0);
   const statusRequest = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -202,6 +207,36 @@ const AdminSeasonDashboard: React.FC = () => {
     return () => controller.abort();
   }, [isOwner, seasonId, unitsReload, t]);
 
+  useEffect(() => {
+    if (!isOwner) {
+      setAllocations(null);
+      setAllocationsError(null);
+      setAllocationsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const loadAllocations = async () => {
+      try {
+        setAllocations(null);
+        setAllocationsError(null);
+        setAllocationsLoading(true);
+        const response = await getEndpoints().listAllocationsOfASeason<{ data: { allocations: Allocation[] } }>(
+          seasonId,
+          { ...authRequestOptions(), signal: controller.signal },
+        );
+        if (!controller.signal.aborted) setAllocations(response.data.allocations);
+      } catch (err) {
+        if (!controller.signal.aborted) setAllocationsError(apiErrorMessage(err, t('adminSeasonDashboard.allocationsLoadFailed')));
+      } finally {
+        if (!controller.signal.aborted) setAllocationsLoading(false);
+      }
+    };
+
+    void loadAllocations();
+    return () => controller.abort();
+  }, [isOwner, seasonId, allocationsReload, t]);
+
   const updateStatus = async (status: SeasonStatus) => {
     if (!season || !isOwner || updating || status === season.status) return;
 
@@ -290,6 +325,38 @@ const AdminSeasonDashboard: React.FC = () => {
                 onRetry={() => setUnitsReload((value) => value + 1)}
               />
             </div>
+            <section className="card mt-3" aria-labelledby="season-allocations-heading">
+              <div className="card-body">
+                <h2 id="season-allocations-heading" className="h5 mb-3">{t('adminSeasonDetail.allocationsTab')}</h2>
+                {(membersLoading || unitsLoading || allocationsLoading) && <div role="status">{t('common.loading')}</div>}
+                {(membersError || unitsError || allocationsError) && (
+                  <div className="alert alert-danger" role="alert">
+                    {[membersError, unitsError, allocationsError].filter(Boolean).map((message, index) => (
+                      <div key={index}>{message}</div>
+                    ))}
+                    <button type="button" className="btn btn-sm btn-outline-danger mt-2" onClick={() => {
+                      if (membersError) setMembersReload((value) => value + 1);
+                      if (unitsError) setUnitsReload((value) => value + 1);
+                      if (allocationsError) setAllocationsReload((value) => value + 1);
+                    }}>
+                      {t('home.retry')}
+                    </button>
+                  </div>
+                )}
+                {members && units && allocations && (
+                  <AllocationSummary
+                    members={members}
+                    units={units}
+                    allocations={allocations}
+                    onRetry={() => {
+                      setMembersReload((value) => value + 1);
+                      setUnitsReload((value) => value + 1);
+                      setAllocationsReload((value) => value + 1);
+                    }}
+                  />
+                )}
+              </div>
+            </section>
             </>
           )}
         </div>

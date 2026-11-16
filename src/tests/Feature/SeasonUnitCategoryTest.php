@@ -113,4 +113,70 @@ class SeasonUnitCategoryTest extends TestCase
         }
         $this->assertSame('General', $enrollment->fresh()->category);
     }
+
+    public function test_owner_can_preview_rule_price_using_current_season_categories_without_changing_allocation(): void
+    {
+        $owner = User::create(['name' => 'Owner', 'email' => 'owner@example.test', 'password' => 'password']);
+        $memberUser = User::create(['name' => 'Member', 'email' => 'member@example.test', 'password' => 'password']);
+        $member = Member::create(['id' => $memberUser->id, 'first_name' => 'First', 'last_name' => 'Last', 'category' => 'General member']);
+        $season = Season::create(['name' => 'Season', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
+        $season->owners()->attach($owner);
+        $memberEnrollment = $season->memberSeasons()->create(['member_id' => $member->id, 'category' => 'Season member']);
+        $location = Location::create(['name' => 'Location']);
+        $unit = $location->units()->create(['code' => 'A', 'category' => 'General unit']);
+        $unitEnrollment = $season->unitSeasons()->create(['unit_id' => $unit->id, 'category' => 'Season unit']);
+        $allocation = Allocation::create([
+            'member_season_id' => $memberEnrollment->id,
+            'unit_season_id' => $unitEnrollment->id,
+            'status' => 'pending',
+            'amount_due' => 100,
+            'variable_symbol' => '123',
+        ]);
+        $url = "/api/allocations/{$allocation->id}/price";
+        $this->actingAs($owner, 'sanctum');
+
+        $this->getJson($url)->assertOk()->assertJsonPath('price', null);
+        $fallbackRule = PricingRule::create(['season_id' => $season->id, 'priority' => 1, 'price' => 150]);
+        PricingRule::create([
+            'season_id' => $season->id,
+            'member_category' => 'Season member',
+            'unit_category' => 'Season unit',
+            'priority' => 2,
+            'price' => 200,
+        ]);
+        $this->getJson($url)->assertOk()->assertExactJson(['price' => '200.00']);
+        $unitEnrollment->update(['category' => 'Changed']);
+        $this->getJson($url)->assertOk()->assertExactJson(['price' => '150.00']);
+        $fallbackRule->update(['price' => 0]);
+        $this->getJson($url)->assertOk()->assertExactJson(['price' => '0.00']);
+        $this->assertSame('100.00', $allocation->fresh()->amount_due);
+    }
+
+    public function test_rule_price_preview_requires_season_ownership(): void
+    {
+        $owner = User::create(['name' => 'Owner', 'email' => 'owner@example.test', 'password' => 'password']);
+        $manager = User::create(['name' => 'Manager', 'email' => 'manager@example.test', 'password' => 'password']);
+        $manager->forceFill(['is_manager' => true])->save();
+        $memberUser = User::create(['name' => 'Member', 'email' => 'member@example.test', 'password' => 'password']);
+        $member = Member::create(['id' => $memberUser->id, 'first_name' => 'First', 'last_name' => 'Last']);
+        $season = Season::create(['name' => 'Season', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
+        $season->owners()->attach($owner);
+        $memberEnrollment = $season->memberSeasons()->create(['member_id' => $member->id]);
+        $location = Location::create(['name' => 'Location']);
+        $unit = $location->units()->create(['code' => 'A']);
+        $unitEnrollment = $season->unitSeasons()->create(['unit_id' => $unit->id]);
+        $allocation = Allocation::create([
+            'member_season_id' => $memberEnrollment->id,
+            'unit_season_id' => $unitEnrollment->id,
+            'status' => 'pending',
+            'amount_due' => 100,
+            'variable_symbol' => '123',
+        ]);
+        $url = "/api/allocations/{$allocation->id}/price";
+
+        $this->getJson($url)->assertUnauthorized();
+        $this->actingAs($manager, 'sanctum')->getJson($url)->assertForbidden();
+        $this->actingAs($owner, 'sanctum')->getJson($url)->assertOk()->assertJsonPath('price', null);
+        $this->getJson('/api/allocations/99999/price')->assertNotFound();
+    }
 }

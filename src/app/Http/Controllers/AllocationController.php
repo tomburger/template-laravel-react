@@ -87,6 +87,27 @@ class AllocationController extends Controller
     }
 
     /**
+     * Preview the current rule price for an allocation.
+     *
+     * Uses the season enrollment categories and does not change the stored amount.
+     *
+     * @endpoint
+     * @authenticated
+     * @urlParam allocation integer required The allocation ID.
+     * @responseField price string|null The matching price, or null when no rule matches.
+     */
+    public function previewPrice(Allocation $allocation, PricingService $pricing): JsonResponse
+    {
+        $rule = $pricing->resolve(
+            $allocation->unitSeason->season_id,
+            $allocation->unitSeason->category,
+            $allocation->memberSeason->category,
+        );
+
+        return response()->json(['price' => $rule?->price])->header('Cache-Control', 'no-store');
+    }
+
+    /**
      * Update allocation
      *
      * Changes the amount due, the variable symbol and the status. The status must follow the

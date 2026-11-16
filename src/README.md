@@ -115,3 +115,14 @@ because they affect pricing.
 Season owners can adjust an enrolled member's or unit's category for that season
 without changing its general category. The adjusted category is used for new
 allocations; existing allocation amounts are not recalculated.
+
+Season owners manage allocations from the Members and Units enrollment tabs.
+New allocations start pending with a price from the matching pricing rule;
+their price, status and variable symbol can then be edited in the allocation drawer.
+The drawer can preview the current matching rule price for an allocation and copy
+it into the amount field; the stored amount changes only when the edit is saved.
+Cancelled allocations remain visible, and pending or cancelled allocations can be deleted.
+Additional allocations can be started from an existing allocation's drawer.
+The season dashboard counts distinct enrolled members and units with non-cancelled
+allocations, summarizes active amounts by season category, and shows amounts by
+status separately. Cancelled allocations do not contribute to active totals.

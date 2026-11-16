@@ -43,7 +43,9 @@ const MembersTab: React.FC<Props> = ({
   const [selectedMember, setSelectedMember] = useState('');
   const [editing, setEditing] = useState<MemberEnrollment | null>(null);
 
-  const visible = enrollments.filter((item) => matchesFilter(filter, allocationsByMember.has(item.id)));
+  const visible = enrollments.filter((item) =>
+    matchesFilter(filter, allocationsByMember.get(item.id)?.some((allocation) => allocation.status !== 'cancelled') ?? false)
+  );
 
   return (
     <>
@@ -110,6 +112,7 @@ const MembersTab: React.FC<Props> = ({
                     label={(a) => `${a.location_name} / ${a.unit_code}`}
                     busy={busy}
                     canEdit={canEdit}
+                    canAllocate
                     onEdit={onEditAllocation}
                     onAllocate={() => onAllocate(item.id)}
                   />

@@ -43,7 +43,9 @@ const UnitsTab: React.FC<Props> = ({
   const [selectedUnit, setSelectedUnit] = useState('');
   const [editing, setEditing] = useState<UnitEnrollment | null>(null);
 
-  const visible = enrollments.filter((item) => matchesFilter(filter, allocationsByUnit.has(item.id)));
+  const visible = enrollments.filter((item) =>
+    matchesFilter(filter, allocationsByUnit.get(item.id)?.some((allocation) => allocation.status !== 'cancelled') ?? false)
+  );
 
   return (
     <>
@@ -112,6 +114,7 @@ const UnitsTab: React.FC<Props> = ({
                     label={(a) => a.member_name}
                     busy={busy}
                     canEdit={canEdit}
+                    canAllocate={!allocationsByUnit.get(item.id)?.some((allocation) => allocation.status !== 'cancelled')}
                     onEdit={onEditAllocation}
                     onAllocate={() => onAllocate(item.id)}
                   />

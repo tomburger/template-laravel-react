@@ -16,12 +16,12 @@ import {
   authRequestOptions,
 } from '../services/apiHelpers';
 import AllocationEditDrawer from './seasonDetail/AllocationEditDrawer';
-import AllocationsTab from './seasonDetail/AllocationsTab';
+import AllocationCreateDrawer, { AllocationTarget } from './seasonDetail/AllocationCreateDrawer';
 import MembersTab from './seasonDetail/MembersTab';
 import UnitsTab from './seasonDetail/UnitsTab';
 import { AllocationFilter, AllocationsByEnrollment } from './seasonDetail/shared';
 
-type Tab = 'members' | 'units' | 'allocations';
+type Tab = 'members' | 'units';
 
 const AdminSeasonDetail: React.FC = () => {
   const { user } = useAuth();
@@ -49,8 +49,9 @@ const AdminSeasonDetail: React.FC = () => {
   // Filters live here because reloading unmounts the tabs, which would reset local state
   const [memberFilter, setMemberFilter] = useState<AllocationFilter>('all');
   const [unitFilter, setUnitFilter] = useState<AllocationFilter>('all');
-  const [preselect, setPreselect] = useState({ memberSeasonId: '', unitSeasonId: '' });
+  const [allocationTarget, setAllocationTarget] = useState<AllocationTarget | null>(null);
   const [editingAllocation, setEditingAllocation] = useState<Allocation | null>(null);
+  const [allocationCreated, setAllocationCreated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +85,6 @@ const AdminSeasonDetail: React.FC = () => {
       setUnitEnrollments(units.data.enrollments);
       setAvailableUnits(freeUnits.data.units);
       setAllocations(allocationList.data.allocations);
-      setPreselect({ memberSeasonId: '', unitSeasonId: '' });
     } catch (err) {
       setError(apiErrorMessage(err, t('adminSeasonDetail.loadFailed')));
     } finally {
@@ -116,18 +116,10 @@ const AdminSeasonDetail: React.FC = () => {
 
   const formatDate = (value: string) => new Date(`${value}T00:00:00`).toLocaleDateString(i18n.language);
 
-  // Active (non-cancelled) allocations grouped by member / unit enrollment
-  const groupActiveAllocations = (key: 'member_season_id' | 'unit_season_id') => {
+  const groupAllocations = (key: 'member_season_id' | 'unit_season_id') => {
     const groups: AllocationsByEnrollment = new Map();
-    allocations
-      .filter((item) => item.status !== 'cancelled')
-      .forEach((item) => groups.set(item[key], [...(groups.get(item[key]) ?? []), item]));
+    allocations.forEach((item) => groups.set(item[key], [...(groups.get(item[key]) ?? []), item]));
     return groups;
-  };
-
-  const startAllocation = (memberSeasonId: string, unitSeasonId: string) => {
-    setPreselect({ memberSeasonId, unitSeasonId });
-    setTab('allocations');
   };
 
   return (
@@ -159,11 +151,6 @@ const AdminSeasonDetail: React.FC = () => {
                 {t('adminSeasonDetail.unitsTab')} ({unitEnrollments.length})
               </button>
             </li>
-            <li className="nav-item">
-              <button className={`nav-link ${tab === 'allocations' ? 'active' : ''}`} onClick={() => setTab('allocations')}>
-                {t('adminSeasonDetail.allocationsTab')} ({allocations.length})
-              </button>
-            </li>
           </ul>
 
           {loading ? (
@@ -179,30 +166,14 @@ const AdminSeasonDetail: React.FC = () => {
               run={run}
               enrollments={memberEnrollments}
               availableMembers={availableMembers}
-              allocationsByMember={groupActiveAllocations('member_season_id')}
+              allocationsByMember={groupAllocations('member_season_id')}
               filter={memberFilter}
               onFilterChange={setMemberFilter}
-              onEditAllocation={setEditingAllocation}
-              onAllocate={(id) => startAllocation(String(id), '')}
-              onChanged={load}
-              onConfirmRemove={(name) => confirmRemoval({
-                message: t('adminSeasonDetail.confirmRemove', { name }),
-                confirmText: t('adminSeasonDetail.remove'),
-              })}
-            />
-          ) : tab === 'units' ? (
-            <UnitsTab
-              seasonId={seasonId}
-              canEdit={canEdit}
-              busy={busy}
-              run={run}
-              enrollments={unitEnrollments}
-              availableUnits={availableUnits}
-              allocationsByUnit={groupActiveAllocations('unit_season_id')}
-              filter={unitFilter}
-              onFilterChange={setUnitFilter}
-              onEditAllocation={setEditingAllocation}
-              onAllocate={(id) => startAllocation('', String(id))}
+              onEditAllocation={(allocation) => {
+                setAllocationCreated(false);
+                setEditingAllocation(allocation);
+              }}
+              onAllocate={(id) => setAllocationTarget({ kind: 'member', id })}
               onChanged={load}
               onConfirmRemove={(name) => confirmRemoval({
                 message: t('adminSeasonDetail.confirmRemove', { name }),
@@ -210,30 +181,66 @@ const AdminSeasonDetail: React.FC = () => {
               })}
             />
           ) : (
-            <AllocationsTab
+            <UnitsTab
               seasonId={seasonId}
               canEdit={canEdit}
               busy={busy}
               run={run}
-              memberEnrollments={memberEnrollments}
-              unitEnrollments={unitEnrollments}
-              allocations={allocations}
-              initialMemberId={preselect.memberSeasonId}
-              initialUnitId={preselect.unitSeasonId}
-              onEditAllocation={setEditingAllocation}
+              enrollments={unitEnrollments}
+              availableUnits={availableUnits}
+              allocationsByUnit={groupAllocations('unit_season_id')}
+              filter={unitFilter}
+              onFilterChange={setUnitFilter}
+              onEditAllocation={(allocation) => {
+                setAllocationCreated(false);
+                setEditingAllocation(allocation);
+              }}
+              onAllocate={(id) => setAllocationTarget({ kind: 'unit', id })}
+              onChanged={load}
+              onConfirmRemove={(name) => confirmRemoval({
+                message: t('adminSeasonDetail.confirmRemove', { name }),
+                confirmText: t('adminSeasonDetail.remove'),
+              })}
             />
           )}
           </>}
         </div>
       </div>
 
+      <AllocationCreateDrawer
+        seasonId={seasonId}
+        target={allocationTarget}
+        members={memberEnrollments}
+        units={unitEnrollments}
+        allocations={allocations}
+        onClose={() => setAllocationTarget(null)}
+        onCreated={(allocation) => {
+          setAllocations((current) => [allocation, ...current]);
+          setAllocationTarget(null);
+          setAllocationCreated(true);
+          setEditingAllocation(allocation);
+        }}
+      />
       <AllocationEditDrawer
         allocation={editingAllocation}
+        newlyCreated={allocationCreated}
         onClose={() => setEditingAllocation(null)}
         onSaved={() => {
           setEditingAllocation(null);
           load();
         }}
+        onConfirmDelete={(name) => confirmRemoval({
+          message: t('adminSeasonDetail.confirmDeleteAllocation', { name }),
+          confirmText: t('common.delete'),
+        })}
+        onAllocateMore={editingAllocation && (tab === 'members' || !allocations.some(
+          (item) => item.unit_season_id === editingAllocation.unit_season_id && item.status !== 'cancelled'
+        )) ? () => {
+          setAllocationTarget(tab === 'members'
+            ? { kind: 'member', id: editingAllocation.member_season_id }
+            : { kind: 'unit', id: editingAllocation.unit_season_id });
+          setEditingAllocation(null);
+        } : undefined}
       />
       {removalDialog}
     </PageLayout>

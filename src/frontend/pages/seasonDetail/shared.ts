@@ -22,7 +22,7 @@ export const STATUS_BADGES: Record<AllocationStatus, string> = {
 // Runs a mutation, then reloads the page data; shows the server message on failure
 export type RunAction = (action: () => Promise<unknown>, fallback: string) => Promise<void>;
 
-// Active (non-cancelled) allocations grouped by member / unit enrollment id
+// Allocations grouped by member / unit enrollment id
 export type AllocationsByEnrollment = Map<number, Allocation[]>;
 
 export const matchesFilter = (filter: AllocationFilter, hasAllocation: boolean) =>

@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { getEndpoints } from '../services/endpoints/endpoints';
 import { Allocation, MemberEnrollment, UnitEnrollment, SEASON_STATUSES, Season, SeasonStatus, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 import AllocationSummary from './seasonDetail/AllocationSummary';
+import AllocationBulkActions from './seasonDetail/AllocationBulkActions';
 
 interface EnrollmentSummaryProps {
   headingId: string;
@@ -92,6 +93,7 @@ const AdminSeasonDashboard: React.FC = () => {
   const { user } = useAuth();
   const seasonId = Number(useParams().seasonId);
   const [season, setSeason] = useState<Season | null>(null);
+  const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
@@ -122,6 +124,7 @@ const AdminSeasonDashboard: React.FC = () => {
         setUpdating(false);
         const response = await getEndpoints().listSeasons<{ data: { seasons: Season[] } }>(authRequestOptions());
         if (!cancelled) {
+          setSeasons(response.data.seasons);
           const selected = response.data.seasons.find((item) => item.id === seasonId);
           if (selected) {
             setSeason(selected);
@@ -327,7 +330,15 @@ const AdminSeasonDashboard: React.FC = () => {
             </div>
             <section className="card mt-3" aria-labelledby="season-allocations-heading">
               <div className="card-body">
-                <h2 id="season-allocations-heading" className="h5 mb-3">{t('adminSeasonDetail.allocationsTab')}</h2>
+                <div className="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+                  <h2 id="season-allocations-heading" className="h5 mb-0">{t('adminSeasonDetail.allocationsTab')}</h2>
+                  <AllocationBulkActions
+                    seasonId={seasonId}
+                    seasons={seasons}
+                    allocations={allocations}
+                    onChanged={() => setAllocationsReload((value) => value + 1)}
+                  />
+                </div>
                 {(membersLoading || unitsLoading || allocationsLoading) && <div role="status">{t('common.loading')}</div>}
                 {(membersError || unitsError || allocationsError) && (
                   <div className="alert alert-danger" role="alert">

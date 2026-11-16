@@ -65,6 +65,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/seasons/{season}/allocations', [AllocationController::class, 'index'])->middleware('management_access:read');
     Route::post('/seasons/{season}/allocations', [AllocationController::class, 'store'])->middleware('management_access:own-season');
+    Route::delete('/seasons/{season}/allocations', [AllocationController::class, 'destroyEligible'])->middleware('management_access:own-season');
+    Route::post('/seasons/{season}/allocations/recalculate', [AllocationController::class, 'recalculate'])->middleware('management_access:own-season');
+    Route::post('/seasons/{season}/allocations/copy', [AllocationController::class, 'copy'])->middleware('management_access:own-season');
     Route::get('/allocations/{allocation}/price', [AllocationController::class, 'previewPrice'])->middleware('management_access:own-allocation');
     Route::put('/allocations/{allocation}', [AllocationController::class, 'update'])->middleware('management_access:own-allocation');
     Route::put('/allocations/{allocation}/status', [AllocationController::class, 'updateStatus'])->middleware('management_access:own-allocation');

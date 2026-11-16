@@ -126,3 +126,9 @@ Additional allocations can be started from an existing allocation's drawer.
 The season dashboard counts distinct enrolled members and units with non-cancelled
 allocations, summarizes active amounts by season category, and shows amounts by
 status separately. Cancelled allocations do not contribute to active totals.
+Season owners can bulk-remove pending and cancelled allocations or recalculate
+pending amounts; allocations without a matching rule are skipped and reported.
+They can copy active allocations from another season when both
+member and unit are enrolled and the unit is free. Copies start pending with a
+new variable symbol and destination pricing; missing prices and ineligible or
+occupied units are skipped and reported.

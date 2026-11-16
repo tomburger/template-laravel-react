@@ -11,7 +11,10 @@ use App\Models\Season;
 use App\Models\UnitSeason;
 use App\Services\PricingService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class AllocationController extends Controller
 {
@@ -84,6 +87,139 @@ class AllocationController extends Controller
         }
 
         return response()->json(['allocation' => $this->present($allocation->load(self::WITH))], 201);
+    }
+
+    /**
+     * Remove pending and cancelled allocations from a season.
+     *
+     * Confirmed and paid allocations remain unchanged.
+     *
+     * @endpoint
+     * @authenticated
+     * @urlParam season integer required The destination season ID.
+     * @responseField deleted integer Number of allocations removed.
+     * @responseField retained integer Number of allocations retained.
+     */
+    public function destroyEligible(Season $season): JsonResponse
+    {
+        $result = DB::transaction(function () use ($season) {
+            $query = Allocation::whereHas('unitSeason', fn ($q) => $q->where('season_id', $season->id));
+            $deleted = (clone $query)->whereIn('status', [Allocation::STATUS_PENDING, Allocation::STATUS_CANCELLED])->delete();
+
+            return ['deleted' => $deleted, 'retained' => $query->count()];
+        });
+
+        return response()->json($result);
+    }
+
+    /**
+     * Recalculate pending allocations for a season.
+     *
+     * Unmatched allocations are skipped; other statuses remain unchanged.
+     *
+     * @endpoint
+     * @authenticated
+     * @urlParam season integer required The season ID.
+     * @responseField recalculated integer Number of allocations recalculated.
+     * @responseField skipped_no_rule integer Number without a matching pricing rule.
+     */
+    public function recalculate(Season $season, PricingService $pricing): JsonResponse
+    {
+        $result = DB::transaction(function () use ($season, $pricing) {
+            $allocations = Allocation::with(['memberSeason', 'unitSeason'])
+                ->whereHas('unitSeason', fn ($q) => $q->where('season_id', $season->id))
+                ->where('status', Allocation::STATUS_PENDING)
+                ->lockForUpdate()
+                ->get();
+            $result = ['recalculated' => 0, 'skipped_no_rule' => 0];
+
+            foreach ($allocations as $allocation) {
+                $rule = $pricing->resolve($season->id, $allocation->unitSeason->category, $allocation->memberSeason->category);
+                if (! $rule) {
+                    $result['skipped_no_rule']++;
+                    continue;
+                }
+
+                $allocation->update(['amount_due' => $rule->price]);
+                $result['recalculated']++;
+            }
+
+            return $result;
+        });
+
+        return response()->json($result);
+    }
+
+    /**
+     * Copy active allocations from another season.
+     *
+     * Only members and units enrolled in the destination are eligible. Occupied units and
+     * allocations without a matching destination price are skipped. Copies start pending.
+     *
+     * @endpoint
+     * @authenticated
+     * @urlParam season integer required The destination season ID.
+     * @bodyParam source_season_id integer required The source season ID.
+     * @responseField copied integer Number of allocations copied.
+     * @responseField skipped_ineligible integer Number missing a destination enrollment.
+     * @responseField skipped_occupied integer Number whose destination unit was already allocated.
+     * @responseField skipped_no_rule integer Number without a matching destination pricing rule.
+     */
+    public function copy(Request $request, Season $season, PricingService $pricing): JsonResponse
+    {
+        $data = $request->validate([
+            'source_season_id' => ['required', 'integer', 'exists:seasons,id', Rule::notIn([$season->id])],
+        ]);
+
+        $result = DB::transaction(function () use ($season, $pricing, $data) {
+            $members = $season->memberSeasons()->get()->keyBy('member_id');
+            $units = $season->unitSeasons()->get()->keyBy('unit_id');
+            $occupied = Allocation::whereHas('unitSeason', fn ($q) => $q->where('season_id', $season->id))
+                ->where('status', '!=', Allocation::STATUS_CANCELLED)
+                ->pluck('unit_season_id')
+                ->flip();
+            $source = Allocation::with(['memberSeason', 'unitSeason'])
+                ->whereHas('unitSeason', fn ($q) => $q->where('season_id', $data['source_season_id']))
+                ->where('status', '!=', Allocation::STATUS_CANCELLED)
+                ->orderBy('id')
+                ->get();
+            $result = ['copied' => 0, 'skipped_ineligible' => 0, 'skipped_occupied' => 0, 'skipped_no_rule' => 0];
+
+            foreach ($source as $allocation) {
+                $member = $members->get($allocation->memberSeason->member_id);
+                $unit = $units->get($allocation->unitSeason->unit_id);
+                if (! $member || ! $unit) {
+                    $result['skipped_ineligible']++;
+                    continue;
+                }
+                if ($occupied->has($unit->id)) {
+                    $result['skipped_occupied']++;
+                    continue;
+                }
+                $rule = $pricing->resolve($season->id, $unit->category, $member->category);
+                if (! $rule) {
+                    $result['skipped_no_rule']++;
+                    continue;
+                }
+                $symbol = $this->nextVariableSymbol();
+                if (strlen($symbol) > 10) {
+                    throw ValidationException::withMessages(['variable_symbol' => 'No variable symbols are available.']);
+                }
+                Allocation::create([
+                    'member_season_id' => $member->id,
+                    'unit_season_id' => $unit->id,
+                    'status' => Allocation::STATUS_PENDING,
+                    'amount_due' => $rule->price,
+                    'variable_symbol' => $symbol,
+                ]);
+                $occupied->put($unit->id, true);
+                $result['copied']++;
+            }
+
+            return $result;
+        });
+
+        return response()->json($result);
     }
 
     /**

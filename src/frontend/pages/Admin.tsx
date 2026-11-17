@@ -23,6 +23,10 @@ const Admin: React.FC = () => {
   const [stats, setStats] = useState<AdminInfoResponse['users'] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const canReadUsers = user?.is_admin || user?.is_content_manager || user?.is_location_owner || user?.is_season_owner;
+  const canReadContent = canReadUsers;
+  const canManageCommunity = user?.is_community_manager || user?.is_location_owner || user?.is_season_owner;
+  const canManagePricing = user?.is_admin || user?.is_pricing_manager;
 
   useEffect(() => {
     if (!user?.is_admin) {
@@ -115,7 +119,7 @@ const Admin: React.FC = () => {
                   </div>
                 )}
 
-                {!user?.is_admin && (
+                {!user?.is_admin && canReadUsers && (
                   <Link to="/admin/users" className="btn btn-primary btn-sm">
                     {t('common.openUserRegister')}
                   </Link>
@@ -124,16 +128,16 @@ const Admin: React.FC = () => {
                 <hr className="my-4" />
                 <h2 className="h4 mb-3">{t('admin.reservations')}</h2>
                 <div className="d-flex flex-wrap gap-2">
-                  <Link to="/admin/locations" className="btn btn-outline-primary btn-sm">
+                  {canReadContent && <Link to="/admin/locations" className="btn btn-outline-primary btn-sm">
                     {t('admin.locationsAndUnits')}
-                  </Link>
-                  {(user?.is_manager || user?.is_location_owner || user?.is_season_owner) && <Link to="/admin/members" className="btn btn-outline-primary btn-sm">
+                  </Link>}
+                  {canManageCommunity && <Link to="/admin/members" className="btn btn-outline-primary btn-sm">
                     {t('admin.members')}
                   </Link>}
-                  <Link to="/admin/seasons" className="btn btn-outline-primary btn-sm">
+                  {canReadContent && <Link to="/admin/seasons" className="btn btn-outline-primary btn-sm">
                     {t('admin.seasons')}
-                  </Link>
-                  {user?.is_admin && <Link to="/admin/pricing" className="btn btn-outline-primary btn-sm">
+                  </Link>}
+                  {canManagePricing && <Link to="/admin/pricing" className="btn btn-outline-primary btn-sm">
                     {t('admin.pricing')}
                   </Link>}
                 </div>

@@ -51,14 +51,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/users/{id}', [UserController::class, 'update'])->middleware('management_access:admin');
     Route::post('/users/{id}/resend-verification-email', [UserController::class, 'resendVerificationEmail'])->middleware('management_access:admin');
 
-    Route::get('/members/candidates', [MemberController::class, 'candidates'])->middleware('management_access:manager');
+    Route::get('/members/candidates', [MemberController::class, 'candidates'])->middleware('management_access:community-manager');
     Route::get('/members', [MemberController::class, 'index'])->middleware('management_access:read-members');
-    Route::post('/members', [MemberController::class, 'store'])->middleware('management_access:manager');
-    Route::put('/members/{member}', [MemberController::class, 'update'])->middleware('management_access:manager');
-    Route::patch('/members/{member}', [MemberController::class, 'update'])->middleware('management_access:manager');
-    Route::delete('/members/{member}', [MemberController::class, 'destroy'])->middleware('management_access:manager');
+    Route::post('/members', [MemberController::class, 'store'])->middleware('management_access:community-manager');
+    Route::put('/members/{member}', [MemberController::class, 'update'])->middleware('management_access:community-manager');
+    Route::patch('/members/{member}', [MemberController::class, 'update'])->middleware('management_access:community-manager');
+    Route::delete('/members/{member}', [MemberController::class, 'destroy'])->middleware('management_access:community-manager');
 
-    Route::middleware('is_admin')->group(function () {
+    Route::middleware('management_access:pricing-manager')->group(function () {
         Route::get('/pricing-rules/preview', [PricingRuleController::class, 'preview']);
         Route::apiResource('pricing-rules', PricingRuleController::class)->except('show');
     });
@@ -83,15 +83,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/seasons/{season}/units/{unitSeason}', [SeasonUnitController::class, 'update'])->middleware('management_access:own-season');
     Route::delete('/seasons/{season}/units/{unitSeason}', [SeasonUnitController::class, 'destroy'])->middleware('management_access:own-season');
 
-    Route::get('/seasons', [SeasonController::class, 'index'])->middleware('management_access:read');
-    Route::post('/seasons', [SeasonController::class, 'store'])->middleware('management_access:manager');
+    Route::get('/seasons', [SeasonController::class, 'index'])->middleware('management_access:read-seasons');
+    Route::post('/seasons', [SeasonController::class, 'store'])->middleware('management_access:content-manager');
     Route::patch('/seasons/{season}/status', [SeasonController::class, 'updateStatus'])->middleware('management_access:own-season');
     Route::match(['put', 'patch'], '/seasons/{season}', [SeasonController::class, 'update'])->middleware('management_access:edit-season');
-    Route::delete('/seasons/{season}', [SeasonController::class, 'destroy'])->middleware('management_access:manager');
+    Route::delete('/seasons/{season}', [SeasonController::class, 'destroy'])->middleware('management_access:content-manager');
     Route::get('/locations', [LocationController::class, 'index'])->middleware('management_access:read');
-    Route::post('/locations', [LocationController::class, 'store'])->middleware('management_access:manager');
+    Route::post('/locations', [LocationController::class, 'store'])->middleware('management_access:content-manager');
     Route::match(['put', 'patch'], '/locations/{location}', [LocationController::class, 'update'])->middleware('management_access:edit-location');
-    Route::delete('/locations/{location}', [LocationController::class, 'destroy'])->middleware('management_access:manager');
+    Route::delete('/locations/{location}', [LocationController::class, 'destroy'])->middleware('management_access:content-manager');
     Route::get('/locations/{location}/layout', [LocationLayoutController::class, 'show'])->middleware('management_access:read');
     Route::post('/locations/{location}/layout', [LocationLayoutController::class, 'update'])->middleware('management_access:own-location');
     Route::delete('/locations/{location}/layout', [LocationLayoutController::class, 'destroy'])->middleware('management_access:own-location');

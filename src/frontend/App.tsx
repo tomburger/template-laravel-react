@@ -57,7 +57,7 @@ function App() {
             path="/admin/users"
             element={
               <ProtectedRoute>
-                <AdminRoute>
+                <AdminRoute access="content">
                   <AdminUsers />
                 </AdminRoute>
               </ProtectedRoute>
@@ -68,7 +68,7 @@ function App() {
             path="/admin/locations"
             element={
               <ProtectedRoute>
-                <AdminRoute>
+                <AdminRoute access="content">
                   <AdminLocations />
                 </AdminRoute>
               </ProtectedRoute>
@@ -78,7 +78,7 @@ function App() {
             path="/admin/locations/:locationId"
             element={
               <ProtectedRoute>
-                <AdminRoute>
+                <AdminRoute access="content">
                   <AdminUnits />
                 </AdminRoute>
               </ProtectedRoute>
@@ -89,7 +89,7 @@ function App() {
             path="/admin/members"
             element={
               <ProtectedRoute>
-                <AdminRoute membersOnly>
+                <AdminRoute access="community">
                   <AdminMembers />
                 </AdminRoute>
               </ProtectedRoute>
@@ -100,7 +100,7 @@ function App() {
             path="/admin/seasons"
             element={
               <ProtectedRoute>
-                <AdminRoute>
+                <AdminRoute access="content">
                   <AdminSeasons />
                 </AdminRoute>
               </ProtectedRoute>
@@ -111,7 +111,7 @@ function App() {
             path="/admin/locations/:locationId/layout"
             element={
               <ProtectedRoute>
-                <AdminRoute>
+                <AdminRoute access="content">
                   <AdminLocationLayout />
                 </AdminRoute>
               </ProtectedRoute>
@@ -122,7 +122,7 @@ function App() {
             path="/admin/seasons/:seasonId"
             element={
               <ProtectedRoute>
-                <AdminRoute>
+                <AdminRoute access="content">
                   <AdminSeasonDashboard />
                 </AdminRoute>
               </ProtectedRoute>
@@ -133,7 +133,7 @@ function App() {
             path="/admin/seasons/:seasonId/enrollments"
             element={
               <ProtectedRoute>
-                <AdminRoute>
+                <AdminRoute access="content">
                   <AdminSeasonDetail />
                 </AdminRoute>
               </ProtectedRoute>
@@ -144,7 +144,7 @@ function App() {
             path="/admin/pricing"
             element={
               <ProtectedRoute>
-                <AdminRoute adminOnly>
+                <AdminRoute access="pricing">
                   <AdminPricing />
                 </AdminRoute>
               </ProtectedRoute>

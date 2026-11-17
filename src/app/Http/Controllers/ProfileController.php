@@ -16,7 +16,7 @@ class ProfileController extends Controller
      * @endpoint
      * @authenticated
      * @responseField name string User's display name.
-     * @responseField member object|null Member details, including the manager-controlled category.
+     * @responseField member object|null Member details, including the community-manager-controlled category.
      */
     public function show(Request $request): JsonResponse
     {
@@ -39,7 +39,7 @@ class ProfileController extends Controller
      * @bodyParam member.last_name string Last name; required when member is supplied.
      * @bodyParam member.phone_number string Phone number.
      * @responseField name string User's display name.
-     * @responseField member object|null Member details, including the manager-controlled category.
+     * @responseField member object|null Member details, including the community-manager-controlled category.
      */
     public function update(UpdateProfileRequest $request): JsonResponse
     {

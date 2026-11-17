@@ -143,7 +143,7 @@ class SeasonAllocationBulkTest extends TestCase
     {
         $owner = User::create(['name' => 'Owner', 'email' => 'owner@example.test', 'password' => 'password']);
         $manager = User::create(['name' => 'Manager', 'email' => 'manager@example.test', 'password' => 'password']);
-        $manager->forceFill(['is_manager' => true])->save();
+        $manager->forceFill(['is_content_manager' => true])->save();
         $season = Season::create(['name' => 'Season', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
         $season->owners()->attach($owner);
         $base = "/api/seasons/{$season->id}/allocations";

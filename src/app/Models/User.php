@@ -50,7 +50,9 @@ class User extends Authenticatable
             'password_reset_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
-            'is_manager' => 'boolean',
+            'is_content_manager' => 'boolean',
+            'is_community_manager' => 'boolean',
+            'is_pricing_manager' => 'boolean',
             'is_deactivated' => 'boolean',
         ];
     }
@@ -65,9 +67,19 @@ class User extends Authenticatable
         return $this->is_admin === true;
     }
 
-    public function isManager(): bool
+    public function isContentManager(): bool
     {
-        return $this->is_manager === true;
+        return $this->is_content_manager === true;
+    }
+
+    public function isCommunityManager(): bool
+    {
+        return $this->is_community_manager === true;
+    }
+
+    public function isPricingManager(): bool
+    {
+        return $this->is_pricing_manager === true;
     }
 
     public function ownedLocations(): BelongsToMany

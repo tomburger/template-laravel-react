@@ -24,7 +24,7 @@ class UpdateSeasonRequest extends FormRequest
             'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
             'status' => ['sometimes', 'required', 'string', Rule::in(Season::STATUSES)],
             // Scribe inspects rules without an authenticated user.
-            'owner_ids' => ($this->user()?->isManager() ?? true) ? 'required|array|min:1' : 'prohibited',
+            'owner_ids' => ($this->user()?->isContentManager() ?? true) ? 'required|array|min:1' : 'prohibited',
             'owner_ids.*' => 'required|integer|distinct|exists:users,id',
         ];
     }

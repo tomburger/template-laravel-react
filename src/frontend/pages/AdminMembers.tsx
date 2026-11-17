@@ -31,7 +31,7 @@ const AdminMembers: React.FC = () => {
       setError(null);
       const membersResponse = await listMembers<{ data: { members: Member[] } }>(authRequestOptions());
       setMembers(membersResponse.data.members);
-      if (user?.is_manager) {
+      if (user?.is_community_manager) {
         const candidatesResponse = await listUsersThatAreNotMembersYet<{ data: { users: UserOption[] } }>(authRequestOptions());
         setCandidates(candidatesResponse.data.users);
       }
@@ -113,7 +113,7 @@ const AdminMembers: React.FC = () => {
               <h1 className="h3 mb-1">{t('adminMembers.title')}</h1>
               <p className="text-muted mb-0">{t('adminMembers.subtitle')}</p>
             </div>
-            {user?.is_manager && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
+            {user?.is_community_manager && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
               {t('adminMembers.add')}
             </button>}
           </div>
@@ -151,10 +151,10 @@ const AdminMembers: React.FC = () => {
                       <td>{member.category}</td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end flex-wrap gap-2">
-                          {user?.is_manager && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(member)}>
+                          {user?.is_community_manager && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(member)}>
                             {t('adminUsers.edit')}
                           </button>}
-                          {user?.is_manager && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(member)}>
+                          {user?.is_community_manager && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(member)}>
                             {t('common.delete')}
                           </button>}
                         </div>

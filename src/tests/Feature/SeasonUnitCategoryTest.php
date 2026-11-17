@@ -82,7 +82,7 @@ class SeasonUnitCategoryTest extends TestCase
     {
         $owner = User::create(['name' => 'Owner', 'email' => 'owner@example.test', 'password' => 'password']);
         $manager = User::create(['name' => 'Manager', 'email' => 'manager@example.test', 'password' => 'password']);
-        $manager->forceFill(['is_manager' => true])->save();
+        $manager->forceFill(['is_content_manager' => true])->save();
         $season = Season::create(['name' => 'Season', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
         $otherSeason = Season::create(['name' => 'Other', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
         $season->owners()->attach($owner);
@@ -156,7 +156,7 @@ class SeasonUnitCategoryTest extends TestCase
     {
         $owner = User::create(['name' => 'Owner', 'email' => 'owner@example.test', 'password' => 'password']);
         $manager = User::create(['name' => 'Manager', 'email' => 'manager@example.test', 'password' => 'password']);
-        $manager->forceFill(['is_manager' => true])->save();
+        $manager->forceFill(['is_content_manager' => true])->save();
         $memberUser = User::create(['name' => 'Member', 'email' => 'member@example.test', 'password' => 'password']);
         $member = Member::create(['id' => $memberUser->id, 'first_name' => 'First', 'last_name' => 'Last']);
         $season = Season::create(['name' => 'Season', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);

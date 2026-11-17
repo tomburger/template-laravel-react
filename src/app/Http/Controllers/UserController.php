@@ -18,7 +18,7 @@ class UserController extends Controller
     /**
      * List all users
      *
-     * Get a list of all registered users. Only admins can access this endpoint.
+     * Get a list of all registered users. Admins, content managers, and owners can access this endpoint.
      *
      * @endpoint
      * @authenticated
@@ -26,7 +26,18 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
-        $users = User::all(['id', 'name', 'email', 'is_admin', 'is_manager', 'is_deactivated', 'email_verified_at', 'created_at']);
+        $users = User::all([
+            'id',
+            'name',
+            'email',
+            'is_admin',
+            'is_content_manager',
+            'is_community_manager',
+            'is_pricing_manager',
+            'is_deactivated',
+            'email_verified_at',
+            'created_at',
+        ]);
 
         return response()->json([
             'users' => $users,
@@ -73,7 +84,9 @@ class UserController extends Controller
      * @authenticated
      * @urlParam id integer required The user ID. Example: 1
      * @bodyParam is_admin boolean Set whether the user is an admin.
-     * @bodyParam is_manager boolean Set whether the user is a manager.
+     * @bodyParam is_content_manager boolean Set whether the user is a content manager.
+     * @bodyParam is_community_manager boolean Set whether the user is a community manager.
+     * @bodyParam is_pricing_manager boolean Set whether the user is a pricing manager.
      * @bodyParam is_deactivated boolean Set whether the user is deactivated.
      * @responseField user object Updated user data
      * @responseField message string Success message
@@ -106,7 +119,9 @@ class UserController extends Controller
                 'name' => $updatedUser->name,
                 'email' => $updatedUser->email,
                 'is_admin' => $updatedUser->is_admin,
-                'is_manager' => $updatedUser->is_manager,
+                'is_content_manager' => $updatedUser->is_content_manager,
+                'is_community_manager' => $updatedUser->is_community_manager,
+                'is_pricing_manager' => $updatedUser->is_pricing_manager,
                 'is_deactivated' => $updatedUser->is_deactivated,
                 'email_verified_at' => $updatedUser->email_verified_at,
                 'created_at' => $updatedUser->created_at,

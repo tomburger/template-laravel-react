@@ -21,15 +21,19 @@ class ManagementAccess
         $allocation = $request->route('allocation');
 
         $allowed = match ($ability) {
-            'read' => $user->isAdmin() || $user->isManager()
+            'read' => $user->isAdmin() || $user->isContentManager()
                 || $user->ownedLocations()->exists() || $user->ownedSeasons()->exists(),
-            'read-members' => $user->isManager()
+            'read-seasons' => $user->isAdmin() || $user->isContentManager() || $user->isPricingManager()
+                || $user->ownedLocations()->exists() || $user->ownedSeasons()->exists(),
+            'read-members' => $user->isCommunityManager()
                 || $user->ownedLocations()->exists() || $user->ownedSeasons()->exists(),
             'admin' => $user->isAdmin(),
-            'manager' => $user->isManager(),
-            'edit-location' => $user->isManager() || ($location instanceof Location && $location->owners()->whereKey($user->id)->exists()),
+            'content-manager' => $user->isContentManager(),
+            'community-manager' => $user->isCommunityManager(),
+            'pricing-manager' => $user->isAdmin() || $user->isPricingManager(),
+            'edit-location' => $user->isContentManager() || ($location instanceof Location && $location->owners()->whereKey($user->id)->exists()),
             'own-location' => $location instanceof Location && $location->owners()->whereKey($user->id)->exists(),
-            'edit-season' => $user->isManager() || ($season instanceof Season && $season->owners()->whereKey($user->id)->exists()),
+            'edit-season' => $user->isContentManager() || ($season instanceof Season && $season->owners()->whereKey($user->id)->exists()),
             'own-season' => $season instanceof Season && $season->owners()->whereKey($user->id)->exists(),
             'own-allocation' => $allocation instanceof Allocation
                 && $allocation->unitSeason->season->owners()->whereKey($user->id)->exists(),

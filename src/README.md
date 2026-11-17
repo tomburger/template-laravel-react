@@ -92,25 +92,28 @@ Authorization: Bearer {token}
 
 ## Management access
 
-Roles combine: users may be administrators, managers, and owners of individual
-locations or seasons at the same time. Users without these roles have no
-management access. Deactivated users cannot use management endpoints.
+Roles combine: users may be administrators, content managers, community
+managers, pricing managers, and owners of individual locations or seasons at
+the same time. Users without these roles have no management access. Deactivated
+users cannot use management endpoints.
 
 - Administrators manage user flags and verification and can view locations and seasons.
-- Managers manage members, create, edit and delete locations and seasons, and
-  assign their owners. They can view users.
+- Content managers create, edit and delete locations and seasons, assign their
+  owners, and view users.
+- Community managers manage members.
+- Pricing managers manage pricing rules.
 - Location owners can edit their locations, units and layouts, but cannot change
   owners or delete locations.
 - Season owners can edit their seasons, manage enrollments and allocations,
   but cannot change owners or delete seasons.
 - Owners can also view users, members, locations and seasons they do not own.
 
-Pricing remains administrator-only for now. Location layout images remain public
-as before. User accounts are created through self-registration.
+Administrators and pricing managers can manage pricing rules. Location layout
+images remain public as before. User accounts are created through self-registration.
 
 Authenticated users can edit their own display name and create or update their
-own member details from the dashboard. Member categories remain manager-controlled
-because they affect pricing.
+own member details from the dashboard. Member categories remain
+community-manager-controlled because they affect pricing.
 
 Season owners can adjust an enrolled member's or unit's category for that season
 without changing its general category. The adjusted category is used for new

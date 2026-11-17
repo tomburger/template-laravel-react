@@ -56,7 +56,7 @@ const AdminLocations: React.FC = () => {
       setFormError(null);
       const data: CreateLocationBody & Partial<OwnerInput> = {
         name,
-        ...(user?.is_manager ? { owner_ids: owners.map((owner) => owner.id) } : {}),
+        ...(user?.is_content_manager ? { owner_ids: owners.map((owner) => owner.id) } : {}),
       };
       if (editing) {
         await updateLocation(editing.id, data, authRequestOptions());
@@ -95,7 +95,7 @@ const AdminLocations: React.FC = () => {
               <h1 className="h3 mb-1">{t('adminLocations.title')}</h1>
               <p className="text-muted mb-0">{t('adminLocations.subtitle')}</p>
             </div>
-            {user?.is_manager && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
+            {user?.is_content_manager && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
               {t('adminLocations.add')}
             </button>}
           </div>
@@ -137,10 +137,10 @@ const AdminLocations: React.FC = () => {
                           <Link to={`/admin/locations/${location.id}/layout`} className="btn btn-sm btn-primary">
                             {t('adminLocations.layout')}
                           </Link>
-                          {(user?.is_manager || location.owners.some((owner) => owner.id === user?.id)) && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(location)}>
+                          {(user?.is_content_manager || location.owners.some((owner) => owner.id === user?.id)) && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(location)}>
                             {t('adminUsers.edit')}
                           </button>}
-                          {user?.is_manager && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(location)}>
+                          {user?.is_content_manager && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(location)}>
                             {t('common.delete')}
                           </button>}
                         </div>
@@ -166,7 +166,7 @@ const AdminLocations: React.FC = () => {
             <button type="button" className="btn btn-outline-secondary" onClick={() => setDrawerOpen(false)} disabled={saving}>
               {t('adminUsers.cancel')}
             </button>
-            <button type="button" className="btn btn-dark" onClick={save} disabled={saving || name.trim() === '' || (!!user?.is_manager && owners.length === 0)}>
+            <button type="button" className="btn btn-dark" onClick={save} disabled={saving || name.trim() === '' || (!!user?.is_content_manager && owners.length === 0)}>
               {saving ? t('adminUsers.saving') : t('adminUsers.save')}
             </button>
           </div>
@@ -177,8 +177,8 @@ const AdminLocations: React.FC = () => {
           <label className="form-label" htmlFor="location-name">{t('adminLocations.name')}</label>
           <input id="location-name" className="form-control" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} readOnly={!user?.is_manager} label={t('owners.label')} emptyText={t('owners.none')} />
-        {user?.is_manager && <div className="form-text">{t('owners.required')}</div>}
+        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} readOnly={!user?.is_content_manager} label={t('owners.label')} emptyText={t('owners.none')} />
+        {user?.is_content_manager && <div className="form-text">{t('owners.required')}</div>}
       </RightDrawer>
       {dialog}
     </PageLayout>

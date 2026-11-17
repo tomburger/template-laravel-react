@@ -65,7 +65,7 @@ const AdminSeasons: React.FC = () => {
   const save = async () => {
     const data: CreateSeasonBody & Partial<OwnerInput> = {
       name: form.name.trim(), start_date: form.start_date, end_date: form.end_date, status: form.status,
-      ...(user?.is_manager ? { owner_ids: owners.map((owner) => owner.id) } : {}),
+      ...(user?.is_content_manager ? { owner_ids: owners.map((owner) => owner.id) } : {}),
     };
     try {
       setSaving(true);
@@ -105,7 +105,7 @@ const AdminSeasons: React.FC = () => {
     }
   };
 
-  const canSave = form.name.trim() !== '' && form.start_date !== '' && form.end_date !== '' && (!user?.is_manager || owners.length > 0);
+  const canSave = form.name.trim() !== '' && form.start_date !== '' && form.end_date !== '' && (!user?.is_content_manager || owners.length > 0);
   const filteredSeasons = seasons.filter((season) => statusFilter === 'all' || season.status === statusFilter);
 
   return (
@@ -120,7 +120,7 @@ const AdminSeasons: React.FC = () => {
               <h1 className="h3 mb-1">{t('adminSeasons.title')}</h1>
               <p className="text-muted mb-0">{t('adminSeasons.subtitle')}</p>
             </div>
-            {user?.is_manager && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
+            {user?.is_content_manager && <button className="btn btn-dark btn-sm" onClick={() => openDrawer(null)}>
               {t('adminSeasons.add')}
             </button>}
           </div>
@@ -186,10 +186,10 @@ const AdminSeasons: React.FC = () => {
                           {season.owners.some((owner) => owner.id === user?.id) && <Link to={`/admin/seasons/${season.id}`} className="btn btn-sm btn-outline-primary">
                             {t('adminSeasons.dashboard')}
                           </Link>}
-                          {(user?.is_manager || season.owners.some((owner) => owner.id === user?.id)) && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(season)}>
+                          {(user?.is_content_manager || season.owners.some((owner) => owner.id === user?.id)) && <button className="btn btn-sm btn-dark" onClick={() => openDrawer(season)}>
                             {t('adminUsers.edit')}
                           </button>}
-                          {user?.is_manager && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(season)}>
+                          {user?.is_content_manager && <button className="btn btn-sm btn-outline-danger" onClick={() => remove(season)}>
                             {t('common.delete')}
                           </button>}
                         </div>
@@ -245,8 +245,8 @@ const AdminSeasons: React.FC = () => {
             ))}
           </select>
         </div>
-        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} readOnly={!user?.is_manager} label={t('owners.label')} emptyText={t('owners.none')} />
-        {user?.is_manager && <div className="form-text mb-3">{t('owners.required')}</div>}
+        <ContentEditorsSelector value={owners} onChange={setOwners} disabled={saving} readOnly={!user?.is_content_manager} label={t('owners.label')} emptyText={t('owners.none')} />
+        {user?.is_content_manager && <div className="form-text mb-3">{t('owners.required')}</div>}
         {!editing && (
           <div className="mb-3">
             <label className="form-label" htmlFor="season-copy">{t('adminSeasons.copyFrom')}</label>

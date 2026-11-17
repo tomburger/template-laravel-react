@@ -32,7 +32,10 @@ const Header: React.FC = () => {
         <div className="d-flex align-items-center gap-2">
           <span className="me-3">{t('header.welcome', { name: user?.name })}</span>
           <LanguageSwitcher />
-          {user && !user.is_deactivated && (user.is_admin || user.is_manager || user.is_location_owner || user.is_season_owner) && (
+          {user && !user.is_deactivated && (
+            user.is_admin || user.is_content_manager || user.is_community_manager
+            || user.is_pricing_manager || user.is_location_owner || user.is_season_owner
+          ) && (
             <button
               className="btn btn-outline-primary btn-sm me-2"
               onClick={() => navigate('/admin')}

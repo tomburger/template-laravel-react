@@ -7,7 +7,7 @@ use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 
-class UserManagerFlagTest extends TestCase
+class UserManagementFlagsTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -22,7 +22,7 @@ class UserManagerFlagTest extends TestCase
         return $app;
     }
 
-    public function test_admin_can_enable_and_disable_manager_flag(): void
+    public function test_admin_can_enable_and_disable_each_manager_flag(): void
     {
         $admin = User::findOrFail(1);
         $user = User::create([
@@ -31,24 +31,28 @@ class UserManagerFlagTest extends TestCase
             'password' => 'password',
         ])->fresh();
 
-        $this->assertFalse($user->is_manager);
-        $user->forceFill(['is_admin' => true])->save();
         $this->actingAs($admin, 'sanctum');
 
-        foreach ([true, false] as $manager) {
-            $this->postJson("/api/users/{$user->id}", ['is_manager' => $manager])
-                ->assertOk()
-                ->assertJsonPath('user.is_manager', $manager)
-                ->assertJsonPath('user.is_admin', true);
+        foreach (['is_content_manager', 'is_community_manager', 'is_pricing_manager'] as $flag) {
+            $this->assertFalse($user->fresh()->{$flag});
 
-            $this->assertSame($manager, $user->fresh()->is_manager);
+            $this->postJson("/api/users/{$user->id}", [$flag => true])
+                ->assertOk()
+                ->assertJsonPath("user.{$flag}", true);
+            $this->assertTrue($user->fresh()->{$flag});
+
             $this->getJson('/api/users')
                 ->assertOk()
-                ->assertJsonFragment(['id' => $user->id, 'is_manager' => $manager]);
+                ->assertJsonFragment(['id' => $user->id, $flag => true]);
+
+            $this->postJson("/api/users/{$user->id}", [$flag => false])
+                ->assertOk()
+                ->assertJsonPath("user.{$flag}", false);
+            $this->assertFalse($user->fresh()->{$flag});
         }
     }
 
-    public function test_manager_flag_requires_a_boolean_and_admin_access(): void
+    public function test_manager_flags_require_booleans_and_admin_access(): void
     {
         $admin = User::findOrFail(1);
         $user = User::create([
@@ -57,16 +61,25 @@ class UserManagerFlagTest extends TestCase
             'password' => 'password',
         ]);
 
-        $this->actingAs($admin, 'sanctum')
-            ->postJson("/api/users/{$user->id}", ['is_manager' => 'invalid'])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors('is_manager');
+        foreach (['is_content_manager', 'is_community_manager', 'is_pricing_manager'] as $flag) {
+            $this->actingAs($admin, 'sanctum')
+                ->postJson("/api/users/{$user->id}", [$flag => 'invalid'])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors($flag);
+        }
 
         $this->actingAs($user, 'sanctum')
-            ->postJson("/api/users/{$user->id}", ['is_manager' => true])
+            ->postJson("/api/users/{$user->id}", ['is_pricing_manager' => true])
             ->assertForbidden();
 
-        $this->assertFalse($user->fresh()->is_manager);
+        $this->assertFalse($user->fresh()->is_content_manager);
+        $this->assertFalse($user->fresh()->is_community_manager);
+        $this->assertFalse($user->fresh()->is_pricing_manager);
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/users/{$user->id}", ['is_manager' => true])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('is_manager');
     }
 
     public function test_admin_cannot_remove_their_own_admin_status(): void

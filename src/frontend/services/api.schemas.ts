@@ -279,8 +279,12 @@ export type ListUsersThatAreNotMembersYet401 = {
 export type UpdateUserFlagsBody = {
   /** Set whether the user is an admin. */
   is_admin?: boolean;
-  /** Set whether the user is a manager. */
-  is_manager?: boolean;
+  /** Set whether the user is a content manager. */
+  is_content_manager?: boolean;
+  /** Set whether the user is a community manager. */
+  is_community_manager?: boolean;
+  /** Set whether the user is a pricing manager. */
+  is_pricing_manager?: boolean;
   /** Set whether the user is deactivated. */
   is_deactivated?: boolean;
 };

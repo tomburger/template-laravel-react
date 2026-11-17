@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 interface AdminRouteProps {
   children: React.ReactNode;
-  adminOnly?: boolean;
-  membersOnly?: boolean;
+  access?: 'content' | 'community' | 'pricing';
 }
 
-const AdminRoute: React.FC<AdminRouteProps> = ({ children, adminOnly = false, membersOnly = false }) => {
+const AdminRoute: React.FC<AdminRouteProps> = ({ children, access }) => {
   const { isAuthenticated, loading, user } = useAuth();
   const { t } = useTranslation();
 
@@ -22,9 +21,16 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children, adminOnly = false, me
     );
   }
 
-  const canAccess = user && !user.is_deactivated && (adminOnly
-    ? user.is_admin
-    : (!membersOnly && user.is_admin) || user.is_manager || user.is_location_owner || user.is_season_owner);
+  const isOwner = user?.is_location_owner || user?.is_season_owner;
+  const canAccess = user && !user.is_deactivated && (
+    access === 'content'
+      ? user.is_admin || user.is_content_manager || isOwner
+      : access === 'community'
+        ? user.is_community_manager || isOwner
+        : access === 'pricing'
+          ? user.is_admin || user.is_pricing_manager
+          : user.is_admin || user.is_content_manager || user.is_community_manager || user.is_pricing_manager || isOwner
+  );
 
   if (!isAuthenticated || !canAccess) {
     return (
@@ -32,7 +38,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children, adminOnly = false, me
         <div className="text-center">
           <h1 className="display-4 mb-4">          {t('adminRoute.title')}</h1>
                     <p className="lead mb-4">{t('adminRoute.noPermission')}</p>
-                    {adminOnly && <p className="text-muted">{t('adminRoute.adminsOnly')}</p>}
+                    {access === 'pricing' && !user?.is_admin && <p className="text-muted">{t('adminRoute.pricingManagersOrAdmins')}</p>}
         </div>
       </div>
     );

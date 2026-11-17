@@ -10,7 +10,9 @@ interface User {
   email: string;
   email_verified_at: string | null;
   is_admin: boolean;
-  is_manager: boolean;
+  is_content_manager: boolean;
+  is_community_manager: boolean;
+  is_pricing_manager: boolean;
   is_location_owner: boolean;
   is_season_owner: boolean;
   is_deactivated: boolean;
@@ -23,7 +25,7 @@ interface AuthContextType {
   user: User | null;
   isDefaultAdminActive: boolean;
   setDefaultAdminActive: (isActive: boolean) => void;
-  updateCurrentUserFlags: (flags: Pick<User, 'id' | 'is_admin' | 'is_manager' | 'is_deactivated'>) => void;
+  updateCurrentUserFlags: (flags: Pick<User, 'id' | 'is_admin' | 'is_content_manager' | 'is_community_manager' | 'is_pricing_manager' | 'is_deactivated'>) => void;
   updateCurrentUserName: (name: string) => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -210,9 +212,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
   };
 
-  const updateCurrentUserFlags = (flags: Pick<User, 'id' | 'is_admin' | 'is_manager' | 'is_deactivated'>) => {
+  const updateCurrentUserFlags = (flags: Pick<User, 'id' | 'is_admin' | 'is_content_manager' | 'is_community_manager' | 'is_pricing_manager' | 'is_deactivated'>) => {
     setUser((current) => current?.id === flags.id
-      ? { ...current, is_admin: flags.is_admin, is_manager: flags.is_manager, is_deactivated: flags.is_deactivated }
+      ? {
+          ...current,
+          is_admin: flags.is_admin,
+          is_content_manager: flags.is_content_manager,
+          is_community_manager: flags.is_community_manager,
+          is_pricing_manager: flags.is_pricing_manager,
+          is_deactivated: flags.is_deactivated,
+        }
       : current);
   };
 

@@ -14,7 +14,9 @@ type UserRow = {
   name: string;
   email: string;
   is_admin: boolean;
-  is_manager: boolean;
+  is_content_manager: boolean;
+  is_community_manager: boolean;
+  is_pricing_manager: boolean;
   is_deactivated: boolean;
   email_verified_at: string | null;
   created_at: string;
@@ -29,9 +31,9 @@ type UpdateUserResponse = {
   message?: string;
 };
 
-type FilterValue = 'all' | 'active' | 'deactivated' | 'verified' | 'pending-verification' | 'admin' | 'manager';
+type FilterValue = 'all' | 'active' | 'deactivated' | 'verified' | 'pending-verification' | 'admin' | 'content-manager' | 'community-manager' | 'pricing-manager';
 
-const FILTER_VALUES: FilterValue[] = ['all', 'active', 'deactivated', 'verified', 'pending-verification', 'admin', 'manager'];
+const FILTER_VALUES: FilterValue[] = ['all', 'active', 'deactivated', 'verified', 'pending-verification', 'admin', 'content-manager', 'community-manager', 'pricing-manager'];
 
 const AdminUsers: React.FC = () => {
   const { user: currentUser, isDefaultAdminActive, setDefaultAdminActive, updateCurrentUserFlags } = useAuth();
@@ -45,7 +47,13 @@ const AdminUsers: React.FC = () => {
   const [filter, setFilter] = useState<FilterValue>('all');
   const [busyUserId, setBusyUserId] = useState<number | null>(null);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
-  const [editFlags, setEditFlags] = useState({ is_admin: false, is_manager: false, is_deactivated: false });
+  const [editFlags, setEditFlags] = useState({
+    is_admin: false,
+    is_content_manager: false,
+    is_community_manager: false,
+    is_pricing_manager: false,
+    is_deactivated: false,
+  });
   const [editError, setEditError] = useState<string | null>(null);
 
 
@@ -73,7 +81,9 @@ const AdminUsers: React.FC = () => {
     if (editingUser) {
       setEditFlags({
         is_admin: editingUser.is_admin,
-        is_manager: editingUser.is_manager,
+        is_content_manager: editingUser.is_content_manager,
+        is_community_manager: editingUser.is_community_manager,
+        is_pricing_manager: editingUser.is_pricing_manager,
         is_deactivated: editingUser.is_deactivated,
       });
     }
@@ -103,8 +113,12 @@ const AdminUsers: React.FC = () => {
           return user.email_verified_at === null;
         case 'admin':
           return user.is_admin;
-        case 'manager':
-          return user.is_manager;
+        case 'content-manager':
+          return user.is_content_manager;
+        case 'community-manager':
+          return user.is_community_manager;
+        case 'pricing-manager':
+          return user.is_pricing_manager;
         default:
           return true;
       }
@@ -271,15 +285,23 @@ const AdminUsers: React.FC = () => {
                                 </span>
                               </td>
                               <td>
-                                {user.is_admin && (
-                                  <span className="badge bg-dark">{t('adminUsers.admin')}</span>
-                                )}
-                                {user.is_manager && (
-                                  <span className={`badge bg-info${user.is_admin ? ' ms-2' : ''}`}>{t('adminUsers.manager')}</span>
-                                )}
-                                {!user.is_admin && !user.is_manager && (
-                                  <span className="badge bg-light text-dark border">{t('adminUsers.user')}</span>
-                                )}
+                                <div className="d-flex flex-wrap gap-2">
+                                  {user.is_admin && (
+                                    <span className="badge bg-dark">{t('adminUsers.admin')}</span>
+                                  )}
+                                  {user.is_content_manager && (
+                                    <span className="badge bg-info">{t('adminUsers.contentManager')}</span>
+                                  )}
+                                  {user.is_community_manager && (
+                                    <span className="badge bg-success">{t('adminUsers.communityManager')}</span>
+                                  )}
+                                  {user.is_pricing_manager && (
+                                    <span className="badge bg-warning text-dark">{t('adminUsers.pricingManager')}</span>
+                                  )}
+                                  {!user.is_admin && !user.is_content_manager && !user.is_community_manager && !user.is_pricing_manager && (
+                                    <span className="badge bg-light text-dark border">{t('adminUsers.user')}</span>
+                                  )}
+                                </div>
                               </td>
                               <td>{new Date(user.created_at).toLocaleDateString(i18n.language)}</td>
                               <td className="text-end">
@@ -355,17 +377,44 @@ const AdminUsers: React.FC = () => {
                     disabled={editingUser.id === 1 && !editingUser.is_admin}
                   />
                   <label className="form-check-label" htmlFor="edit-user-admin">{t('adminUsers.admin')}</label>
+                  <div className="form-text">{t('adminUsers.adminDescription')}</div>
                 </div>
                 <div className="form-check form-switch mb-3">
                   <input
-                    id="edit-user-manager"
+                    id="edit-user-content-manager"
                     className="form-check-input"
                     type="checkbox"
-                    checked={editFlags.is_manager}
-                    onChange={(event) => setEditFlags((flags) => ({ ...flags, is_manager: event.target.checked }))}
+                    checked={editFlags.is_content_manager}
+                    onChange={(event) => setEditFlags((flags) => ({ ...flags, is_content_manager: event.target.checked }))}
                   />
-                  <label className="form-check-label" htmlFor="edit-user-manager">{t('adminUsers.manager')}</label>
+                  <label className="form-check-label" htmlFor="edit-user-content-manager">{t('adminUsers.contentManager')}</label>
+                  <div className="form-text">{t('adminUsers.contentManagerDescription')}</div>
                 </div>
+                <div className="form-check form-switch mb-3">
+                  <input
+                    id="edit-user-community-manager"
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={editFlags.is_community_manager}
+                    onChange={(event) => setEditFlags((flags) => ({ ...flags, is_community_manager: event.target.checked }))}
+                  />
+                  <label className="form-check-label" htmlFor="edit-user-community-manager">{t('adminUsers.communityManager')}</label>
+                  <div className="form-text">{t('adminUsers.communityManagerDescription')}</div>
+                </div>
+                <div className="form-check form-switch">
+                  <input
+                    id="edit-user-pricing-manager"
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={editFlags.is_pricing_manager}
+                    onChange={(event) => setEditFlags((flags) => ({ ...flags, is_pricing_manager: event.target.checked }))}
+                  />
+                  <label className="form-check-label" htmlFor="edit-user-pricing-manager">{t('adminUsers.pricingManager')}</label>
+                  <div className="form-text">{t('adminUsers.pricingManagerDescription')}</div>
+                </div>
+              </div>
+              <div className="border rounded p-3 mb-4 bg-light-subtle">
+                <div className="fw-semibold mb-3">{t('adminUsers.accountStatus')}</div>
                 <div className="form-check form-switch">
                   <input
                     id="edit-user-deactivated"
@@ -375,6 +424,7 @@ const AdminUsers: React.FC = () => {
                     onChange={(event) => setEditFlags((flags) => ({ ...flags, is_deactivated: event.target.checked }))}
                   />
                   <label className="form-check-label" htmlFor="edit-user-deactivated">{t('adminUsers.deactivateAccount')}</label>
+                  <div className="form-text">{t('adminUsers.deactivateDescription')}</div>
                 </div>
               </div>
               <div className="border rounded p-3">

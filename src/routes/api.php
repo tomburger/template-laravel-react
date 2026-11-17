@@ -46,7 +46,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/admin/info', [UserController::class, 'adminInfo'])->middleware('management_access:admin');
     Route::get('/users', [UserController::class, 'index'])->middleware('management_access:read');
     Route::post('/users/{id}', [UserController::class, 'update'])->middleware('management_access:admin');
     Route::post('/users/{id}/resend-verification-email', [UserController::class, 'resendVerificationEmail'])->middleware('management_access:admin');

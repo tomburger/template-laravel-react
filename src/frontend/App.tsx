@@ -10,7 +10,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ResendVerification from './pages/ResendVerification';
 import Home from './pages/Home';
-import Admin from './pages/Admin';
 import AdminUsers from './pages/AdminUsers';
 import AdminLocations from './pages/AdminLocations';
 import AdminMembers from './pages/AdminMembers';
@@ -40,16 +39,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <Admin />
-                </AdminRoute>
               </ProtectedRoute>
             }
           />

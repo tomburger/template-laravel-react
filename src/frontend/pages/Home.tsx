@@ -166,10 +166,21 @@ const Home: React.FC = () => {
     <PageLayout>
       <div className="row g-3 align-items-start">
         <div className="col-12 col-lg-8">
-          <section className="card shadow-sm mb-3" aria-labelledby="home-administration-heading">
+          <section className="card shadow-sm" aria-labelledby="home-membership-heading">
             <div className="card-body p-4">
-              <h2 id="home-administration-heading" className="h4 mb-0">{t('home.administration')}</h2>
-              <div className="d-flex flex-wrap gap-2 mt-3">
+              <h2 id="home-membership-heading" className="h4 mb-0">{t('header.welcome', { name: user?.name })}</h2>
+            </div>
+          </section>
+        </div>
+        <aside className="col-12 col-lg-4" aria-labelledby="home-administration-heading">
+          <DefaultAdminWarning
+            isDefaultAdminActive={isDefaultAdminActive}
+            isCurrentUserAdmin={user?.is_admin}
+          />
+          <section className="card shadow-sm mb-3" aria-labelledby="home-administration-heading">
+            <div className="card-body p-3 p-lg-4">
+              <h1 id="home-administration-heading" className="h4 mb-3">{t('home.administration')}</h1>
+              <div className="d-flex flex-wrap gap-2">
                 {canReadUsers && <Link to="/admin/users" className="btn btn-outline-primary btn-sm">{t('admin.users')}</Link>}
                 {canReadContent && <Link to="/admin/locations" className="btn btn-outline-primary btn-sm">{t('admin.locationsAndUnits')}</Link>}
                 {canReadContent && <Link to="/admin/seasons" className="btn btn-outline-primary btn-sm">{t('admin.seasons')}</Link>}
@@ -177,12 +188,12 @@ const Home: React.FC = () => {
                 {canManagePricing && <Link to="/admin/pricing" className="btn btn-outline-primary btn-sm">{t('admin.pricing')}</Link>}
               </div>
               {isOwner && (
-                <div className="mt-4">
+                <div className="mt-3">
                   {loadingOwnedItems && <div role="status">{t('common.loading')}</div>}
                   {ownedItemsError && <div className="alert alert-danger mt-3 mb-0" role="alert">{ownedItemsError}</div>}
                   {!loadingOwnedItems && !ownedItemsError && ownedSeasons.length > 0 && (
                     <div className="mb-3">
-                      <h3 className="h6 mb-2">{t('home.yourSeasons')}</h3>
+                      <h2 className="h6 mb-2">{t('home.yourSeasons')}</h2>
                       <div className="d-flex flex-wrap gap-2">
                         {ownedSeasons.map((season) => (
                           <Link key={season.id} to={`/admin/seasons/${season.id}`} className="btn btn-outline-secondary btn-sm">
@@ -194,7 +205,7 @@ const Home: React.FC = () => {
                   )}
                   {!loadingOwnedItems && !ownedItemsError && ownedLocations.length > 0 && (
                     <div>
-                      <h3 className="h6 mb-2">{t('home.yourLocations')}</h3>
+                      <h2 className="h6 mb-2">{t('home.yourLocations')}</h2>
                       <div className="d-flex flex-wrap gap-2">
                         {ownedLocations.map((location) => (
                           <Link key={location.id} to={`/admin/locations/${location.id}/layout`} className="btn btn-outline-secondary btn-sm">
@@ -208,20 +219,8 @@ const Home: React.FC = () => {
               )}
             </div>
           </section>
-          <section className="card shadow-sm" aria-labelledby="home-membership-heading">
-            <div className="card-body p-4">
-              <h2 id="home-membership-heading" className="h4 mb-0">{t('home.membership')}</h2>
-            </div>
-          </section>
-        </div>
-        <aside className="col-12 col-lg-4" aria-labelledby="home-profile-heading">
-          <div className="card shadow-sm">
+          <section className="card shadow-sm" aria-labelledby="home-profile-heading">
             <div className="card-body p-3 p-lg-4">
-              <DefaultAdminWarning
-                isDefaultAdminActive={isDefaultAdminActive}
-                isCurrentUserAdmin={user?.is_admin}
-              />
-              <div className="alert alert-success" role="alert">{t('home.loggedIn')}</div>
               {saved && <div className="alert alert-success" role="status">{t('home.profileSaved')}</div>}
               {loadError && (
                 <div className="alert alert-danger" role="alert">
@@ -241,7 +240,7 @@ const Home: React.FC = () => {
                 </div>
               )}
 
-              <div className="mt-4">
+              <div>
                 <div className="d-flex justify-content-between align-items-center gap-2">
                   <h2 id="home-profile-heading" className="h5 mb-0">{t('home.profile')}</h2>
                   <button type="button" className="btn btn-sm btn-dark" onClick={() => openEditor()} disabled={loadingProfile}>
@@ -276,7 +275,7 @@ const Home: React.FC = () => {
                 </table>
               </div>
             </div>
-          </div>
+          </section>
         </aside>
       </div>
       <RightDrawer

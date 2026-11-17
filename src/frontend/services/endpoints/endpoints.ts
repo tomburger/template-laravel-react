@@ -159,18 +159,6 @@ const updateLanguage = <TData = AxiosResponse<unknown>>(
     );
   }
 /**
- * Get high-level user statistics for the admin dashboard.
-Only admins can access this endpoint.
- * @summary Admin dashboard info
- */
-const adminDashboardInfo = <TData = AxiosResponse<unknown>>(
-     options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.get(
-      `/api/admin/info`,options
-    );
-  }
-/**
  * Get a list of all registered users. Only admins can access this endpoint.
  * @summary List all users
  */
@@ -654,7 +642,7 @@ const getLocationLayoutImage = <TData = AxiosResponse<unknown>>(
       `/api/locations/${locationId}/layout/image`,options
     );
   }
-return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,adminDashboardInfo,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,previewPrice,listAllocationsOfASeason,allocateAUnitToAMember,updateAllocation,deleteAllocation,changeAllocationStatus,listPricingRules,createPricingRule,updatePricingRule,deletePricingRule,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,getLocationLayout,saveLocationLayout,clearLocationLayout,listUnitsOfALocation,createUnit,updateUnit,deleteUnit,getLocationLayoutImage}};
+return {registerANewUser,loginUser,verifyEmail,resendVerificationEmail,forgotPassword,resetPassword,logoutUser,refreshToken,getCurrentUser,updateLanguage,listAllUsers,updateUserFlags,resendVerificationEmailForUseradmin,listUsersThatAreNotMembersYet,listMembers,createMember,updateMember,deleteMember,previewPrice,listAllocationsOfASeason,allocateAUnitToAMember,updateAllocation,deleteAllocation,changeAllocationStatus,listPricingRules,createPricingRule,updatePricingRule,deletePricingRule,listMembersNotYetEnrolledInASeason,listMembersEnrolledInASeason,enrollMemberInASeason,removeMemberEnrollmentFromASeason,listUnitsNotYetEnrolledInASeason,listUnitsEnrolledInASeason,enrollUnitInASeason,removeUnitEnrollmentFromASeason,listSeasons,createSeason,updateSeason,deleteSeason,listLocations,createLocation,updateLocation,deleteLocation,getLocationLayout,saveLocationLayout,clearLocationLayout,listUnitsOfALocation,createUnit,updateUnit,deleteUnit,getLocationLayoutImage}};
 export type RegisterANewUserResult = AxiosResponse<unknown>
 export type LoginUserResult = AxiosResponse<unknown>
 export type VerifyEmailResult = AxiosResponse<unknown>

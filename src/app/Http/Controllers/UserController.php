@@ -45,36 +45,6 @@ class UserController extends Controller
     }
 
     /**
-     * Admin dashboard info
-     *
-     * Get high-level user statistics for the admin dashboard.
-     * Only admins can access this endpoint.
-     *
-     * @endpoint
-     * @authenticated
-     * @responseField users.total integer Total number of users.
-     * @responseField users.active integer Active users (not deactivated).
-     * @responseField users.pending_verification integer Users with unverified email.
-     * @responseField users.recent integer Users created in the last 7 days.
-     */
-    public function adminInfo(): JsonResponse
-    {
-        $totalUsers = User::count();
-        $activeUsers = User::where('is_deactivated', false)->count();
-        $pendingVerificationUsers = User::whereNull('email_verified_at')->count();
-        $recentUsers = User::where('created_at', '>=', now()->subDays(7))->count();
-
-        return response()->json([
-            'users' => [
-                'total' => $totalUsers,
-                'active' => $activeUsers,
-                'pending_verification' => $pendingVerificationUsers,
-                'recent' => $recentUsers,
-            ],
-        ], 200);
-    }
-
-    /**
      * Update user flags
      *
      * Update user access and account status flags. Only admins can access this endpoint.

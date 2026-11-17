@@ -132,7 +132,7 @@ const AdminPricing: React.FC = () => {
       <div className="card shadow-sm">
         <div className="card-body p-4 p-md-5">
           <p className="mb-2">
-            <Link to="/admin" className="text-decoration-none">&larr; {t('adminPricing.back')}</Link>
+            <Link to="/" className="text-decoration-none">&larr; {t('adminPricing.back')}</Link>
           </p>
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div>

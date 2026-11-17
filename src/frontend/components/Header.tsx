@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { APP_NAME } from '../config';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -30,19 +31,8 @@ const Header: React.FC = () => {
           {APP_NAME}
         </span>
         <div className="d-flex align-items-center gap-2">
-          <span className="me-3">{t('header.welcome', { name: user?.name })}</span>
+          {pathname !== '/' && <span className="me-3">{t('header.welcome', { name: user?.name })}</span>}
           <LanguageSwitcher />
-          {user && !user.is_deactivated && (
-            user.is_admin || user.is_content_manager || user.is_community_manager
-            || user.is_pricing_manager || user.is_location_owner || user.is_season_owner
-          ) && (
-            <button
-              className="btn btn-outline-primary btn-sm me-2"
-              onClick={() => navigate('/admin')}
-            >
-              {t('header.admin')}
-            </button>
-          )}
           <button
             className="btn btn-outline-danger btn-sm"
             onClick={handleLogout}

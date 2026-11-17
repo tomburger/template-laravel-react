@@ -280,7 +280,11 @@ const cs: typeof en = {
     advice: 'Ujistěte se, že je dostupný jiný administrátorský účet, poté výchozímu účtu odeberte administrátorská práva a deaktivujte jej.',
   },
   home: {
-    title: 'Přehled',
+    administration: 'Administrace',
+    membership: 'Členství',
+    yourSeasons: 'Vaše sezóny',
+    yourLocations: 'Vaše lokality',
+    ownedItemsLoadFailed: 'Nepodařilo se načíst vaše sezóny a lokality.',
     loggedIn: 'Byli jste úspěšně přihlášeni!',
     profile: 'Informace o vašem profilu',
     name: 'Jméno:',

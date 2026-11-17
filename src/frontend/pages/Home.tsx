@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import PageLayout from '../components/PageLayout';
 import DefaultAdminWarning from '../components/DefaultAdminWarning';
 import RightDrawer from '../components/RightDrawer';
-import { apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import { Location, Season, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
+import { getEndpoints } from '../services/endpoints/endpoints';
 
 type MemberProfile = {
   first_name: string;
@@ -31,6 +33,11 @@ const Home: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [ownedLocations, setOwnedLocations] = useState<Location[]>([]);
+  const [ownedSeasons, setOwnedSeasons] = useState<Season[]>([]);
+  const [loadingOwnedItems, setLoadingOwnedItems] = useState(false);
+  const [ownedItemsError, setOwnedItemsError] = useState<string | null>(null);
+  const { listLocations, listSeasons } = getEndpoints();
 
   const loadProfile = async (signal?: AbortSignal) => {
     try {
@@ -55,6 +62,54 @@ const Home: React.FC = () => {
     void loadProfile(controller.signal);
     return () => controller.abort();
   }, [user?.id]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const canLoadLocations = Boolean(user?.is_location_owner);
+    const canLoadSeasons = Boolean(user?.is_season_owner);
+    setOwnedLocations([]);
+    setOwnedSeasons([]);
+
+    if (!user || (!canLoadLocations && !canLoadSeasons)) {
+      setLoadingOwnedItems(false);
+      setOwnedItemsError(null);
+      return () => controller.abort();
+    }
+
+    const loadOwnedItems = async () => {
+      try {
+        setLoadingOwnedItems(true);
+        setOwnedItemsError(null);
+        const [locationsResponse, seasonsResponse] = await Promise.all([
+          canLoadLocations
+            ? listLocations<{ data: { locations: Location[] } }>({ ...authRequestOptions(), signal: controller.signal })
+            : Promise.resolve(null),
+          canLoadSeasons
+            ? listSeasons<{ data: { seasons: Season[] } }>({ ...authRequestOptions(), signal: controller.signal })
+            : Promise.resolve(null),
+        ]);
+        if (!controller.signal.aborted) {
+          setOwnedLocations(locationsResponse?.data.locations.filter((location) =>
+            location.owners.some((owner) => owner.id === user.id)
+          ) ?? []);
+          setOwnedSeasons(seasonsResponse?.data.seasons.filter((season) =>
+            season.owners.some((owner) => owner.id === user.id)
+          ) ?? []);
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setOwnedItemsError(apiErrorMessage(err, t('home.ownedItemsLoadFailed')));
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingOwnedItems(false);
+        }
+      }
+    };
+
+    void loadOwnedItems();
+    return () => controller.abort();
+  }, [user?.id, user?.is_location_owner, user?.is_season_owner]);
 
   const openEditor = (joinMembership = false) => {
     setForm({
@@ -101,18 +156,71 @@ const Home: React.FC = () => {
   const editingMember = Boolean(profile?.member || join);
   const canSave = form.name.trim() !== ''
     && (!editingMember || (form.first_name.trim() !== '' && form.last_name.trim() !== ''));
+  const isOwner = user?.is_location_owner || user?.is_season_owner;
+  const canReadContent = user?.is_admin || user?.is_content_manager || isOwner;
+  const canReadUsers = canReadContent;
+  const canManageCommunity = user?.is_community_manager || isOwner;
+  const canManagePricing = user?.is_admin || user?.is_pricing_manager;
 
   return (
     <PageLayout>
-      <div className="row">
-        <div className="col-md-8 mx-auto">
+      <div className="row g-3 align-items-start">
+        <div className="col-12 col-lg-8">
+          <section className="card shadow-sm mb-3" aria-labelledby="home-administration-heading">
+            <div className="card-body p-4">
+              <h2 id="home-administration-heading" className="h4 mb-0">{t('home.administration')}</h2>
+              <div className="d-flex flex-wrap gap-2 mt-3">
+                {canReadUsers && <Link to="/admin/users" className="btn btn-outline-primary btn-sm">{t('admin.users')}</Link>}
+                {canReadContent && <Link to="/admin/locations" className="btn btn-outline-primary btn-sm">{t('admin.locationsAndUnits')}</Link>}
+                {canReadContent && <Link to="/admin/seasons" className="btn btn-outline-primary btn-sm">{t('admin.seasons')}</Link>}
+                {canManageCommunity && <Link to="/admin/members" className="btn btn-outline-primary btn-sm">{t('admin.members')}</Link>}
+                {canManagePricing && <Link to="/admin/pricing" className="btn btn-outline-primary btn-sm">{t('admin.pricing')}</Link>}
+              </div>
+              {isOwner && (
+                <div className="mt-4">
+                  {loadingOwnedItems && <div role="status">{t('common.loading')}</div>}
+                  {ownedItemsError && <div className="alert alert-danger mt-3 mb-0" role="alert">{ownedItemsError}</div>}
+                  {!loadingOwnedItems && !ownedItemsError && ownedSeasons.length > 0 && (
+                    <div className="mb-3">
+                      <h3 className="h6 mb-2">{t('home.yourSeasons')}</h3>
+                      <div className="d-flex flex-wrap gap-2">
+                        {ownedSeasons.map((season) => (
+                          <Link key={season.id} to={`/admin/seasons/${season.id}`} className="btn btn-outline-secondary btn-sm">
+                            {season.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {!loadingOwnedItems && !ownedItemsError && ownedLocations.length > 0 && (
+                    <div>
+                      <h3 className="h6 mb-2">{t('home.yourLocations')}</h3>
+                      <div className="d-flex flex-wrap gap-2">
+                        {ownedLocations.map((location) => (
+                          <Link key={location.id} to={`/admin/locations/${location.id}/layout`} className="btn btn-outline-secondary btn-sm">
+                            {location.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+          <section className="card shadow-sm" aria-labelledby="home-membership-heading">
+            <div className="card-body p-4">
+              <h2 id="home-membership-heading" className="h4 mb-0">{t('home.membership')}</h2>
+            </div>
+          </section>
+        </div>
+        <aside className="col-12 col-lg-4" aria-labelledby="home-profile-heading">
           <div className="card shadow-sm">
-            <div className="card-body p-5">
+            <div className="card-body p-3 p-lg-4">
               <DefaultAdminWarning
                 isDefaultAdminActive={isDefaultAdminActive}
                 isCurrentUserAdmin={user?.is_admin}
               />
-              <h1 className="card-title mb-4">{t('home.title')}</h1>
               <div className="alert alert-success" role="alert">{t('home.loggedIn')}</div>
               {saved && <div className="alert alert-success" role="status">{t('home.profileSaved')}</div>}
               {loadError && (
@@ -135,12 +243,12 @@ const Home: React.FC = () => {
 
               <div className="mt-4">
                 <div className="d-flex justify-content-between align-items-center gap-2">
-                  <h5>{t('home.profile')}</h5>
+                  <h2 id="home-profile-heading" className="h5 mb-0">{t('home.profile')}</h2>
                   <button type="button" className="btn btn-sm btn-dark" onClick={() => openEditor()} disabled={loadingProfile}>
                     {t('home.editProfile')}
                   </button>
                 </div>
-                <table className="table">
+                <table className="table table-sm">
                   <tbody>
                     <tr><td><strong>{t('home.name')}</strong></td><td>{user?.name}</td></tr>
                     <tr><td><strong>{t('home.email')}</strong></td><td>{user?.email}</td></tr>
@@ -169,7 +277,7 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
       <RightDrawer
         isOpen={drawerOpen}

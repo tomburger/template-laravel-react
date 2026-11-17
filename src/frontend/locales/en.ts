@@ -278,7 +278,11 @@ const en = {
     advice: 'Ensure another admin account is available, then remove admin access and deactivate the default account.',
   },
   home: {
-    title: 'Dashboard',
+    administration: 'Administration',
+    membership: 'Membership',
+    yourSeasons: 'Your seasons',
+    yourLocations: 'Your locations',
+    ownedItemsLoadFailed: 'Failed to load your seasons and locations.',
     loggedIn: 'You are successfully logged in!',
     profile: 'Your Profile Information',
     name: 'Name:',

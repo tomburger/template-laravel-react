@@ -5,6 +5,8 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\LocationLayoutController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\MemberAllocationController;
+use App\Http\Controllers\MemberSeasonController;
 use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\PricingRuleController;
 use App\Http\Controllers\ProfileController;
@@ -43,6 +45,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/profile', [ProfileController::class, 'show']);
     Route::put('/user/profile', [ProfileController::class, 'update']);
     Route::put('/user/language', [AuthController::class, 'updateLanguage']);
+    Route::get('/user/seasons', [MemberSeasonController::class, 'index']);
+    Route::post('/user/seasons/{season}/enrollment', [MemberSeasonController::class, 'store']);
+    Route::get('/user/allocations', [MemberAllocationController::class, 'index']);
+    Route::post('/user/allocations/{allocation}/cancel', [MemberAllocationController::class, 'cancel']);
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {

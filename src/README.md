@@ -115,6 +115,15 @@ Authenticated users can edit their own display name and create or update their
 own member details from the dashboard. Member categories remain
 community-manager-controlled because they affect pricing.
 
+Members can view open seasons and enroll themselves from the home page.
+Self-enrollment snapshots the member's current category; an existing enrollment
+is retained without changing its category. Other members' enrollments are not
+exposed through the self-service API.
+Members can view their allocations in open or reserved seasons, including
+cancelled allocations. They can cancel their own pending or confirmed
+allocations; cancellation is final and paid allocations cannot be cancelled by
+the member.
+
 Season owners can adjust an enrolled member's or unit's category for that season
 without changing its general category. The adjusted category is used for new
 allocations; existing allocation amounts are not recalculated.

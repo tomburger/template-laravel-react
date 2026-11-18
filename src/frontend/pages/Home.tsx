@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import PageLayout from '../components/PageLayout';
 import DefaultAdminWarning from '../components/DefaultAdminWarning';
+import MemberAllocations from '../components/MemberAllocations';
+import MemberSeasons from '../components/MemberSeasons';
 import RightDrawer from '../components/RightDrawer';
 import { Location, Season, apiErrorMessage, authRequestOptions } from '../services/apiHelpers';
 import { getEndpoints } from '../services/endpoints/endpoints';
@@ -186,6 +188,8 @@ const Home: React.FC = () => {
                   </button>
                 </div>
               )}
+              {!loadingProfile && !loadError && profile?.member && <MemberSeasons key={`seasons-${user?.id}`} />}
+              {!loadingProfile && !loadError && profile?.member && <MemberAllocations key={`allocations-${user?.id}`} />}
             </div>
           </section>
         </div>

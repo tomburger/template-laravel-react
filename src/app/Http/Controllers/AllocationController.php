@@ -264,9 +264,14 @@ class AllocationController extends Controller
             return response()->json(['message' => "Status cannot change from {$allocation->status} to {$data['status']}"], 422);
         }
 
-        $allocation->update($data);
+        $updated = Allocation::whereKey($allocation->id)
+            ->where('status', $allocation->status)
+            ->update($data);
+        if (! $updated && ! Allocation::whereKey($allocation->id)->where('status', $allocation->status)->exists()) {
+            return response()->json(['message' => 'The allocation has changed. Please reload and try again.'], 409);
+        }
 
-        return response()->json(['allocation' => $this->present($allocation->load(self::WITH))]);
+        return response()->json(['allocation' => $this->present($allocation->refresh()->load(self::WITH))]);
     }
 
     /**
@@ -288,9 +293,14 @@ class AllocationController extends Controller
             return response()->json(['message' => "Status cannot change from {$allocation->status} to {$status}"], 422);
         }
 
-        $allocation->update(['status' => $status]);
+        $updated = Allocation::whereKey($allocation->id)
+            ->where('status', $allocation->status)
+            ->update(['status' => $status]);
+        if (! $updated) {
+            return response()->json(['message' => 'The allocation has changed. Please reload and try again.'], 409);
+        }
 
-        return response()->json(['allocation' => $this->present($allocation->load(self::WITH))]);
+        return response()->json(['allocation' => $this->present($allocation->refresh()->load(self::WITH))]);
     }
 
     /**

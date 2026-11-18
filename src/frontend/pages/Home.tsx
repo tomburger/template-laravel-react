@@ -169,6 +169,23 @@ const Home: React.FC = () => {
           <section className="card shadow-sm" aria-labelledby="home-membership-heading">
             <div className="card-body p-4">
               <h2 id="home-membership-heading" className="h4 mb-0">{t('header.welcome', { name: user?.name })}</h2>
+              {loadError && (
+                <div className="alert alert-danger mt-3 mb-0" role="alert">
+                  {loadError}{' '}
+                  <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => void loadProfile()}>
+                    {t('home.retry')}
+                  </button>
+                </div>
+              )}
+              {loadingProfile && <div className="mt-3" role="status">{t('common.loading')}</div>}
+              {!loadingProfile && !loadError && profile && !profile.member && (
+                <div className="alert alert-warning mt-3 mb-0" role="alert">
+                  <div>{t('home.notMember')}</div>
+                  <button type="button" className="btn btn-sm btn-outline-dark mt-2" onClick={() => openEditor(true)}>
+                    {t('home.becomeMember')}
+                  </button>
+                </div>
+              )}
             </div>
           </section>
         </div>
@@ -222,28 +239,11 @@ const Home: React.FC = () => {
           <section className="card shadow-sm" aria-labelledby="home-profile-heading">
             <div className="card-body p-3 p-lg-4">
               {saved && <div className="alert alert-success" role="status">{t('home.profileSaved')}</div>}
-              {loadError && (
-                <div className="alert alert-danger" role="alert">
-                  {loadError}{' '}
-                  <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => void loadProfile()}>
-                    {t('home.retry')}
-                  </button>
-                </div>
-              )}
-              {loadingProfile && <div role="status">{t('common.loading')}</div>}
-              {profile && !profile.member && (
-                <div className="alert alert-warning" role="alert">
-                  <div>{t('home.notMember')}</div>
-                  <button type="button" className="btn btn-sm btn-outline-dark mt-2" onClick={() => openEditor(true)}>
-                    {t('home.becomeMember')}
-                  </button>
-                </div>
-              )}
 
               <div>
                 <div className="d-flex justify-content-between align-items-center gap-2">
                   <h2 id="home-profile-heading" className="h5 mb-0">{t('home.profile')}</h2>
-                  <button type="button" className="btn btn-sm btn-dark" onClick={() => openEditor()} disabled={loadingProfile}>
+                  <button type="button" className="btn btn-sm btn-dark" onClick={() => openEditor()} disabled={loadingProfile || !profile}>
                     {t('home.editProfile')}
                   </button>
                 </div>
